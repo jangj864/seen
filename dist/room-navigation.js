@@ -1,12 +1,13 @@
 'use strict';
 
 // Route through visible gaps rather than forcing every trip through the centre aisle.
-function createSeenRoomNavigation(chairs){
+function createSeenRoomNavigation(chairs,obstacles=null){
  const rectangles=[];
- for(const seat of [...chairs].sort((a,b)=>a.y-b.y||a.x-b.x)){
-  const bounds={left:seat.x-.13,right:seat.x+.78,top:seat.y-.14,bottom:seat.y+.64},last=rectangles.at(-1);
+ const raw=obstacles||chairs.map(seat=>({left:seat.x-.13,right:seat.x+.78,top:seat.y-.14,bottom:seat.y+.64}));
+ for(const bounds of [...raw].sort((a,b)=>a.top-b.top||a.left-b.left)){
+  const last=rectangles.at(-1);
   if(last&&last.top===bounds.top&&last.bottom===bounds.bottom&&bounds.left<=last.right)last.right=Math.max(last.right,bounds.right);
-  else rectangles.push(bounds);
+  else rectangles.push({...bounds});
  }
  const blocked=(x,y)=>rectangles.some(r=>x>r.left&&x<r.right&&y>r.top&&y<r.bottom);
  function clear(a,b){

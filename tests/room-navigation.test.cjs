@@ -42,3 +42,9 @@ test('a replacement target never inherits the previous route',()=>{
  const end={x:halfway.x+.15,y:halfway.y+.05},path=nav.route(halfway,end);const arrived=nav.advance(halfway,path,100);
  assert.equal(arrived.x,end.x);assert.equal(arrived.y,end.y);assert.equal(path.length,0);
 });
+test('lobby routes avoid the expanded counter and rope footprints',()=>{
+ const lobby=context.createSeenRoomNavigation([],[{left:3.42,right:6.78,top:6.32,bottom:7.77},{left:7.28,right:8.92,top:7.78,bottom:8.22}]);
+ const start={x:3,y:7},end={x:7,y:7},route=lobby.route(start,end);assert.ok(route.length>1);
+ let position=start,frames=0;while(route.length&&frames++<1000){position=lobby.advance(position,route,.1);assert.ok(!lobby.blocked(position.x,position.y))}
+ assert.equal(position.x,end.x);assert.equal(position.y,end.y);assert.equal(lobby.blocked(8,8),true);
+});
