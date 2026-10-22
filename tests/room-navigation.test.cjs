@@ -19,3 +19,11 @@ test('every seat can reach every other seat without crossing a chair',()=>{
  }
 });
 test('occupied destinations are rejected',()=>assert.equal(nav.route({x:6,y:10.65},chairs[0]).length,0));
+test('a blocked click behind a row stays in the rear aisle',()=>{
+ const start={x:3.24,y:7.5},target={x:3.3,y:7.2};
+ const end=nav.destination(start,target);assert.ok(end.y>7.34);assert.ok(Math.abs(end.x-target.x)<.01);assert.equal(nav.route(start,end).length,1);
+});
+test('nearby unobstructed clicks retain the exact destination',()=>{
+ const start={x:3.24,y:6.37},target={x:3.45,y:6.4};
+ const end=nav.destination(start,target);assert.equal(end.x,target.x);assert.equal(end.y,target.y);assert.equal(nav.route(start,end).length,1);
+});

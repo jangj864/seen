@@ -45,5 +45,13 @@ function createSeenRoomNavigation(chairs){
   }
   const result=[];for(let node=to;node!==from;node=previous[node]){if(node<0)return [];result.unshift({...points[node]})}return result;
  }
- return {route,blocked,clear};
+ function destination(start,target){
+  if(!blocked(target.x,target.y))return {...target};
+  const r=rectangles.find(r=>target.x>r.left&&target.x<r.right&&target.y>r.top&&target.y<r.bottom),gap=.08;
+  const candidates=[{x:r.left-gap,y:target.y},{x:r.right+gap,y:target.y},{x:target.x,y:r.top-gap},{x:target.x,y:r.bottom+gap}];
+  let best=null,bestCost=Infinity;
+  for(const point of candidates){const path=route(start,point);if(!path.length)continue;let travel=0,previous=start;for(const next of path){travel+=distance(previous,next);previous=next}const cost=distance(target,point)+travel*.2;if(cost<bestCost){best=point;bestCost=cost}}
+  return best;
+ }
+ return {route,blocked,clear,destination};
 }

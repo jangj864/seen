@@ -77,7 +77,10 @@ if(motion?.kind==='transfer'){
  if(t===1){seated=move.seat;motion=null;posture=1;gait=0;sit.disabled=false;sit.textContent='STAND UP';seatChoices.set(currentRoom.n,seated.id);updateSeat();picker.value=seated.id;seenSetText(status,`Seated at ${seated.id}. Enter or Stand up to explore.`);if(afterStand||manual)stand()}
 }
 else if(motion){gait*=Math.exp(-dt*15);motion.elapsed+=dt;const t=Math.min(1,motion.elapsed/motion.duration),k=ease(t);visitor.x=motion.from.x+(motion.to.x-motion.from.x)*k;visitor.y=motion.from.y+(motion.to.y-motion.from.y)*k;posture=motion.kind==='sit'?k:1-k;turnToward(-Math.PI/2,dt);isWalking=false;if(t===1){const kind=motion.kind;motion=null;sit.disabled=false;if(kind==='sit'){posture=1;seenSetText(status,`Seated at ${seated.id}. Enter or Stand up to explore.`);sit.textContent='STAND UP';if(afterStand||manual)stand()}else{posture=0;seated=null;sit.textContent='TAKE A SEAT';seenSetText(status,'Back in the aisle. Keep exploring.');const action=afterStand;afterStand=null;action?.()}}}
-else if(!seated){if(!manual&&path.length){dx=path[0].x-visitor.x;dy=path[0].y-visitor.y;if(Math.hypot(dx,dy)<.055){visitor={...path.shift()};if(!path.length)velocity={x:0,y:0};if(!path.length&&pendingSeat){closeSeat=pendingSeat;pendingSeat=null;sitHere()}dx=dy=0}}
+else if(!seated){if(!manual&&path.length){
+// Drop a corner as soon as the remaining path is directly visible.
+for(let i=path.length-1;i>0;i--)if(navigation.clear(visitor,path[i])){path.splice(0,i);break}
+dx=path[0].x-visitor.x;dy=path[0].y-visitor.y;if(Math.hypot(dx,dy)<.055){visitor={...path.shift()};if(!path.length)velocity={x:0,y:0};if(!path.length&&pendingSeat){closeSeat=pendingSeat;pendingSeat=null;sitHere()}dx=dy=0}}
 if(!motion){const len=Math.hypot(dx,dy),speed=manual?3.5:Math.min(3.5,len*8),factor=1-Math.exp(-dt*(len?12:18));velocity.x+=((len?dx/len*speed:0)-velocity.x)*factor;velocity.y+=((len?dy/len*speed:0)-velocity.y)*factor;const old={...visitor},nx=Math.max(.4,Math.min(11.6,visitor.x+velocity.x*dt)),ny=Math.max(1.4,Math.min(11.6,visitor.y+velocity.y*dt));if(!occupied(nx,ny)){visitor.x=nx;visitor.y=ny}else{if(!occupied(nx,visitor.y))visitor.x=nx;else velocity.x=0;if(!occupied(visitor.x,ny))visitor.y=ny;else velocity.y=0}const distance=Math.hypot(visitor.x-old.x,visitor.y-old.y);isWalking=distance>.0005;gait+=(Math.min(1,distance/Math.max(dt,.001)/2.8)-gait)*(1-Math.exp(-dt*12));if(isWalking){tick+=distance*12;turnToward(Math.atan2(visitor.y-old.y,visitor.x-old.x),dt)}}}
 else{gait=0;isWalking=false;turnToward(-Math.PI/2,dt)}
 closeSeat=seated||nearest();sit.hidden=!closeSeat&&!motion;if(!motion&&!seated&&closeSeat)seenSetText(status,`Seat ${closeSeat.id} nearby. Enter to sit.`);else if(!motion&&!seated&&!pendingSeat)seenSetText(status,'Walk the aisles or choose a seat.');
@@ -86,7 +89,29 @@ seenSetData(world,'motion',motion?.kind||(seated?'seated':isWalking?'walking':'i
 const paintKey=[roomRevision,seenFontRevision,currentRoom?.n,seatChoices.get(currentRoom?.n),world.dataset.position,heading.toFixed(3),gait.toFixed(3),posture.toFixed(3),tick.toFixed(3),path.at(-1)?.x,path.at(-1)?.y].join('|');
 if(paintKey!==roomPaintKey){render();roomPaintKey=paintKey}}
 requestAnimationFrame(loop)}requestAnimationFrame(loop);
-world.addEventListener('pointerdown',e=>{if(!active())return;const r=world.getBoundingClientRect(),px=e.clientX-r.left,py=e.clientY-r.top;const exitBottom=point(6,11.78,0),exitTop=point(6,11.78,2.2);if(Math.abs(px-exitBottom.x)<unit*.85&&py>exitTop.y-unit*.35&&py<exitBottom.y+unit*.5){walkToExit();return}const a=point(1.8,.32,4.5),b=point(10.2,.32,4.5),c=point(1.8,.32,1.65),u=(px-a.x)/(b.x-a.x),v=(py-a.y-u*(b.y-a.y))/(c.y-a.y);if(u>=0&&u<=1&&v>=0&&v<=1){document.querySelector('#start-program').click();return}let hit=null;for(const seat of chairHitOrder){const q=point(seat.x+.32,seat.y+.25,.6);if(Math.abs(px-q.x)<unit*.45&&Math.abs(py-q.y)<unit*.55){hit=seat;break}}if(hit){planSeat(hit.id);return}const sx=(px-cx)/unit/.86,sy=(py-cy)/unit/.43;let x=Math.max(.5,Math.min(11.5,(sx+sy)/2)),y=Math.max(1.5,Math.min(11.5,(sy-sx)/2));if(occupied(x,y)){const row=chairs.reduce((best,s)=>Math.abs(s.y-y)<Math.abs(best.y-y)?s:best,chairs[0]);y=row.y-.33}requestAction(()=>{pendingSeat=null;path=navigation.route(visitor,{x,y});});world.focus({preventScroll:true})});
+// Test actual projected chair faces instead of a large rectangle covering nearby aisles.
+function insideFace(px,py,vertices){let inside=false;for(let i=0,j=vertices.length-1;i<vertices.length;j=i++){const a=vertices[i],b=vertices[j];if((a.y>py)!==(b.y>py)&&px<(b.x-a.x)*(py-a.y)/(b.y-a.y)+a.x)inside=!inside}return inside}
+function chairHit(seat,px,py){
+ for(const [x,y,z,dx,dy,dz]of [[seat.x+.03,seat.y+.46,.45,.59,.12,.56],[seat.x,seat.y,.28,.65,.54,.18],...[-.025,.60].map(side=>[seat.x+side,seat.y+.09,.50,.075,.32,.065])]){
+  const vertices=[[x,y,z+dz],[x+dx,y,z+dz],[x+dx,y+dy,z+dz],[x,y+dy,z+dz],[x,y+dy,z],[x+dx,y+dy,z],[x+dx,y,z]].map(v=>point(...v));
+  // Each visible cube face is a convex quadrilateral.
+  for(const face of [[0,1,2,3],[3,2,5,4],[1,6,5,2]])if(insideFace(px,py,face.map(i=>vertices[i])))return true;
+ }return false;
+}
+world.addEventListener('pointerdown',e=>{
+ if(!active())return;const r=world.getBoundingClientRect(),px=e.clientX-r.left,py=e.clientY-r.top;
+ const sx=(px-cx)/unit/.86,sy=(py-cy)/unit/.43;
+ const floor={x:Math.max(.5,Math.min(11.5,(sx+sy)/2)),y:Math.max(1.5,Math.min(11.5,(sy-sx)/2))};
+ const nearbyFloor=!seated&&!motion&&Math.hypot(floor.x-visitor.x,floor.y-visitor.y)<.85&&!occupied(floor.x,floor.y)&&navigation.clear(visitor,floor);
+ if(!nearbyFloor){
+  const exitBottom=point(6,11.78,0),exitTop=point(6,11.78,2.2);
+  if(Math.abs(px-exitBottom.x)<unit*.85&&py>exitTop.y-unit*.35&&py<exitBottom.y+unit*.5){walkToExit();return}
+  const a=point(1.8,.32,4.5),b=point(10.2,.32,4.5),c=point(1.8,.32,1.65),u=(px-a.x)/(b.x-a.x),v=(py-a.y-u*(b.y-a.y))/(c.y-a.y);
+  if(u>=0&&u<=1&&v>=0&&v<=1){document.querySelector('#start-program').click();return}
+  const hit=chairHitOrder.find(seat=>chairHit(seat,px,py));if(hit){planSeat(hit.id);return}
+ }
+ requestAction(()=>{pendingSeat=null;const target=navigation.destination(visitor,floor);path=target?navigation.route(visitor,target):[];velocity={x:0,y:0}});world.focus({preventScroll:true});
+});
 addEventListener('keydown',e=>{if(!active()||seenTypingTarget(e.target))return;const key=seenNavigationKey(e);if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','w','a','s','d'].includes(key)){e.preventDefault();held.add(key);world.focus({preventScroll:true})}if(key==='Enter'&&document.activeElement===world){e.preventDefault();sitHere()}});addEventListener('keyup',e=>held.delete(seenNavigationKey(e)));addEventListener('blur',()=>held.clear());dialog.addEventListener('close',()=>held.clear());document.querySelector('#start-program').addEventListener('click',()=>{held.clear();velocity={x:0,y:0}});
 const controls={up:'ArrowUp',left:'ArrowLeft',down:'ArrowDown',right:'ArrowRight'};document.querySelectorAll('[data-room-dir]').forEach(button=>{button.addEventListener('pointerdown',e=>{e.preventDefault();button.setPointerCapture(e.pointerId);held.add(controls[button.dataset.roomDir])});for(const name of ['pointerup','pointercancel','lostpointercapture'])button.addEventListener(name,()=>held.delete(controls[button.dataset.roomDir]))});
 document.addEventListener('seen-room-enter',()=>{held.clear();exiting=false;visitor={x:6,y:10.65};path=[];seated=null;pendingSeat=null;closeSeat=null;motion=null;afterStand=null;posture=0;heading=-Math.PI/2;velocity={x:0,y:0};gait=0;sit.disabled=false;sit.textContent='TAKE A SEAT';picker.value=seatChoices.get(currentRoom.n)||'';size();world.focus({preventScroll:true});render()});
