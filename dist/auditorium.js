@@ -22,8 +22,20 @@ function label(text,x,y,z,font,color,wall=false){const p=point(x,y,z);g.save();g
 function drawCurtains(){
 // Project the fabric onto the same wall plane as the screen.
 function fabric(x,z,w,h,mirror=false,valance=false){const a=point(x,.30,z+h),b=point(x+w,.30,z+h),c=point(x,.30,z);g.save();g.transform((b.x-a.x)/200,(b.y-a.y)/200,(c.x-a.x)/400,(c.y-a.y)/400,a.x,a.y);if(mirror){g.translate(200,0);g.scale(-1,1)}g.beginPath();g.moveTo(0,0);g.lineTo(200,0);if(valance){g.lineTo(200,350);for(let i=200;i>0;i-=40)g.quadraticCurveTo(i-20,405,i-40,350)}else{g.bezierCurveTo(180,105,132,210,178,385);g.quadraticCurveTo(90,410,0,385)}g.closePath();g.clip();const velvet=g.createLinearGradient(0,0,200,0);for(let i=0;i<=10;i++){velvet.addColorStop(i/10,i%2?'#b94038':'#591e27')}g.fillStyle=velvet;g.fillRect(0,0,200,420);const shade=g.createLinearGradient(0,0,0,400);shade.addColorStop(0,'#240e2545');shade.addColorStop(.4,'#b4593a10');shade.addColorStop(1,'#260c2066');g.fillStyle=shade;g.fillRect(0,0,200,420);g.strokeStyle='#d6aa6a';g.lineWidth=valance?10:3;g.beginPath();if(valance){g.moveTo(0,348);for(let i=0;i<200;i+=40)g.quadraticCurveTo(i+20,403,i+40,348)}else{g.moveTo(0,380);g.quadraticCurveTo(90,405,178,380)}g.stroke();if(!valance){g.strokeStyle='#ca9b5e';g.lineWidth=5;g.beginPath();g.moveTo(4,250);g.quadraticCurveTo(88,282,151,255);g.stroke()}g.restore()}
-cube(.18,.10,0,11.65,.65,.20,'#44302b','#292322','#201e1e');fabric(.22,.34,1.40,4.43);fabric(10.38,.34,1.40,4.43,true);fabric(.22,4.66,11.56,.35,false,true);}
-function drawScreen(){const a=point(1.8,.32,4.5),b=point(10.2,.32,4.5),c=point(1.8,.32,1.65);g.save();g.transform((b.x-a.x)/840,(b.y-a.y)/840,(c.x-a.x)/285,(c.y-a.y)/285,a.x,a.y);g.fillStyle='#090c0d';g.fillRect(-13,-13,866,311);const im=screenStill;if(im.complete&&im.naturalWidth){const targetRatio=840/285,ir=im.naturalWidth/im.naturalHeight;let sx=0,sy=0,sw=im.naturalWidth,sh=im.naturalHeight;if(ir>targetRatio){sw=sh*targetRatio;sx=(im.naturalWidth-sw)/2}else{sh=sw/targetRatio;sy=(im.naturalHeight-sh)/2}g.drawImage(im,sx,sy,sw,sh,0,0,840,285)}g.fillStyle='#101611a6';g.fillRect(0,0,840,285);g.fillStyle='#e3c18b';g.font='500 15px "DM Sans",sans-serif';g.fillText(`SEEN / SCREEN ${currentRoom?.n||'01'}`,40,51);g.fillStyle='#fff0d2';g.font='600 46px "Barlow Condensed",sans-serif';const title=currentRoom?.name||'SEEN CINEMA';g.fillText(title,40,133,755);g.fillStyle='#ebc58e';g.font='500 14px "DM Sans",sans-serif';g.fillText('READ THE STORY  ↗',40,216);g.restore();polygon([[1.8,.38,1.58],[10.2,.38,1.58],[10.2,.47,1.58],[1.8,.47,1.58]],'#c9b085');}
+cube(.18,.10,0,11.65,.65,.20,'#44302b','#292322','#201e1e');fabric(.22,.34,2.40,4.43);fabric(9.38,.34,2.40,4.43,true);fabric(.22,4.66,11.56,.35,false,true);}
+// Local wall dimensions and image pixels share the same 16:9 aspect ratio.
+const screenGeometry={left:2.8,right:9.2,top:4.5,bottom:.9,width:800,height:450};
+function screenPoints(){const s=screenGeometry;return{a:point(s.left,.32,s.top),b:point(s.right,.32,s.top),c:point(s.left,.32,s.bottom)}}
+function drawScreen(){
+ const s=screenGeometry,{a,b,c}=screenPoints(),W=s.width,H=s.height;
+ g.save();g.transform((b.x-a.x)/W,(b.y-a.y)/W,(c.x-a.x)/H,(c.y-a.y)/H,a.x,a.y);
+ g.fillStyle='#090c0d';g.fillRect(-13,-13,W+26,H+26);
+ const im=screenStill;if(im.complete&&im.naturalWidth){const ratio=16/9,ir=im.naturalWidth/im.naturalHeight;let sx=0,sy=0,sw=im.naturalWidth,sh=im.naturalHeight;if(ir>ratio){sw=sh*ratio;sx=(im.naturalWidth-sw)/2}else{sh=sw/ratio;sy=(im.naturalHeight-sh)/2}g.drawImage(im,sx,sy,sw,sh,0,0,W,H)}
+ g.fillStyle='#101611a6';g.fillRect(0,0,W,H);g.fillStyle='#e3c18b';g.font='500 15px "DM Sans",sans-serif';g.fillText(`SEEN / SCREEN ${currentRoom?.n||'01'}`,40,65);
+ g.fillStyle='#fff0d2';g.font='600 46px "Barlow Condensed",sans-serif';g.fillText(currentRoom?.name||'SEEN CINEMA',40,215,W-80);
+ g.fillStyle='#ebc58e';g.font='500 14px "DM Sans",sans-serif';g.fillText('READ THE STORY  ↗',40,380);g.restore();
+ polygon([[s.left,.38,s.bottom-.07],[s.right,.38,s.bottom-.07],[s.right,.47,s.bottom-.07],[s.left,.47,s.bottom-.07]],'#c9b085');
+}
 function chair(seat){const selected=seatChoices.get(currentRoom?.n)===seat.id,x=seat.x,y=seat.y;
 oval(x+.23,y+.3,.015,.4,.14,'#0004');
 cube(x+.06,y+.12,0,.10,.35,.29,'#343331','#242629','#242629');cube(x+.49,y+.12,0,.10,.35,.29,'#343331','#242629','#242629');
@@ -38,7 +50,6 @@ function drawExitMat(){polygon([[5.23,10.82,.018],[6.77,10.82,.018],[6.77,11.98,
 function drawExit(){for(const x of [5.23,6.65])cube(x,11.72,0,.12,.12,1.85,'#d4c49c','#c2ad81','#897e5d');cube(5.23,11.72,1.84,1.54,.12,.35,'#b6ad83','#516c49','#405739');label('EXIT',6,11.86,1.93,.24,'#f5e8ba',true);label('TO THE LOBBY',6,11.86,1.55,.12,'#d6cda6',true);}
 function walkToExit(){requestAction(()=>{pendingSeat=null;autoSpeed=0;path=navigation.route(visitor,exitZone);status.textContent='Walking to the exit…'});world.focus({preventScroll:true})}
 function leaveThroughExit(){if(exiting)return;exiting=true;held.clear();path=[];velocity={x:0,y:0};document.querySelector('#leave-room').click()}
-document.querySelector('#walk-exit').addEventListener('click',walkToExit);
 function render(){if(!width||!height)return;g.clearRect(0,0,width,height);const gradient=g.createRadialGradient(width*.5,height*.4,0,width*.5,height*.4,width*.8);gradient.addColorStop(0,'#353d33');gradient.addColorStop(1,'#171d1b');g.fillStyle=gradient;g.fillRect(0,0,width,height);cube(0,0,-.14,12,12,.14,'#3c3731','#272c28','#212723');for(let y=0;y<12;y++)polygon([[0,y,.005],[12,y,.005],[12,y+.025,.005],[0,y+.025,.005]],'#d6b78209');cube(0,-.12,0,12,.24,5.1,'#51403a','#292326','#201e21');cube(-.12,0,0,.18,11.6,1.05,'#655b49','#374333','#29372d');drawScreen();drawCurtains();for(const x of [.8,5.65,6.4,11.1])for(let y=3;y<11.7;y+=.6)cube(x,y,.015,.035,.18,.02,'#bd9c5d','#bd9c5d','#bd9c5d');if(path.length){const dest=path[path.length-1];oval(dest.x,dest.y,.02,.22,.09,'#e8c28b55')}
 drawExitMat();// Seats have a fixed depth order; merge the visitor and exit without per-frame sorting.
 const visitorDepth=seated&&posture>.45&&motion?.kind!=='transfer'?seated.x+seated.y+.45:visitor.x+visitor.y;
@@ -131,7 +142,7 @@ world.addEventListener('pointerdown',e=>{
  if(!nearbyFloor){
   const exitBottom=point(6,11.78,0),exitTop=point(6,11.78,2.2);
   if(Math.abs(px-exitBottom.x)<unit*.85&&py>exitTop.y-unit*.35&&py<exitBottom.y+unit*.5){walkToExit();return}
-  const a=point(1.8,.32,4.5),b=point(10.2,.32,4.5),c=point(1.8,.32,1.65),u=(px-a.x)/(b.x-a.x),v=(py-a.y-u*(b.y-a.y))/(c.y-a.y);
+  const {a,b,c}=screenPoints(),u=(px-a.x)/(b.x-a.x),v=(py-a.y-u*(b.y-a.y))/(c.y-a.y);
   if(u>=0&&u<=1&&v>=0&&v<=1){document.querySelector('#start-program').click();return}
   const hit=chairHitOrder.find(seat=>chairHit(seat,px,py));if(hit){planSeat(hit.id);return}
  }
