@@ -39,7 +39,7 @@ function leaveThroughExit(){if(exiting)return;exiting=true;held.clear();path=[];
 document.querySelector('#walk-exit').addEventListener('click',walkToExit);
 function render(){if(!width||!height)return;g.clearRect(0,0,width,height);const gradient=g.createRadialGradient(width*.5,height*.4,0,width*.5,height*.4,width*.8);gradient.addColorStop(0,'#353d33');gradient.addColorStop(1,'#171d1b');g.fillStyle=gradient;g.fillRect(0,0,width,height);cube(0,0,-.14,12,12,.14,'#3c3731','#272c28','#212723');for(let y=0;y<12;y++)polygon([[0,y,.005],[12,y,.005],[12,y+.025,.005],[0,y+.025,.005]],'#d6b78209');cube(0,-.12,0,12,.24,5.1,'#51403a','#292326','#201e21');cube(-.12,0,0,.18,11.6,1.05,'#655b49','#374333','#29372d');drawScreen();drawCurtains();for(const x of [.8,5.65,6.4,11.1])for(let y=3;y<11.7;y+=.6)cube(x,y,.015,.035,.18,.02,'#bd9c5d','#bd9c5d','#bd9c5d');if(path.length){const dest=path[path.length-1];oval(dest.x,dest.y,.02,.22,.09,'#e8c28b55')}
 drawExitMat();// Seats have a fixed depth order; merge the visitor and exit without per-frame sorting.
-const visitorDepth=seated&&posture>.45?seated.x+seated.y+.45:visitor.x+visitor.y;
+const visitorDepth=seated&&posture>.45&&motion?.kind!=='transfer'?seated.x+seated.y+.45:visitor.x+visitor.y;
 let visitorDrawn=false,exitDrawn=false;
 for(const seat of chairDrawOrder){const depth=seat.x+seat.y+.5;if(!visitorDrawn&&visitorDepth<Math.min(depth,exitDrawn?Infinity:17.9)){character();visitorDrawn=true}if(!exitDrawn&&17.9<depth){drawExit();exitDrawn=true}if(!visitorDrawn&&visitorDepth<depth){character();visitorDrawn=true}chair(seat)}
 if(!visitorDrawn&&visitorDepth<17.9){character();visitorDrawn=true}if(!exitDrawn)drawExit();if(!visitorDrawn)character();}
@@ -50,12 +50,33 @@ function stand(){if(motion)return;if(!seated){afterStand?.();afterStand=null;ret
 function requestAction(action){if(seated||motion){afterStand=action;if(!motion)stand()}else action()}
 function nearest(){return chairs.find(s=>Math.hypot(visitor.x-(s.x+.33),visitor.y-(s.y-.33))<.44)||null}
 function sitHere(){if(motion)return;if(seated){stand();return}if(!closeSeat)return;seated=closeSeat;seatChoices.set(currentRoom.n,seated.id);updateSeat();picker.value=seated.id;path=[];velocity={x:0,y:0};motion={kind:'sit',elapsed:0,duration:reduced ? .01 : .65,from:{...visitor},to:{x:seated.x+.33,y:seated.y+.22}};seenSetText(status,`Taking seat ${seated.id}…`);sit.disabled=true;}
-function planSeat(id){const seat=chairById.get(id);if(!seat)return;requestAction(()=>{const y=seat.y-.33;path=navigation.route(visitor,{x:seat.x+.33,y});pendingSeat=seat;});world.focus({preventScroll:true})}
+function planSeat(id){const seat=chairById.get(id);if(!seat)return;
+// Staying in the same seat needs no animation; neighbours share one short aisle transfer.
+if(seated?.id===seat.id&&!motion){world.focus({preventScroll:true});return}
+if(seated&&!motion&&seat.y===seated.y&&Math.abs(seat.x-seated.x)<1.6){
+ const fromAisle={x:seated.x+.33,y:seated.y-.33},toAisle={x:seat.x+.33,y:seat.y-.33};
+ if(navigation.clear(fromAisle,toAisle)){
+  motion={kind:'transfer',elapsed:0,duration:reduced ? .01 : .75+Math.abs(seat.x-seated.x)*.24,from:{...visitor},fromAisle,toAisle,to:{x:seat.x+.33,y:seat.y+.22},seat};
+  afterStand=null;pendingSeat=null;path=[];velocity={x:0,y:0};sit.disabled=true;
+  seenSetText(status,`Moving to seat ${seat.id}…`);world.focus({preventScroll:true});return;
+ }
+}
+requestAction(()=>{const y=seat.y-.33;path=navigation.route(visitor,{x:seat.x+.33,y});pendingSeat=seat;});world.focus({preventScroll:true})}
 picker.addEventListener('change',()=>planSeat(picker.value));sit.onclick=()=>{sitHere();world.focus({preventScroll:true})};
 function loop(now){const dt=Math.min((now-previous)/1000,.04);previous=now;if(active()){
 let dx=0,dy=0;for(const [key,vx,vy]of [['ArrowUp',-1,-1],['w',-1,-1],['ArrowDown',1,1],['s',1,1],['ArrowLeft',-1,1],['a',-1,1],['ArrowRight',1,-1],['d',1,-1]])if(held.has(key)){dx+=vx;dy+=vy}
 const manual=!!(dx||dy);if(manual){if(seated&&!motion){afterStand=null;stand()}path=[];pendingSeat=null;}
-if(motion){gait*=Math.exp(-dt*15);motion.elapsed+=dt;const t=Math.min(1,motion.elapsed/motion.duration),k=ease(t);visitor.x=motion.from.x+(motion.to.x-motion.from.x)*k;visitor.y=motion.from.y+(motion.to.y-motion.from.y)*k;posture=motion.kind==='sit'?k:1-k;turnToward(-Math.PI/2,dt);isWalking=false;if(t===1){const kind=motion.kind;motion=null;sit.disabled=false;if(kind==='sit'){posture=1;seenSetText(status,`Seated at ${seated.id}. Enter or Stand up to explore.`);sit.textContent='STAND UP';if(afterStand||manual)stand()}else{posture=0;seated=null;sit.textContent='TAKE A SEAT';seenSetText(status,'Back in the aisle. Keep exploring.');const action=afterStand;afterStand=null;action?.()}}}
+if(motion?.kind==='transfer'){
+ const move=motion;move.elapsed+=dt;const t=Math.min(1,move.elapsed/move.duration);
+ let start,end,progress;
+ if(t<.25){start=move.from;end=move.fromAisle;progress=ease(t/.25);posture=1-progress;gait=0}
+ else if(t<.75){start=move.fromAisle;end=move.toAisle;progress=ease((t-.25)/.5);posture=0;gait=Math.sin((t-.25)/.5*Math.PI);turnToward(Math.atan2(end.y-start.y,end.x-start.x),dt)}
+ else{start=move.toAisle;end=move.to;progress=ease((t-.75)/.25);posture=progress;gait=0;turnToward(-Math.PI/2,dt)}
+ const x=start.x+(end.x-start.x)*progress,y=start.y+(end.y-start.y)*progress;
+ tick+=Math.hypot(x-visitor.x,y-visitor.y)*12;visitor={x,y};isWalking=t>=.25&&t<.75;
+ if(t===1){seated=move.seat;motion=null;posture=1;gait=0;sit.disabled=false;sit.textContent='STAND UP';seatChoices.set(currentRoom.n,seated.id);updateSeat();picker.value=seated.id;seenSetText(status,`Seated at ${seated.id}. Enter or Stand up to explore.`);if(afterStand||manual)stand()}
+}
+else if(motion){gait*=Math.exp(-dt*15);motion.elapsed+=dt;const t=Math.min(1,motion.elapsed/motion.duration),k=ease(t);visitor.x=motion.from.x+(motion.to.x-motion.from.x)*k;visitor.y=motion.from.y+(motion.to.y-motion.from.y)*k;posture=motion.kind==='sit'?k:1-k;turnToward(-Math.PI/2,dt);isWalking=false;if(t===1){const kind=motion.kind;motion=null;sit.disabled=false;if(kind==='sit'){posture=1;seenSetText(status,`Seated at ${seated.id}. Enter or Stand up to explore.`);sit.textContent='STAND UP';if(afterStand||manual)stand()}else{posture=0;seated=null;sit.textContent='TAKE A SEAT';seenSetText(status,'Back in the aisle. Keep exploring.');const action=afterStand;afterStand=null;action?.()}}}
 else if(!seated){if(!manual&&path.length){dx=path[0].x-visitor.x;dy=path[0].y-visitor.y;if(Math.hypot(dx,dy)<.055){visitor={...path.shift()};if(!path.length)velocity={x:0,y:0};if(!path.length&&pendingSeat){closeSeat=pendingSeat;pendingSeat=null;sitHere()}dx=dy=0}}
 if(!motion){const len=Math.hypot(dx,dy),speed=manual?3.5:Math.min(3.5,len*8),factor=1-Math.exp(-dt*(len?12:18));velocity.x+=((len?dx/len*speed:0)-velocity.x)*factor;velocity.y+=((len?dy/len*speed:0)-velocity.y)*factor;const old={...visitor},nx=Math.max(.4,Math.min(11.6,visitor.x+velocity.x*dt)),ny=Math.max(1.4,Math.min(11.6,visitor.y+velocity.y*dt));if(!occupied(nx,ny)){visitor.x=nx;visitor.y=ny}else{if(!occupied(nx,visitor.y))visitor.x=nx;else velocity.x=0;if(!occupied(visitor.x,ny))visitor.y=ny;else velocity.y=0}const distance=Math.hypot(visitor.x-old.x,visitor.y-old.y);isWalking=distance>.0005;gait+=(Math.min(1,distance/Math.max(dt,.001)/2.8)-gait)*(1-Math.exp(-dt*12));if(isWalking){tick+=distance*12;turnToward(Math.atan2(visitor.y-old.y,visitor.x-old.x),dt)}}}
 else{gait=0;isWalking=false;turnToward(-Math.PI/2,dt)}
