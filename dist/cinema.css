@@ -54,3 +54,9 @@
 
 /* An opaque backdrop prevents blurred lobby text from appearing as stray shadows. */
 #game-room::backdrop{background:#3f493e;backdrop-filter:none;-webkit-backdrop-filter:none}
+
+/* One consistent row of real movement buttons, with jump alongside. */
+.controls{gap:6px;bottom:15px}.controls .key,.room-touch .key{width:30px;height:32px;min-width:30px;display:grid;place-items:center;padding:0;margin:0;border:1px solid #aaa393;border-bottom-width:3px;border-radius:4px;background:#f7f0e3;color:#38362d;font:500 16px 'DM Sans',sans-serif;touch-action:none;cursor:pointer}.controls .jump-key,.room-touch .jump-key{width:64px;font-size:9px;line-height:1.1;letter-spacing:.5px;display:flex;align-items:center;justify-content:center;gap:4px}.jump-key small{font-size:6px;letter-spacing:0}.controls .key:active,.room-touch .key:active{transform:translateY(1px);border-bottom-width:1px}.room-touch{position:absolute;display:flex;align-items:center;gap:6px;right:4%;bottom:144px;z-index:4;text-align:center}.room-touch .key{background:#29352b;color:#e9ce9d;border-color:#a58f5f77}.room-actions{grid-template-columns:70px 130px 112px minmax(150px,1fr)}.auditorium-bottom{grid-template-columns:minmax(180px,1fr) minmax(492px,2.8fr)}
+@media(max-width:1100px){.auditorium-bottom{grid-template-columns:1fr}.room-touch{bottom:196px}}
+@media(max-width:800px){.room-touch{bottom:230px;right:5%}.room-actions{grid-template-columns:repeat(4,minmax(0,1fr))}.auditorium-bottom #start-program{grid-column:1/5}}
+@media(max-width:700px){.controls{width:90%;justify-content:center;gap:6px;bottom:16px}.controls .key{display:grid}.controls .jump-key{display:flex}.controls>span,.controls>i{display:none}.room-touch .key,.controls .key{width:34px;height:36px}.room-touch .jump-key,.controls .jump-key{width:70px}.jump-key small{display:none}}

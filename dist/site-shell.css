@@ -11,3 +11,15 @@
 #issue-menu{max-height:calc(100dvh - 120px);overflow-y:auto;top:104px;right:4%}
 #issue-menu button{display:block;border:0;border-bottom:1px solid var(--line);width:100%;padding:12px 25px;text-align:left;background:none;font-size:13px;color:inherit;cursor:pointer}
 @media(max-width:700px){.site-header{height:78px}.site-header .logo{font-size:42px}.site-header .issue{display:none}.site-footer{height:50px;font-size:7px;gap:12px}.site-footer .foot-center{display:none}.site-header button{font-size:10px}.site-header button span{margin-left:16px}#issue-menu{top:78px;max-height:calc(100dvh - 94px)}}
+
+/* Compact shared navigation leaves more room for the cinema itself. */
+.site-header{height:64px;gap:16px}
+.site-header .logo{font-size:40px;letter-spacing:-1.4px}
+.site-header .issue{font-size:9px;letter-spacing:1px;gap:12px}
+.site-header button{font-size:9px;letter-spacing:.8px}
+.site-header button span{font-size:18px;margin-left:14px}
+.site-footer{height:38px;font-size:8px;letter-spacing:.7px}
+.site-footer .foot-center{display:none}
+#issue-menu{top:64px;max-height:calc(100dvh - 80px)}
+.cinema-page>main{height:calc(100dvh - 102px);min-height:0}
+@media(max-width:700px){.site-header{height:56px}.site-header .logo{font-size:34px}.site-header button{font-size:9px}.site-footer{height:34px;font-size:7px}.cinema-page>main{height:calc(100dvh - 90px)}#issue-menu{top:56px;max-height:calc(100dvh - 72px)}}
