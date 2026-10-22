@@ -8,7 +8,9 @@ let roomRevision=0,roomPaintKey='';
 screenStill.addEventListener('load',()=>roomRevision++);
 const chairDrawOrder=[...chairs].sort((a,b)=>(a.x+a.y)-(b.x+b.y)),chairHitOrder=[...chairDrawOrder].reverse();
 const chairById=new Map(chairs.map(seat=>[seat.id,seat]));
-const navigation=createSeenRoomNavigation(chairs);
+const navigation=createSeenRoomNavigation(chairs),roomJump=createSeenJump(),jumpButton=document.querySelector('#jump-room');
+function jump(){if(!active()||seated||motion)return;roomJump.start();world.focus({preventScroll:true})}
+jumpButton.onclick=jump;
 const active=()=>!document.hidden&&dialog.open&&!room.hidden&&!articleDialog.open;
 function size(){roomRevision++;width=world.clientWidth;height=world.clientHeight;if(!width||!height)return;const ratio=Math.min(devicePixelRatio||1,2);world.width=width*ratio;world.height=height*ratio;g.setTransform(ratio,0,0,ratio,0,0);unit=Math.min(width/22.5,height/18.3);cx=width/2;cy=Math.max(unit*5.3+12,height*.29);}
 new ResizeObserver(size).observe(world);
@@ -30,7 +32,7 @@ cube(x,y,.28,.65,.54,.18,selected?'#e2ba7a':'#a45a49',selected?'#ad8953':'#793e3
 for(const side of [-.025,.60]){cube(x+side,y+.16,.37,.065,.075,.13,'#665843','#514335','#423a32');cube(x+side,y+.09,.50,.075,.32,.065,'#71634c','#514335','#423a32');}
 cube(x+.03,y+.46,.45,.59,.12,.56,selected?'#e8c88c':'#b06a54',selected?'#c69e63':'#904a40',selected?'#927347':'#5b3430');
 label(seat.id,x+.32,y+.595,.73,.13,selected?'#59482d':'#deb28a',true)}
-function character(){drawSeenCharacter({ctx:g,unit,project:point,x:visitor.x,y:visitor.y,heading,posture,gait:reduced?0:gait,phase:tick})}
+function character(){drawSeenCharacter({ctx:g,unit,project:point,x:visitor.x,y:visitor.y,heading,posture,gait:reduced?0:gait,phase:tick,jump:roomJump.height})}
 const exitZone={x:6,y:11.55};
 function drawExitMat(){polygon([[5.23,10.82,.018],[6.77,10.82,.018],[6.77,11.98,.018],[5.23,11.98,.018]],'#526343');polygon([[5.3,11.28,.024],[6.7,11.28,.024],[6.7,11.34,.024],[5.3,11.34,.024]],'#bca777')}
 function drawExit(){for(const x of [5.23,6.65])cube(x,11.72,0,.12,.12,1.85,'#d4c49c','#c2ad81','#897e5d');cube(5.23,11.72,1.84,1.54,.12,.35,'#b6ad83','#516c49','#405739');label('EXIT',6,11.86,1.93,.24,'#f5e8ba',true);label('TO THE LOBBY',6,11.86,1.55,.12,'#d6cda6',true);}
@@ -49,7 +51,7 @@ function turnToward(angle,dt){let difference=Math.atan2(Math.sin(angle-heading),
 function stand(){if(motion)return;if(!seated){afterStand?.();afterStand=null;return}motion={kind:'stand',elapsed:0,duration:reduced ? .01 : .55,from:{...visitor},to:{x:seated.x+.33,y:seated.y-.33}};path=[];velocity={x:0,y:0};seenSetText(status,'Standing up…');sit.disabled=true;}
 function requestAction(action){if(seated||motion){afterStand=action;if(!motion)stand()}else action()}
 function nearest(){return chairs.find(s=>Math.hypot(visitor.x-(s.x+.33),visitor.y-(s.y-.33))<.44)||null}
-function sitHere(){if(motion)return;if(seated){stand();return}if(!closeSeat)return;seated=closeSeat;seatChoices.set(currentRoom.n,seated.id);updateSeat();picker.value=seated.id;path=[];velocity={x:0,y:0};motion={kind:'sit',elapsed:0,duration:reduced ? .01 : .65,from:{...visitor},to:{x:seated.x+.33,y:seated.y+.22}};seenSetText(status,`Taking seat ${seated.id}…`);sit.disabled=true;}
+function sitHere(){if(motion)return;roomJump.reset();if(seated){stand();return}if(!closeSeat)return;seated=closeSeat;seatChoices.set(currentRoom.n,seated.id);updateSeat();picker.value=seated.id;path=[];velocity={x:0,y:0};motion={kind:'sit',elapsed:0,duration:reduced ? .01 : .65,from:{...visitor},to:{x:seated.x+.33,y:seated.y+.22}};seenSetText(status,`Taking seat ${seated.id}…`);sit.disabled=true;}
 function planSeat(id){const seat=chairById.get(id);if(!seat)return;
 // Staying in the same seat needs no animation; neighbours share one short aisle transfer.
 if(seated?.id===seat.id&&!motion){world.focus({preventScroll:true});return}
@@ -64,6 +66,7 @@ if(seated&&!motion&&seat.y===seated.y&&Math.abs(seat.x-seated.x)<1.6){
 requestAction(()=>{const y=seat.y-.33;autoSpeed=0;path=navigation.route(visitor,{x:seat.x+.33,y});pendingSeat=seat;});world.focus({preventScroll:true})}
 picker.addEventListener('change',()=>planSeat(picker.value));sit.onclick=()=>{sitHere();world.focus({preventScroll:true})};
 function loop(now){const dt=Math.min((now-previous)/1000,.04);previous=now;if(active()){
+roomJump.step(dt);jumpButton.disabled=!!seated||!!motion;
 let dx=0,dy=0;for(const [key,vx,vy]of [['ArrowUp',-1,-1],['w',-1,-1],['ArrowDown',1,1],['s',1,1],['ArrowLeft',-1,1],['a',-1,1],['ArrowRight',1,-1],['d',1,-1]])if(held.has(key)){dx+=vx;dy+=vy}
 const manual=!!(dx||dy);if(manual){if(seated&&!motion){afterStand=null;stand()}path=[];pendingSeat=null;}
 if(motion?.kind==='transfer'){
@@ -100,8 +103,8 @@ else if(!seated){
 else{gait=0;isWalking=false;turnToward(-Math.PI/2,dt)}
 closeSeat=seated||nearest();sit.hidden=!closeSeat&&!motion;if(!motion&&!seated&&closeSeat)seenSetText(status,`Seat ${closeSeat.id} nearby. Enter to sit.`);else if(!motion&&!seated&&!pendingSeat)seenSetText(status,'Walk the aisles or choose a seat.');
 if(!seated&&!motion&&!exiting&&visitor.x>5.3&&visitor.x<6.7&&visitor.y>11.34){leaveThroughExit();requestAnimationFrame(loop);return}
-seenSetData(world,'motion',motion?.kind||(seated?'seated':isWalking?'walking':'idle'));seenSetData(world,'position',`${visitor.x.toFixed(3)},${visitor.y.toFixed(3)}`);
-const paintKey=[roomRevision,seenFontRevision,currentRoom?.n,seatChoices.get(currentRoom?.n),world.dataset.position,heading.toFixed(3),gait.toFixed(3),posture.toFixed(3),tick.toFixed(3),path.at(-1)?.x,path.at(-1)?.y].join('|');
+seenSetData(world,'jump',roomJump.height.toFixed(3));seenSetData(world,'motion',motion?.kind||(seated?'seated':isWalking?'walking':'idle'));seenSetData(world,'position',`${visitor.x.toFixed(3)},${visitor.y.toFixed(3)}`);
+const paintKey=[roomRevision,seenFontRevision,roomJump.height.toFixed(3),currentRoom?.n,seatChoices.get(currentRoom?.n),world.dataset.position,heading.toFixed(3),gait.toFixed(3),posture.toFixed(3),tick.toFixed(3),path.at(-1)?.x,path.at(-1)?.y].join('|');
 if(paintKey!==roomPaintKey){render();roomPaintKey=paintKey}}
 requestAnimationFrame(loop)}requestAnimationFrame(loop);
 // Test actual projected chair faces instead of a large rectangle covering nearby aisles.
@@ -127,7 +130,7 @@ world.addEventListener('pointerdown',e=>{
  }
  requestAction(()=>{pendingSeat=null;const target=navigation.destination(visitor,floor);autoSpeed=0;path=target?navigation.route(visitor,target):[];velocity={x:0,y:0}});world.focus({preventScroll:true});
 });
-addEventListener('keydown',e=>{if(!active()||seenTypingTarget(e.target))return;const key=seenNavigationKey(e);if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','w','a','s','d'].includes(key)){e.preventDefault();held.add(key);world.focus({preventScroll:true})}if(key==='Enter'&&document.activeElement===world){e.preventDefault();sitHere()}});addEventListener('keyup',e=>held.delete(seenNavigationKey(e)));addEventListener('blur',()=>held.clear());dialog.addEventListener('close',()=>held.clear());document.querySelector('#start-program').addEventListener('click',()=>{held.clear();velocity={x:0,y:0}});
+addEventListener('keydown',e=>{if(!active()||seenTypingTarget(e.target))return;const key=seenNavigationKey(e);if(e.code==='Space'||e.key===' '){e.preventDefault();if(!e.repeat)jump();return}if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','w','a','s','d'].includes(key)){e.preventDefault();held.add(key);world.focus({preventScroll:true})}if(key==='Enter'&&document.activeElement===world){e.preventDefault();sitHere()}});addEventListener('keyup',e=>held.delete(seenNavigationKey(e)));addEventListener('blur',()=>held.clear());dialog.addEventListener('close',()=>held.clear());document.querySelector('#start-program').addEventListener('click',()=>{held.clear();velocity={x:0,y:0}});
 const controls={up:'ArrowUp',left:'ArrowLeft',down:'ArrowDown',right:'ArrowRight'};document.querySelectorAll('[data-room-dir]').forEach(button=>{button.addEventListener('pointerdown',e=>{e.preventDefault();button.setPointerCapture(e.pointerId);held.add(controls[button.dataset.roomDir])});for(const name of ['pointerup','pointercancel','lostpointercapture'])button.addEventListener(name,()=>held.delete(controls[button.dataset.roomDir]))});
-document.addEventListener('seen-room-enter',()=>{held.clear();autoSpeed=0;exiting=false;visitor={x:6,y:10.65};path=[];seated=null;pendingSeat=null;closeSeat=null;motion=null;afterStand=null;posture=0;heading=-Math.PI/2;velocity={x:0,y:0};gait=0;sit.disabled=false;sit.textContent='TAKE A SEAT';picker.value=seatChoices.get(currentRoom.n)||'';size();world.focus({preventScroll:true});render()});
+document.addEventListener('seen-room-enter',()=>{held.clear();roomJump.reset();autoSpeed=0;exiting=false;visitor={x:6,y:10.65};path=[];seated=null;pendingSeat=null;closeSeat=null;motion=null;afterStand=null;posture=0;heading=-Math.PI/2;velocity={x:0,y:0};gait=0;sit.disabled=false;sit.textContent='TAKE A SEAT';picker.value=seatChoices.get(currentRoom.n)||'';size();world.focus({preventScroll:true});render()});
 })();
