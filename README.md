@@ -8,7 +8,7 @@ The entry page is an interactive isometric cinema lobby drawn with Canvas 2D. Wa
 
 ## Game Room
 
-A green doorway on the left of the lobby opens on approach and automatically launches SEEN Quiz when crossed. Click the door or choose The Game Room in The Program to walk there. The arcade-style dialog uses the original six quiz questions, with answer explanations, score, result, replay, and return to the lobby. Progress is preserved during the current visit.
+A green doorway on the left of the lobby opens on approach and automatically launches SEEN Quiz when crossed. Click the door or choose The Game Room in The Program to walk there. The arcade-style dialog uses eight quiz questions, including two actor eye-detail questions, with answer explanations, score, result, replay, and return to the lobby. Progress is preserved during the current visit.
 
 ## Preview
 
@@ -25,4 +25,10 @@ Run `python3 -m http.server 4173 --directory dist`, then open http://localhost:4
 
 Film assets are sourced from official distributor publicity pages and the user-supplied Issue 01 PDF. See the in-publication Sources & credits for individual attribution. Critical articles are AI-assisted editorial drafts, not attributed personal experiences. Browser storage is optional; features continue for the current visit if unavailable. Sharing is initiated by the reader. Shared card text is carried in the URL fragment.
 
-Hosting configuration: `.openai/hosting.json`. Static output: `dist/`. No build or server dependencies.
+Static output: `dist/`. No build or server dependencies.
+
+## Public hosting
+
+GitHub Pages publishes `dist/` automatically whenever changes are pushed to `main`. Workflow: `.github/workflows/pages.yml`.
+
+The quiz blackboard has a fixed height and a reserved answer area, so feedback never resizes the board. Publicity stills for the eye questions are credited to A24.
