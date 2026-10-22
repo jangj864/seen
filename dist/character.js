@@ -2,6 +2,12 @@
 function seenNavigationKey(event){return ({KeyW:'w',KeyA:'a',KeyS:'s',KeyD:'d'})[event.code]||(/^[wasd]$/i.test(event.key)?event.key.toLowerCase():event.key)}
 function seenTypingTarget(target){return target instanceof Element&&!!target.closest('input,textarea,select,[contenteditable="true"]')}
 
+// Avoid replacing text nodes or attributes when the visible state has not changed.
+function seenSetText(node,value){if(node.textContent!==value)node.textContent=value}
+function seenSetData(node,key,value){if(node.dataset[key]!==value)node.dataset[key]=value}
+let seenFontRevision=0;
+document.fonts.ready.then(()=>{seenFontRevision++});
+
 // A single visitor model keeps the lobby and every auditorium visually consistent.
 function drawSeenCharacter({ctx:g,unit,project:point,x,y,heading,posture:blend=0,gait=0,phase:tick=0,tagColor='#e2c797',shadowColor='#0004'}){
 function oval(x,y,z,rx,ry,color){const p=point(x,y,z);g.beginPath();g.ellipse(p.x,p.y,rx*unit,ry*unit,0,0,Math.PI*2);g.fillStyle=color;g.fill()}
