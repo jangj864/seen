@@ -32,3 +32,11 @@ Static output: `dist/`. No build or server dependencies.
 GitHub Pages publishes `dist/` automatically whenever changes are pushed to `main`. Workflow: `.github/workflows/pages.yml`.
 
 The quiz blackboard has a fixed height and a reserved answer area, so feedback never resizes the board. Publicity stills for the eye questions are credited to A24.
+
+## Working folder
+
+Use `/Users/ddoazoo/Documents/GitHub/seen` as the only project folder. Edit site files in `dist/`; `.github/workflows/pages.yml` publishes them on pushes to `main`.
+
+Repository: https://github.com/jangj864/seen
+
+Live site: https://jangj864.github.io/seen/
