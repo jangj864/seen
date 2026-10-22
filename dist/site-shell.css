@@ -1,0 +1,13 @@
+/* Shared full-width chrome for the cinema and paper edition. */
+.site-header,.site-footer{box-sizing:border-box;width:100%;margin:0;padding-inline:4%;background:#eee8db;color:#25251f;font-family:'DM Sans',sans-serif;display:flex;align-items:center;justify-content:space-between;gap:20px}
+.site-header{height:104px;border:0;border-bottom:1px solid #29271f36;position:relative;z-index:2}
+.site-header .logo{display:block;font:900 58px/.8 'Barlow Condensed',sans-serif;letter-spacing:-2px;text-decoration:none;color:inherit}
+.site-header .issue{display:flex;align-items:center;gap:17px;font-size:11px;letter-spacing:1.5px;white-space:nowrap}
+.site-header .issue i{display:inline-block;width:6px;height:6px;border-radius:50%;background:#d92f28}
+.site-header button{display:flex;align-items:center;border:0;background:none;color:inherit;padding:0;font:700 11px 'DM Sans',sans-serif;letter-spacing:1px;cursor:pointer;white-space:nowrap;margin:0}
+.site-header button span{margin-left:22px;font-size:22px}
+.site-footer{height:58px;border:0;border-top:1px solid #29271f36;font-size:9px;letter-spacing:1px;padding-block:0}
+.site-footer a{text-decoration:none;color:inherit;border-bottom:1px solid #777;padding-bottom:3px;white-space:nowrap}
+#issue-menu{max-height:calc(100dvh - 120px);overflow-y:auto;top:104px;right:4%}
+#issue-menu button{display:block;border:0;border-bottom:1px solid var(--line);width:100%;padding:12px 25px;text-align:left;background:none;font-size:13px;color:inherit;cursor:pointer}
+@media(max-width:700px){.site-header{height:78px}.site-header .logo{font-size:42px}.site-header .issue{display:none}.site-footer{height:50px;font-size:7px;gap:12px}.site-footer .foot-center{display:none}.site-header button{font-size:10px}.site-header button span{margin-left:16px}#issue-menu{top:78px;max-height:calc(100dvh - 94px)}}
