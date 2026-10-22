@@ -1,0 +1,28 @@
+# SEEN — Issue 02 / November 2026
+
+A responsive, buildless digital film publication extending Jinhyeok Jang’s SEEN Issue 01 print identity. Theme: **A Seat at the Table** — family, belonging, memory, and coming home.
+
+## Cinema draft
+
+The entry page is an interactive isometric cinema lobby drawn with Canvas 2D. Walk using arrows/WASD, click the floor, or use mobile controls. Lobby doors swing open on approach; crossing a doorway automatically enters its room. Click a door to walk through it. Returning from an auditorium places the visitor outside the threshold to prevent immediate re-entry. Both walking canvases suppress the red focus border. Four screening doors open walkable isometric auditoriums with a large program screen, 50 seats, wall sconces, and aisle lighting. Use arrows/WASD, click a floor destination, or use mobile controls. Click a chair or choose a seat to follow the aisle and sit; Enter sits or stands near a chair. Walking uses eased movement, direction changes, and alternating limb motion. Sitting and standing animate through the front of the seat, with bent knees and the selected seat preserved while reading. The auditorium right wall and its floating wall lights are removed. The screen has a dark stage wall, red velvet side curtains with gold ties, an upper valance, and a low stage. The walking canvas does not show the red focus border. A rear EXIT doorway automatically returns the visitor to the same room’s lobby entrance on crossing its threshold. Click the doorway or EXIT button to walk there, including standing up first if seated. Seat selections remain per room during the visit. The lobby floor has no red guide lines. Each room’s screen opens only its assigned article in a native reading popup: cover story, Lady Bird, After Yang, or Minari. No full magazine navigation or iframe appears in the popup. Closing it preserves the visitor’s position and seated state; readers can return to their seat or the lobby; The Program offers room selection. The original publication remains at `magazine.html`. The five lobby-wall posters open film details with synopsis, US release date, director, studio, and an official film/trailer link. Artwork and metadata use official distributor sources; the Focker-In-Law portrait poster is from Universal’s official film site, Ebenezer from Paramount, and Godzilla Minus Zero from GKIDS. Five evenly spaced posters alternate with four entrances on an expanded rear wall. The lobby and auditoriums share `character.js` for the same visitor proportions, directional turning, gait, and limb animation. Lobby movement also eases into and out of each step. Both spaces accept arrows and physical WASD keys, including uppercase and Korean input mode, even after a button receives focus. Article popups pause movement; typing and native seat selection retain their normal keyboard behavior. No rendering dependencies or WebGL required.
+
+## Game Room
+
+A green doorway on the left of the lobby opens on approach and automatically launches SEEN Quiz when crossed. Click the door or choose The Game Room in The Program to walk there. The arcade-style dialog uses the original six quiz questions, with answer explanations, score, result, replay, and return to the lobby. Progress is preserved during the current visit.
+
+## Preview
+
+Run `python3 -m http.server 4173 --directory dist`, then open http://localhost:4173.
+
+## Contents
+
+- Cover story and three complete critical essays in accessible reading dialogs, with direct article links.
+- November 2026 release previews with official distributor links; separate revisits filter.
+- Browser-local watchlist and shared-screen ballot. Repeat names update their existing vote.
+- Six-question quiz with answer explanations and restart.
+- Personal recommendation card with a shareable URL, clipboard fallback, and downloadable PNG.
+- Source register, image credits, colophon, keyboard navigation, responsive layouts, reduced-motion support.
+
+Film assets are sourced from official distributor publicity pages and the user-supplied Issue 01 PDF. See the in-publication Sources & credits for individual attribution. Critical articles are AI-assisted editorial drafts, not attributed personal experiences. Browser storage is optional; features continue for the current visit if unavailable. Sharing is initiated by the reader. Shared card text is carried in the URL fragment.
+
+Hosting configuration: `.openai/hosting.json`. Static output: `dist/`. No build or server dependencies.
