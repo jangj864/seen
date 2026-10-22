@@ -32,7 +32,7 @@ cube(x,y,.28,.65,.54,.18,selected?'#e2ba7a':'#a45a49',selected?'#ad8953':'#793e3
 for(const side of [-.025,.60]){cube(x+side,y+.16,.37,.065,.075,.13,'#665843','#514335','#423a32');cube(x+side,y+.09,.50,.075,.32,.065,'#71634c','#514335','#423a32');}
 cube(x+.03,y+.46,.45,.59,.12,.56,selected?'#e8c88c':'#b06a54',selected?'#c69e63':'#904a40',selected?'#927347':'#5b3430');
 label(seat.id,x+.32,y+.595,.73,.13,selected?'#59482d':'#deb28a',true)}
-function character(){drawSeenCharacter({ctx:g,unit,project:point,x:visitor.x,y:visitor.y,heading,posture,gait:reduced?0:gait,phase:tick,jump:roomJump.height})}
+function character(){drawSeenCharacter({ctx:g,unit,project:point,x:visitor.x,y:visitor.y,heading,posture,gait:reduced?0:gait,phase:tick,jump:roomJump.height,jumpCrouch:roomJump.crouch,jumpTuck:roomJump.tuck,jumping:roomJump.active})}
 const exitZone={x:6,y:11.55};
 function drawExitMat(){polygon([[5.23,10.82,.018],[6.77,10.82,.018],[6.77,11.98,.018],[5.23,11.98,.018]],'#526343');polygon([[5.3,11.28,.024],[6.7,11.28,.024],[6.7,11.34,.024],[5.3,11.34,.024]],'#bca777')}
 function drawExit(){for(const x of [5.23,6.65])cube(x,11.72,0,.12,.12,1.85,'#d4c49c','#c2ad81','#897e5d');cube(5.23,11.72,1.84,1.54,.12,.35,'#b6ad83','#516c49','#405739');label('EXIT',6,11.86,1.93,.24,'#f5e8ba',true);label('TO THE LOBBY',6,11.86,1.55,.12,'#d6cda6',true);}
@@ -103,8 +103,8 @@ else if(!seated){
 else{gait=0;isWalking=false;turnToward(-Math.PI/2,dt)}
 closeSeat=seated||nearest();sit.hidden=!closeSeat&&!motion;if(!motion&&!seated&&closeSeat)seenSetText(status,`Seat ${closeSeat.id} nearby. Enter to sit.`);else if(!motion&&!seated&&!pendingSeat)seenSetText(status,'Walk the aisles or choose a seat.');
 if(!seated&&!motion&&!exiting&&visitor.x>5.3&&visitor.x<6.7&&visitor.y>11.34){leaveThroughExit();requestAnimationFrame(loop);return}
-seenSetData(world,'jump',roomJump.height.toFixed(3));seenSetData(world,'motion',motion?.kind||(seated?'seated':isWalking?'walking':'idle'));seenSetData(world,'position',`${visitor.x.toFixed(3)},${visitor.y.toFixed(3)}`);
-const paintKey=[roomRevision,seenFontRevision,roomJump.height.toFixed(3),currentRoom?.n,seatChoices.get(currentRoom?.n),world.dataset.position,heading.toFixed(3),gait.toFixed(3),posture.toFixed(3),tick.toFixed(3),path.at(-1)?.x,path.at(-1)?.y].join('|');
+seenSetData(world,'jumpPhase',roomJump.active?'active':'idle');seenSetData(world,'jumpCrouch',roomJump.crouch.toFixed(3));seenSetData(world,'jumpTuck',roomJump.tuck.toFixed(3));seenSetData(world,'jump',roomJump.height.toFixed(3));seenSetData(world,'motion',motion?.kind||(seated?'seated':isWalking?'walking':'idle'));seenSetData(world,'position',`${visitor.x.toFixed(3)},${visitor.y.toFixed(3)}`);
+const paintKey=[roomRevision,seenFontRevision,roomJump.height.toFixed(3),roomJump.crouch.toFixed(3),roomJump.tuck.toFixed(3),currentRoom?.n,seatChoices.get(currentRoom?.n),world.dataset.position,heading.toFixed(3),gait.toFixed(3),posture.toFixed(3),tick.toFixed(3),path.at(-1)?.x,path.at(-1)?.y].join('|');
 if(paintKey!==roomPaintKey){render();roomPaintKey=paintKey}}
 requestAnimationFrame(loop)}requestAnimationFrame(loop);
 // Test actual projected chair faces instead of a large rectangle covering nearby aisles.
