@@ -5,7 +5,7 @@ const lobbyLocation=document.querySelector('#location'),screeningDialog=document
 const canvas=document.querySelector('#world'),ctx=canvas.getContext('2d');
 const rooms=[{n:'01',name:'A Seat at the Table',sub:'THE COVER STORY',x:2.25,y:.65,article:'table',img:'ladybird'},{n:'02',name:'The distance between us.',sub:'CLOSE READING / LADY BIRD',x:6.4,y:.65,article:'ladybird',img:'ladybird-mother'},{n:'03',name:'The things we keep.',sub:'MEMORY / AFTER YANG',x:10.55,y:.65,article:'yang',img:'yang'},{n:'04',name:'A home still taking shape.',sub:'BELONGING / MINARI',x:14.7,y:.65,article:'minari',img:'minari'}];
 rooms.forEach(r=>{r.open=0});
-const gameRoom=document.querySelector('#game-room');let gameOpen=0,lobbyWaypoints=[];
+const gameRoom=document.querySelector('#game-room'),arcadeRoom=document.querySelector('#arcade-room');let gameOpen=0,lobbyWaypoints=[];
 const images={};rooms.forEach(r=>{const im=new Image();im.onload=()=>lobbyRevision++;im.src=`assets/${r.img}.jpg`;images[r.img]=im});
 const upcomingFilms=[
 {id:'hunger',title:'The Hunger Games: Sunrise on the Reaping',short:'SUNRISE ON THE REAPING',date:'20 November 2026',stamp:'20 NOV',director:'Francis Lawrence',studio:'Lionsgate',image:'hunger',synopsis:'A return to Panem, 24 years before the original Hunger Games. A young Haymitch Abernathy faces the Fiftieth Games, the Second Quarter Quell.',question:'Who gets to tell a story—and who has to live inside it?',url:'https://hungergames.movie/'},
@@ -57,9 +57,9 @@ for(const [y,sign]of [[5.30,1],[6.70,-1]]){const tx=.42+.70*Math.sin(angle),ty=y
 function sign(value,y,z,size,color){const q=p(.44,y,z);ctx.save();ctx.transform(.86,-.43,0,1,q.x,q.y);ctx.fillStyle=color;ctx.font=`700 ${size*scale}px "Barlow Condensed",sans-serif`;ctx.textAlign='center';ctx.fillText(value,0,0);ctx.restore()}
 box(.12,5.1,1.85,.28,1.8,.35,'#ddcda3','#516a46','#364e37');sign('GAME ROOM',6,1.95,.19,'#f3dfaa');ctx.save();ctx.globalAlpha=1-gameOpen;sign('?',6,1.03,.58,'#e2c78d');sign('SEEN QUIZ',6,.54,.14,'#e2c78d');ctx.restore();}
 function walkToGame(){keys.clear();walkLobbyTo({x:.56,y:6});canvas.focus({preventScroll:true})}
-let gameIndex=0,gameScore=0,gameAnswered=null;
+let gameIndex=0,gameScore=0,gameAnswered=null,gameMode='all',gameQuestions=seenQuizQuestions;
 function renderGame(){
- const total=seenQuizQuestions.length,complete=gameIndex===total,q=seenQuizQuestions[gameIndex],root=document.querySelector('#game-quiz');
+ const total=gameQuestions.length,complete=gameIndex===total,q=gameQuestions[gameIndex],root=document.querySelector('#game-quiz');
  document.querySelector('#game-progress').textContent=complete?'YOUR RESULT':`QUESTION ${String(gameIndex+1).padStart(2,'0')} / ${String(total).padStart(2,'0')}`;
  document.querySelector('#game-score').textContent=`SCORE ${gameScore}`;
  document.querySelector('#game-progress-bar').style.width=`${Math.min(gameIndex+1,total)/total*100}%`;
@@ -79,8 +79,18 @@ function renderGame(){
  if(complete||gameAnswered!==null){const feedback=document.createElement('p');feedback.className='game-feedback';feedback.setAttribute('role','status');feedback.textContent=complete?'Pass the quiz to a friend. There is always another film to discover.':`${gameAnswered===q.answer?'That’s it.':'Not quite.'} ${q.note}`;
  const next=document.createElement('button');next.className='game-next';next.textContent=complete?'PLAY AGAIN ↻':gameIndex===total-1?'SEE YOUR RESULT →':'NEXT QUESTION →';next.onclick=()=>{if(complete){gameIndex=0;gameScore=0}else gameIndex++;gameAnswered=null;renderGame();root.querySelector('button').focus({preventScroll:true})};slot.append(feedback,next)}
 }
-function enterGame(){if(gameRoom.open)return;keys.clear();target=null;lobbyWaypoints=[];lobbyVelocity={x:0,y:0};renderGame();gameRoom.showModal();gameRoom.scrollTop=0;document.querySelector('#leave-game').focus({preventScroll:true})}
-function leaveGame(){if(!gameRoom.open)return;keys.clear();lobbyVelocity={x:0,y:0};target=null;lobbyWaypoints=[];player={x:1.8,y:6};gameRoom.close();setNear();canvas.focus({preventScroll:true})}document.querySelector('#leave-game').onclick=leaveGame;gameRoom.addEventListener('cancel',e=>{e.preventDefault();leaveGame()});
+function enterGame(){if(arcadeRoom.open)return;keys.clear();target=null;lobbyWaypoints=[];lobbyVelocity={x:0,y:0};lobbyJump.reset();arcadeRoom.showModal();document.dispatchEvent(new Event('seen-arcade-enter'))}
+function openQuiz(mode='all'){
+ if(gameRoom.open)return;
+ if(mode!==gameMode){gameMode=mode;gameQuestions=seenQuizQuestions.filter(q=>mode==='all'||(mode==='eyes'?q.kind==='eyes':q.kind!=='eyes'));gameIndex=0;gameScore=0;gameAnswered=null}
+ const titles={all:'SEEN<span>QUIZ</span>',eyes:'EYES<span>ONLY</span>',films:'FILM<span>CLUB</span>'};
+ document.querySelector('#game-title').innerHTML=titles[mode];document.querySelector('.game-marquee p').textContent=`${gameQuestions.length} questions. ${gameQuestions.length} points. How closely were you watching?`;
+ renderGame();gameRoom.showModal();document.querySelector('#leave-game').focus({preventScroll:true});document.dispatchEvent(new Event('seen-quiz-open'));
+}
+function leaveGame(){if(!gameRoom.open)return;gameRoom.close();document.querySelector('#arcade-world').focus({preventScroll:true})}
+function leaveArcade(){if(gameRoom.open)gameRoom.close();arcadeRoom.close();keys.clear();lobbyVelocity={x:0,y:0};target=null;lobbyWaypoints=[];player={x:1.8,y:6};setNear();canvas.focus({preventScroll:true})}
+ document.querySelector('#leave-game').onclick=leaveGame;gameRoom.addEventListener('cancel',e=>{e.preventDefault();leaveGame()});document.querySelector('#leave-arcade').onclick=leaveArcade;arcadeRoom.addEventListener('cancel',e=>{e.preventDefault();leaveArcade()});
+
 function roomApproach(r){return{x:r.x+.8,y:r.y+1.5}}
 function person(){drawSeenCharacter({ctx,unit:scale,project:p,x:player.x,y:player.y,heading:lobbyHeading,gait:reduced?0:lobbyGait,phase,jump:lobbyJump.height,jumpCrouch:lobbyJump.crouch,jumpTuck:lobbyJump.tuck,jumping:lobbyJump.active,tagColor:'#a44731',shadowColor:'#493e2826'})}
 function offsetProp(paint,dx,dy){ctx.save();ctx.translate((dx-dy)*scale*.86,(dx+dy)*scale*.43);paint();ctx.restore()}
@@ -104,7 +114,7 @@ props.sort((a,b)=>a.depth-b.depth).forEach(item=>item.paint());
 
 }
 function setNear(){const next=rooms.find(r=>{const a=roomApproach(r);return Math.hypot(player.x-a.x,player.y-a.y)<1.1})||null;{near=next;seenSetText(lobbyLocation,Math.hypot(player.x-1.4,player.y-6)<1.4?'OUTSIDE THE GAME ROOM':near?`OUTSIDE SCREEN ${near.n}`:'YOU ARE IN THE LOBBY')}}
-function frame(t){const dt=Math.min((t-last)/1000,.04);last=t;if(document.hidden){requestAnimationFrame(frame);return}const paused=gameRoom.open||filmDialog.open||screeningDialog.open||!directory.hidden;let vx=0,vy=0;
+function frame(t){const dt=Math.min((t-last)/1000,.04);last=t;if(document.hidden){requestAnimationFrame(frame);return}const paused=arcadeRoom.open||gameRoom.open||filmDialog.open||screeningDialog.open||!directory.hidden;let vx=0,vy=0;
 if(!paused)lobbyJump.step(dt);
 if(!paused){if(keys.has('ArrowUp')||keys.has('w')){vx--;vy--}if(keys.has('ArrowDown')||keys.has('s')){vx++;vy++}if(keys.has('ArrowLeft')||keys.has('a')){vx--;vy++}if(keys.has('ArrowRight')||keys.has('d')){vx++;vy--}const manual=!!(vx||vy),before={...player};
 if(manual){
@@ -123,7 +133,7 @@ seenSetData(canvas,'jumpPhase',lobbyJump.active?'active':'idle');seenSetData(can
 const paintKey=[lobbyRevision,seenFontRevision,lobbyJump.height.toFixed(3),lobbyJump.crouch.toFixed(3),lobbyJump.tuck.toFixed(3),canvas.dataset.position,canvas.dataset.doors,canvas.dataset.gameDoor,lobbyHeading.toFixed(3),lobbyGait.toFixed(3),phase.toFixed(3),target?.x,target?.y].join('|');
 if(paintKey!==lobbyPaintKey){draw();lobbyPaintKey=paintKey} requestAnimationFrame(frame)}requestAnimationFrame(frame);
 canvas.addEventListener('pointerdown',e=>{const rect=canvas.getBoundingClientRect(),px=e.clientX-rect.left,py=e.clientY-rect.top;const ga=p(.44,6.9,2.2),gb=p(.44,5.1,2.2),gc=p(.44,6.9,0),gu=(px-ga.x)/(gb.x-ga.x),gv=(py-ga.y-gu*(gb.y-ga.y))/(gc.y-ga.y);if(gu>=0&&gu<=1&&gv>=0&&gv<=1){walkToGame();return}lobbyWaypoints=[];for(const r of rooms){const a=p(r.x+.14,r.y+.3,2.4),b=p(r.x+1.46,r.y+.3,2.4),c=p(r.x+.14,r.y+.3,0),u=(px-a.x)/(b.x-a.x),v=(py-a.y-u*(b.y-a.y))/(c.y-a.y);if(u>=0&&u<=1&&v>=0&&v<=1){walkLobbyTo({x:r.x+.8,y:r.y+.48});canvas.focus({preventScroll:true});return}}const sx=(px-ox)/scale/.86,sy=(py-oy)/scale/.43;walkLobbyTo({x:Math.max(.6,Math.min(18.1,(sx+sy)/2)),y:Math.max(1.1,Math.min(8.4,(sy-sx)/2))});canvas.focus({preventScroll:true});});
-addEventListener('keydown',e=>{if(gameRoom.open||filmDialog.open||document.querySelector('#screening').open||!document.querySelector('#directory').hidden||seenTypingTarget(e.target))return;const key=seenNavigationKey(e);if(e.code==='Space'||e.key===' '){e.preventDefault();if(!e.repeat)lobbyJump.start();canvas.focus({preventScroll:true});return}if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','w','a','s','d'].includes(key)){e.preventDefault();keys.add(key);canvas.focus({preventScroll:true})}if(key==='Enter'&&Math.hypot(player.x-1.4,player.y-6)<1.5&&document.activeElement===canvas){e.preventDefault();enterGame();return}if(key==='Enter'&&near&&document.activeElement===canvas){e.preventDefault();enter()}});addEventListener('keyup',e=>keys.delete(seenNavigationKey(e)));addEventListener('blur',()=>keys.clear());
+addEventListener('keydown',e=>{if(arcadeRoom.open||gameRoom.open||filmDialog.open||document.querySelector('#screening').open||!document.querySelector('#directory').hidden||seenTypingTarget(e.target))return;const key=seenNavigationKey(e);if(e.code==='Space'||e.key===' '){e.preventDefault();if(!e.repeat)lobbyJump.start();canvas.focus({preventScroll:true});return}if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','w','a','s','d'].includes(key)){e.preventDefault();keys.add(key);canvas.focus({preventScroll:true})}if(key==='Enter'&&Math.hypot(player.x-1.4,player.y-6)<1.5&&document.activeElement===canvas){e.preventDefault();enterGame();return}if(key==='Enter'&&near&&document.activeElement===canvas){e.preventDefault();enter()}});addEventListener('keyup',e=>keys.delete(seenNavigationKey(e)));addEventListener('blur',()=>keys.clear());
 let currentRoom=null;
 const seatChoices=new Map();
 const seatRows=document.querySelector('#seat-rows');
@@ -139,4 +149,4 @@ document.querySelector('#leave-room').onclick=()=>{document.querySelector('#scre
 const directory=document.querySelector('#directory'),toggle=document.querySelector('#index-toggle');function closeIndex(){directory.hidden=true;toggle.setAttribute('aria-expanded','false');toggle.focus()}toggle.onclick=()=>{directory.hidden=!directory.hidden;toggle.setAttribute('aria-expanded',String(!directory.hidden));if(!directory.hidden)document.querySelector('#close-index').focus()};document.querySelector('#close-index').onclick=closeIndex;document.querySelector('#room-list').innerHTML=rooms.map((r,i)=>`<button data-room="${i}"><b>${r.n}</b><span><strong>${r.name}</strong><small>${r.sub}</small></span><span style="margin-left:auto">↗</span></button>`).join('')+'<button data-game-room><b>G</b><span><strong>The Game Room</strong><small>PLAY THE SEEN QUIZ</small></span><span style="margin-left:auto">↗</span></button>';document.querySelector('#room-list').onclick=e=>{if(e.target.closest('[data-game-room]')){closeIndex();walkToGame();return}const b=e.target.closest('[data-room]');if(!b)return;const r=rooms[Number(b.dataset.room)];closeIndex();const approach=roomApproach(r);player={x:approach.x,y:approach.y+1};walkLobbyTo(approach);canvas.focus({preventScroll:true})};addEventListener('keydown',e=>{if(e.key==='Escape'&&!directory.hidden)closeIndex()});
 const touchMap={up:'ArrowUp',down:'ArrowDown',left:'ArrowLeft',right:'ArrowRight'};document.querySelectorAll('[data-dir]').forEach(b=>{b.addEventListener('pointerdown',e=>{e.preventDefault();b.setPointerCapture(e.pointerId);keys.add(touchMap[b.dataset.dir])});for(const event of ['pointerup','pointercancel','lostpointercapture'])b.addEventListener(event,()=>keys.delete(touchMap[b.dataset.dir]))});
 
-document.querySelector('#jump-lobby').onclick=()=>{if(gameRoom.open||filmDialog.open||screeningDialog.open||!directory.hidden)return;lobbyJump.start();canvas.focus({preventScroll:true})};
+document.querySelector('#jump-lobby').onclick=()=>{if(arcadeRoom.open||gameRoom.open||filmDialog.open||screeningDialog.open||!directory.hidden)return;lobbyJump.start();canvas.focus({preventScroll:true})};
