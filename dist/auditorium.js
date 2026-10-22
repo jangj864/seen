@@ -1,7 +1,7 @@
 'use strict';
 (()=>{
 const world=document.querySelector('#room-world'),g=world.getContext('2d'),room=document.querySelector('#auditorium'),dialog=document.querySelector('#screening'),sit=document.querySelector('#sit-down'),picker=document.querySelector('#seat-picker'),status=document.querySelector('#room-status');
-const held=new Set(),chairs=[];let width=0,height=0,unit=1,cx=0,cy=0,visitor={x:6,y:10.65},path=[],pendingSeat=null,seated=null,closeSeat=null,tick=0,previous=0,isWalking=false,heading=-Math.PI/2,velocity={x:0,y:0},gait=0,posture=0,motion=null,afterStand=null,exiting=false;
+const held=new Set(),chairs=[];let width=0,height=0,unit=1,cx=0,cy=0,visitor={x:6,y:10.65},path=[],pendingSeat=null,seated=null,closeSeat=null,tick=0,previous=0,isWalking=false,heading=-Math.PI/2,velocity={x:0,y:0},autoSpeed=0,gait=0,posture=0,motion=null,afterStand=null,exiting=false;
 for(let row=0;row<5;row++)for(let col=0;col<10;col++){const id='ABCDE'[row]+String(col+1).padStart(2,'0'),seat={id,x:col<5?1.35+col*.78:6.85+(col-5)*.78,y:4.1+row*1.3};chairs.push(seat);const option=document.createElement('option');option.value=id;option.textContent=`Seat ${id}`;picker.append(option)}
 const articleDialog=document.querySelector('#screen-article'),screenStill=document.querySelector('#screen-still');
 let roomRevision=0,roomPaintKey='';
@@ -34,7 +34,7 @@ function character(){drawSeenCharacter({ctx:g,unit,project:point,x:visitor.x,y:v
 const exitZone={x:6,y:11.55};
 function drawExitMat(){polygon([[5.23,10.82,.018],[6.77,10.82,.018],[6.77,11.98,.018],[5.23,11.98,.018]],'#526343');polygon([[5.3,11.28,.024],[6.7,11.28,.024],[6.7,11.34,.024],[5.3,11.34,.024]],'#bca777')}
 function drawExit(){for(const x of [5.23,6.65])cube(x,11.72,0,.12,.12,1.85,'#d4c49c','#c2ad81','#897e5d');cube(5.23,11.72,1.84,1.54,.12,.35,'#b6ad83','#516c49','#405739');label('EXIT',6,11.86,1.93,.24,'#f5e8ba',true);label('TO THE LOBBY',6,11.86,1.55,.12,'#d6cda6',true);}
-function walkToExit(){requestAction(()=>{pendingSeat=null;path=navigation.route(visitor,exitZone);status.textContent='Walking to the exit…'});world.focus({preventScroll:true})}
+function walkToExit(){requestAction(()=>{pendingSeat=null;autoSpeed=0;path=navigation.route(visitor,exitZone);status.textContent='Walking to the exit…'});world.focus({preventScroll:true})}
 function leaveThroughExit(){if(exiting)return;exiting=true;held.clear();path=[];velocity={x:0,y:0};document.querySelector('#leave-room').click()}
 document.querySelector('#walk-exit').addEventListener('click',walkToExit);
 function render(){if(!width||!height)return;g.clearRect(0,0,width,height);const gradient=g.createRadialGradient(width*.5,height*.4,0,width*.5,height*.4,width*.8);gradient.addColorStop(0,'#353d33');gradient.addColorStop(1,'#171d1b');g.fillStyle=gradient;g.fillRect(0,0,width,height);cube(0,0,-.14,12,12,.14,'#3c3731','#272c28','#212723');for(let y=0;y<12;y++)polygon([[0,y,.005],[12,y,.005],[12,y+.025,.005],[0,y+.025,.005]],'#d6b78209');cube(0,-.12,0,12,.24,5.1,'#51403a','#292326','#201e21');cube(-.12,0,0,.18,11.6,1.05,'#655b49','#374333','#29372d');drawScreen();drawCurtains();for(const x of [.8,5.65,6.4,11.1])for(let y=3;y<11.7;y+=.6)cube(x,y,.015,.035,.18,.02,'#bd9c5d','#bd9c5d','#bd9c5d');if(path.length){const dest=path[path.length-1];oval(dest.x,dest.y,.02,.22,.09,'#e8c28b55')}
@@ -61,7 +61,7 @@ if(seated&&!motion&&seat.y===seated.y&&Math.abs(seat.x-seated.x)<1.6){
   seenSetText(status,`Moving to seat ${seat.id}…`);world.focus({preventScroll:true});return;
  }
 }
-requestAction(()=>{const y=seat.y-.33;path=navigation.route(visitor,{x:seat.x+.33,y});pendingSeat=seat;});world.focus({preventScroll:true})}
+requestAction(()=>{const y=seat.y-.33;autoSpeed=0;path=navigation.route(visitor,{x:seat.x+.33,y});pendingSeat=seat;});world.focus({preventScroll:true})}
 picker.addEventListener('change',()=>planSeat(picker.value));sit.onclick=()=>{sitHere();world.focus({preventScroll:true})};
 function loop(now){const dt=Math.min((now-previous)/1000,.04);previous=now;if(active()){
 let dx=0,dy=0;for(const [key,vx,vy]of [['ArrowUp',-1,-1],['w',-1,-1],['ArrowDown',1,1],['s',1,1],['ArrowLeft',-1,1],['a',-1,1],['ArrowRight',1,-1],['d',1,-1]])if(held.has(key)){dx+=vx;dy+=vy}
@@ -77,11 +77,26 @@ if(motion?.kind==='transfer'){
  if(t===1){seated=move.seat;motion=null;posture=1;gait=0;sit.disabled=false;sit.textContent='STAND UP';seatChoices.set(currentRoom.n,seated.id);updateSeat();picker.value=seated.id;seenSetText(status,`Seated at ${seated.id}. Enter or Stand up to explore.`);if(afterStand||manual)stand()}
 }
 else if(motion){gait*=Math.exp(-dt*15);motion.elapsed+=dt;const t=Math.min(1,motion.elapsed/motion.duration),k=ease(t);visitor.x=motion.from.x+(motion.to.x-motion.from.x)*k;visitor.y=motion.from.y+(motion.to.y-motion.from.y)*k;posture=motion.kind==='sit'?k:1-k;turnToward(-Math.PI/2,dt);isWalking=false;if(t===1){const kind=motion.kind;motion=null;sit.disabled=false;if(kind==='sit'){posture=1;seenSetText(status,`Seated at ${seated.id}. Enter or Stand up to explore.`);sit.textContent='STAND UP';if(afterStand||manual)stand()}else{posture=0;seated=null;sit.textContent='TAKE A SEAT';seenSetText(status,'Back in the aisle. Keep exploring.');const action=afterStand;afterStand=null;action?.()}}}
-else if(!seated){if(!manual&&path.length){
-// Drop a corner as soon as the remaining path is directly visible.
-for(let i=path.length-1;i>0;i--)if(navigation.clear(visitor,path[i])){path.splice(0,i);break}
-dx=path[0].x-visitor.x;dy=path[0].y-visitor.y;if(Math.hypot(dx,dy)<.055){visitor={...path.shift()};if(!path.length)velocity={x:0,y:0};if(!path.length&&pendingSeat){closeSeat=pendingSeat;pendingSeat=null;sitHere()}dx=dy=0}}
-if(!motion){const len=Math.hypot(dx,dy),speed=manual?3.5:Math.min(3.5,len*8),factor=1-Math.exp(-dt*(len?12:18));velocity.x+=((len?dx/len*speed:0)-velocity.x)*factor;velocity.y+=((len?dy/len*speed:0)-velocity.y)*factor;const old={...visitor},nx=Math.max(.4,Math.min(11.6,visitor.x+velocity.x*dt)),ny=Math.max(1.4,Math.min(11.6,visitor.y+velocity.y*dt));if(!occupied(nx,ny)){visitor.x=nx;visitor.y=ny}else{if(!occupied(nx,visitor.y))visitor.x=nx;else velocity.x=0;if(!occupied(visitor.x,ny))visitor.y=ny;else velocity.y=0}const distance=Math.hypot(visitor.x-old.x,visitor.y-old.y);isWalking=distance>.0005;gait+=(Math.min(1,distance/Math.max(dt,.001)/2.8)-gait)*(1-Math.exp(-dt*12));if(isWalking){tick+=distance*12;turnToward(Math.atan2(visitor.y-old.y,visitor.x-old.x),dt)}}}
+else if(!seated){
+ const old={...visitor};
+ if(!manual){
+  velocity={x:0,y:0};
+  if(path.length){
+   let remaining=0,previous=visitor;for(const next of path){remaining+=Math.hypot(next.x-previous.x,next.y-previous.y);previous=next}
+   const desired=Math.min(3.5,Math.sqrt(2*10*remaining));autoSpeed=Math.min(desired,autoSpeed+12*dt);
+   visitor=navigation.advance(visitor,path,autoSpeed*dt);
+   if(!path.length){autoSpeed=0;if(pendingSeat){closeSeat=pendingSeat;pendingSeat=null;sitHere()}}
+  }else autoSpeed=0;
+ }else{
+  autoSpeed=0;const len=Math.hypot(dx,dy),factor=1-Math.exp(-dt*12);
+  velocity.x+=(dx/len*3.5-velocity.x)*factor;velocity.y+=(dy/len*3.5-velocity.y)*factor;
+  const nx=Math.max(.4,Math.min(11.6,visitor.x+velocity.x*dt)),ny=Math.max(1.4,Math.min(11.6,visitor.y+velocity.y*dt));
+  if(!occupied(nx,ny)){visitor.x=nx;visitor.y=ny}else{if(!occupied(nx,visitor.y))visitor.x=nx;else velocity.x=0;if(!occupied(visitor.x,ny))visitor.y=ny;else velocity.y=0}
+ }
+ const distance=Math.hypot(visitor.x-old.x,visitor.y-old.y);isWalking=distance>.0005;
+ gait+=(Math.min(1,distance/Math.max(dt,.001)/2.8)-gait)*(1-Math.exp(-dt*12));
+ if(isWalking){tick+=distance*12;turnToward(Math.atan2(visitor.y-old.y,visitor.x-old.x),dt)}
+}
 else{gait=0;isWalking=false;turnToward(-Math.PI/2,dt)}
 closeSeat=seated||nearest();sit.hidden=!closeSeat&&!motion;if(!motion&&!seated&&closeSeat)seenSetText(status,`Seat ${closeSeat.id} nearby. Enter to sit.`);else if(!motion&&!seated&&!pendingSeat)seenSetText(status,'Walk the aisles or choose a seat.');
 if(!seated&&!motion&&!exiting&&visitor.x>5.3&&visitor.x<6.7&&visitor.y>11.34){leaveThroughExit();requestAnimationFrame(loop);return}
@@ -110,9 +125,9 @@ world.addEventListener('pointerdown',e=>{
   if(u>=0&&u<=1&&v>=0&&v<=1){document.querySelector('#start-program').click();return}
   const hit=chairHitOrder.find(seat=>chairHit(seat,px,py));if(hit){planSeat(hit.id);return}
  }
- requestAction(()=>{pendingSeat=null;const target=navigation.destination(visitor,floor);path=target?navigation.route(visitor,target):[];velocity={x:0,y:0}});world.focus({preventScroll:true});
+ requestAction(()=>{pendingSeat=null;const target=navigation.destination(visitor,floor);autoSpeed=0;path=target?navigation.route(visitor,target):[];velocity={x:0,y:0}});world.focus({preventScroll:true});
 });
 addEventListener('keydown',e=>{if(!active()||seenTypingTarget(e.target))return;const key=seenNavigationKey(e);if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','w','a','s','d'].includes(key)){e.preventDefault();held.add(key);world.focus({preventScroll:true})}if(key==='Enter'&&document.activeElement===world){e.preventDefault();sitHere()}});addEventListener('keyup',e=>held.delete(seenNavigationKey(e)));addEventListener('blur',()=>held.clear());dialog.addEventListener('close',()=>held.clear());document.querySelector('#start-program').addEventListener('click',()=>{held.clear();velocity={x:0,y:0}});
 const controls={up:'ArrowUp',left:'ArrowLeft',down:'ArrowDown',right:'ArrowRight'};document.querySelectorAll('[data-room-dir]').forEach(button=>{button.addEventListener('pointerdown',e=>{e.preventDefault();button.setPointerCapture(e.pointerId);held.add(controls[button.dataset.roomDir])});for(const name of ['pointerup','pointercancel','lostpointercapture'])button.addEventListener(name,()=>held.delete(controls[button.dataset.roomDir]))});
-document.addEventListener('seen-room-enter',()=>{held.clear();exiting=false;visitor={x:6,y:10.65};path=[];seated=null;pendingSeat=null;closeSeat=null;motion=null;afterStand=null;posture=0;heading=-Math.PI/2;velocity={x:0,y:0};gait=0;sit.disabled=false;sit.textContent='TAKE A SEAT';picker.value=seatChoices.get(currentRoom.n)||'';size();world.focus({preventScroll:true});render()});
+document.addEventListener('seen-room-enter',()=>{held.clear();autoSpeed=0;exiting=false;visitor={x:6,y:10.65};path=[];seated=null;pendingSeat=null;closeSeat=null;motion=null;afterStand=null;posture=0;heading=-Math.PI/2;velocity={x:0,y:0};gait=0;sit.disabled=false;sit.textContent='TAKE A SEAT';picker.value=seatChoices.get(currentRoom.n)||'';size();world.focus({preventScroll:true});render()});
 })();

@@ -53,5 +53,18 @@ function createSeenRoomNavigation(chairs){
   for(const point of candidates){const path=route(start,point);if(!path.length)continue;let travel=0,previous=start;for(const next of path){travel+=distance(previous,next);previous=next}const cost=distance(target,point)+travel*.2;if(cost<bestCost){best=point;bestCost=cost}}
   return best;
  }
- return {route,blocked,clear,destination};
+ // Consume a distance budget along the route; never carry momentum past a corner or target.
+ function advance(start,path,budget){
+  let position={...start};
+  while(path.length&&budget>0){
+   const target=path[0],length=distance(position,target);
+   if(length<1e-8){position={...target};path.shift();continue}
+   const step=Math.min(length,budget),next={x:position.x+(target.x-position.x)*step/length,y:position.y+(target.y-position.y)*step/length};
+   if(!clear(position,next))break;
+   position=next;budget-=step;
+   if(step===length){position={...target};path.shift()}
+  }
+  return position;
+ }
+ return {route,blocked,clear,destination,advance};
 }
