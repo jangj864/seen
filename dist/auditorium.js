@@ -8,9 +8,8 @@ let roomRevision=0,roomPaintKey='';
 screenStill.addEventListener('load',()=>roomRevision++);
 const chairDrawOrder=[...chairs].sort((a,b)=>(a.x+a.y)-(b.x+b.y)),chairHitOrder=[...chairDrawOrder].reverse();
 const chairById=new Map(chairs.map(seat=>[seat.id,seat]));
-const navigation=createSeenRoomNavigation(chairs),roomJump=createSeenJump(),jumpButton=document.querySelector('#jump-room');
+const navigation=createSeenRoomNavigation(chairs),roomJump=createSeenJump();
 function jump(){if(!active()||seated||motion)return;roomJump.start();world.focus({preventScroll:true})}
-jumpButton.onclick=jump;
 const active=()=>!document.hidden&&dialog.open&&!room.hidden&&!articleDialog.open;
 function size(){roomRevision++;width=world.clientWidth;height=world.clientHeight;if(!width||!height)return;const ratio=Math.min(devicePixelRatio||1,2);world.width=width*ratio;world.height=height*ratio;g.setTransform(ratio,0,0,ratio,0,0);unit=Math.min(width/22.5,height/18.3);cx=width/2;cy=Math.max(unit*5.3+12,height*.29);}
 new ResizeObserver(size).observe(world);
@@ -82,7 +81,7 @@ if(wasAirborne&&roomJump.height===0&&occupied(visitor.x,visitor.y)){
  const landing=navigation.landing(visitor);
  if(landing)visitor=landing;
 }
-jumpButton.disabled=!!seated||!!motion;
+
 let dx=0,dy=0;for(const [key,vx,vy]of [['ArrowUp',-1,-1],['w',-1,-1],['ArrowDown',1,1],['s',1,1],['ArrowLeft',-1,1],['a',-1,1],['ArrowRight',1,-1],['d',1,-1]])if(held.has(key)){dx+=vx;dy+=vy}
 const manual=!!(dx||dy);if(manual){if(seated&&!motion){afterStand=null;stand()}path=[];pendingSeat=null;}
 if(motion?.kind==='transfer'){

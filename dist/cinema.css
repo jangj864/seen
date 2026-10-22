@@ -60,3 +60,5 @@
 @media(max-width:1100px){.auditorium-bottom{grid-template-columns:1fr}.room-touch{bottom:196px}}
 @media(max-width:800px){.room-touch{bottom:230px;right:5%}.room-actions{grid-template-columns:repeat(4,minmax(0,1fr))}.auditorium-bottom #start-program{grid-column:1/5}}
 @media(max-width:700px){.controls{width:90%;justify-content:center;gap:6px;bottom:16px}.controls .key{display:grid}.controls .jump-key{display:flex}.controls>span,.controls>i{display:none}.room-touch .key,.controls .key{width:34px;height:36px}.room-touch .jump-key,.controls .jump-key{width:70px}.jump-key small{display:none}}
+
+.direction-icon{display:block;width:18px;height:18px;overflow:visible;transform:rotate(var(--arrow-turn,0deg));pointer-events:none}.direction-icon path{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
