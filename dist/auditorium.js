@@ -66,7 +66,12 @@ if(seated&&!motion&&seat.y===seated.y&&Math.abs(seat.x-seated.x)<1.6){
 requestAction(()=>{const y=seat.y-.33;autoSpeed=0;path=navigation.route(visitor,{x:seat.x+.33,y});pendingSeat=seat;});world.focus({preventScroll:true})}
 picker.addEventListener('change',()=>planSeat(picker.value));sit.onclick=()=>{sitHere();world.focus({preventScroll:true})};
 function loop(now){const dt=Math.min((now-previous)/1000,.04);previous=now;if(active()){
-roomJump.step(dt);jumpButton.disabled=!!seated||!!motion;
+const wasAirborne=roomJump.height>0;roomJump.step(dt);
+if(wasAirborne&&roomJump.height===0&&occupied(visitor.x,visitor.y)){
+ const landing=navigation.landing(visitor);
+ if(landing)visitor=landing;
+}
+jumpButton.disabled=!!seated||!!motion;
 let dx=0,dy=0;for(const [key,vx,vy]of [['ArrowUp',-1,-1],['w',-1,-1],['ArrowDown',1,1],['s',1,1],['ArrowLeft',-1,1],['a',-1,1],['ArrowRight',1,-1],['d',1,-1]])if(held.has(key)){dx+=vx;dy+=vy}
 const manual=!!(dx||dy);if(manual){if(seated&&!motion){afterStand=null;stand()}path=[];pendingSeat=null;}
 if(motion?.kind==='transfer'){
@@ -94,7 +99,9 @@ else if(!seated){
   autoSpeed=0;const len=Math.hypot(dx,dy),factor=1-Math.exp(-dt*12);
   velocity.x+=(dx/len*3.5-velocity.x)*factor;velocity.y+=(dy/len*3.5-velocity.y)*factor;
   const nx=Math.max(.4,Math.min(11.6,visitor.x+velocity.x*dt)),ny=Math.max(1.4,Math.min(11.6,visitor.y+velocity.y*dt));
-  if(!occupied(nx,ny)){visitor.x=nx;visitor.y=ny}else{if(!occupied(nx,visitor.y))visitor.x=nx;else velocity.x=0;if(!occupied(visitor.x,ny))visitor.y=ny;else velocity.y=0}
+  // Feet must clear the chair back before movement may cross its footprint.
+  const aboveSeats=roomJump.height>.98;
+  if(aboveSeats||!occupied(nx,ny)){visitor.x=nx;visitor.y=ny}else{if(!occupied(nx,visitor.y))visitor.x=nx;else velocity.x=0;if(!occupied(visitor.x,ny))visitor.y=ny;else velocity.y=0}
  }
  const distance=Math.hypot(visitor.x-old.x,visitor.y-old.y);isWalking=distance>.0005;
  gait+=(Math.min(1,distance/Math.max(dt,.001)/2.8)-gait)*(1-Math.exp(-dt*12));

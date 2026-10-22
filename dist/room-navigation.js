@@ -66,5 +66,10 @@ function createSeenRoomNavigation(chairs){
   }
   return position;
  }
- return {route,blocked,clear,destination,advance};
+ function landing(point){
+  if(!blocked(point.x,point.y))return {...point};
+  const r=rectangles.find(r=>point.x>r.left&&point.x<r.right&&point.y>r.top&&point.y<r.bottom),gap=.08;
+  return [{x:point.x,y:r.top-gap},{x:point.x,y:r.bottom+gap},{x:r.left-gap,y:point.y},{x:r.right+gap,y:point.y}].filter(p=>!blocked(p.x,p.y)).sort((a,b)=>distance(point,a)-distance(point,b))[0]||null;
+ }
+ return {route,blocked,clear,destination,advance,landing};
 }

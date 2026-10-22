@@ -9,12 +9,12 @@ let seenFontRevision=0;
 document.fonts.ready.then(()=>{seenFontRevision++});
 
 function createSeenJump(){
- const prepare=.14,flight=9/14,land=.20,total=prepare+flight+land;
+ const prepare=.14,flight=11.6/14,land=.20,total=prepare+flight+land;
  let elapsed=total;
  const smooth=t=>t*t*(3-2*t);
  return {
   get active(){return elapsed<total},
-  get height(){const t=elapsed-prepare;return t>0&&t<flight?Math.max(0,4.5*t-7*t*t):0},
+  get height(){const t=elapsed-prepare;return t>0&&t<flight?Math.max(0,5.8*t-7*t*t):0},
   get crouch(){if(elapsed>=total)return 0;if(elapsed<prepare)return smooth(elapsed/prepare);if(elapsed<prepare+flight)return 1-smooth(Math.min(1,(elapsed-prepare)/.12));return Math.sin(Math.PI*(elapsed-prepare-flight)/land)*.7},
   get tuck(){return elapsed>prepare&&elapsed<prepare+flight?Math.sin(Math.PI*(elapsed-prepare)/flight):0},
   start(){if(elapsed>=total)elapsed=0},
