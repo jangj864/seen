@@ -5,7 +5,7 @@ const lobbyLocation=document.querySelector('#location'),screeningDialog=document
 const canvas=document.querySelector('#world'),ctx=canvas.getContext('2d');
 const rooms=[{n:'01',name:'A Seat at the Table',sub:'THE COVER STORY',x:2.25,y:.65,article:'table',img:'ladybird'},{n:'02',name:'The distance between us.',sub:'CLOSE READING / LADY BIRD',x:6.4,y:.65,article:'ladybird',img:'ladybird-mother'},{n:'03',name:'The things we keep.',sub:'MEMORY / AFTER YANG',x:10.55,y:.65,article:'yang',img:'yang'},{n:'04',name:'A home still taking shape.',sub:'BELONGING / MINARI',x:14.7,y:.65,article:'minari',img:'minari'}];
 rooms.forEach(r=>{r.open=0});
-const gameRoom=document.querySelector('#game-room'),arcadeRoom=document.querySelector('#arcade-room');let gameOpen=0,lobbyWaypoints=[];
+const gameRoom=document.querySelector('#game-room'),arcadeRoom=document.querySelector('#arcade-room'),quizConfirm=document.querySelector('#game-confirm');let gameOpen=0,lobbyWaypoints=[];
 const images={};rooms.forEach(r=>{const im=new Image();im.onload=()=>lobbyRevision++;im.src=`assets/${r.img}.jpg`;images[r.img]=im});
 const upcomingFilms=[
 {id:'hunger',title:'The Hunger Games: Sunrise on the Reaping',short:'SUNRISE ON THE REAPING',date:'20 November 2026',stamp:'20 NOV',director:'Francis Lawrence',studio:'Lionsgate',image:'hunger',synopsis:'A return to Panem, 24 years before the original Hunger Games. A young Haymitch Abernathy faces the Fiftieth Games, the Second Quarter Quell.',question:'Who gets to tell a story—and who has to live inside it?',url:'https://hungergames.movie/'},
@@ -57,9 +57,30 @@ for(const [y,sign]of [[5.30,1],[6.70,-1]]){const tx=.42+.70*Math.sin(angle),ty=y
 function sign(value,y,z,size,color){const q=p(.44,y,z);ctx.save();ctx.transform(.86,-.43,0,1,q.x,q.y);ctx.fillStyle=color;ctx.font=`700 ${size*scale}px "Barlow Condensed",sans-serif`;ctx.textAlign='center';ctx.fillText(value,0,0);ctx.restore()}
 box(.12,5.1,1.85,.28,1.8,.35,'#ddcda3','#516a46','#364e37');sign('GAME ROOM',6,1.95,.19,'#f3dfaa');ctx.save();ctx.globalAlpha=1-gameOpen;sign('?',6,1.03,.58,'#e2c78d');sign('SEEN QUIZ',6,.54,.14,'#e2c78d');ctx.restore();}
 function walkToGame(){keys.clear();walkLobbyTo({x:.56,y:6});canvas.focus({preventScroll:true})}
+const quizThemes={
+ all:{title:'SEEN QUIZ',accent:'#c25c3c',light:'#e9bb68',onAccent:'#fff3dc',description:'영화 이야기와 배우 눈 맞히기, 총 8문제'},
+ eyes:{title:'EYES ONLY',accent:'#428b7e',light:'#a4d4b2',onAccent:'#fff3dc',description:'눈만 보고 배우를 맞히는 2문제'},
+ films:{title:'FILM CLUB',accent:'#b1893e',light:'#efcf82',onAccent:'#172a20',description:'영화에 관한 6가지 질문'}
+};
+let requestedQuiz=null;
+function applyQuizTheme(element,mode){const theme=quizThemes[mode];element.dataset.mode=mode;for(const [key,value]of Object.entries({accent:theme.accent,light:theme.light,'on-accent':theme.onAccent}))element.style.setProperty(`--game-${key}`,value)}
+function requestQuiz(mode){
+ if(!isSceneOpen('arcade-room')||gameRoom.open||quizConfirm.open||!quizThemes[mode])return;
+ requestedQuiz=mode;applyQuizTheme(quizConfirm,mode);document.querySelector('#game-confirm-title').textContent=`${quizThemes[mode].title} 게임을 플레이하시겠습니까?`;document.querySelector('#game-confirm-description').textContent=quizThemes[mode].description;
+ quizConfirm.showModal();document.querySelector('#confirm-game-start').focus({preventScroll:true});document.dispatchEvent(new Event('seen-quiz-open'));
+}
+function cancelQuizRequest(){requestedQuiz=null;quizConfirm.close();document.querySelector('#arcade-world').focus({preventScroll:true})}
+document.querySelector('#cancel-game-start').onclick=cancelQuizRequest;
+quizConfirm.addEventListener('cancel',event=>{event.preventDefault();cancelQuizRequest()});
+document.querySelector('#confirm-game-start').onclick=()=>{const mode=requestedQuiz;requestedQuiz=null;quizConfirm.close();if(mode)openQuiz(mode)};
+function updateQuizIndicators(total,complete){
+ const dots=document.querySelector('#game-indicators');dots.replaceChildren();
+ for(let i=0;i<total;i++){const dot=document.createElement('li'),current=!complete&&i===gameIndex,answered=complete||i<gameIndex||(current&&gameAnswered!==null);dot.className='quiz-dot';dot.classList.toggle('is-current',current);dot.classList.toggle('is-answered',answered);dot.setAttribute('aria-label',`문제 ${i+1}: ${current?'현재 문제':answered?'완료':'아직 풀지 않은 문제'}`);if(current)dot.setAttribute('aria-current','step');dots.append(dot)}
+}
 let gameIndex=0,gameScore=0,gameAnswered=null,gameMode='all',gameQuestions=seenQuizQuestions;
 function renderGame(){
  const total=gameQuestions.length,complete=gameIndex===total,q=gameQuestions[gameIndex],root=document.querySelector('#game-quiz');
+ updateQuizIndicators(total,complete);
  document.querySelector('#game-progress').textContent=complete?'YOUR RESULT':`QUESTION ${String(gameIndex+1).padStart(2,'0')} / ${String(total).padStart(2,'0')}`;
  document.querySelector('#game-score').textContent=`SCORE ${gameScore}`;
  document.querySelector('#game-progress-bar').style.width=`${Math.min(gameIndex+1,total)/total*100}%`;
@@ -81,14 +102,15 @@ function renderGame(){
 }
 function enterGame(){if(isSceneOpen('arcade-room'))return;keys.clear();target=null;lobbyWaypoints=[];lobbyVelocity={x:0,y:0};lobbyJump.reset();showScene('arcade-room');document.dispatchEvent(new Event('seen-arcade-enter'))}
 function openQuiz(mode='all'){
- if(gameRoom.open)return;
+ if(gameRoom.open||!quizThemes[mode])return;
+ applyQuizTheme(gameRoom,mode);document.querySelector('#game-room .game-toolbar>span').textContent=quizThemes[mode].title;
  if(mode!==gameMode){gameMode=mode;gameQuestions=seenQuizQuestions.filter(q=>mode==='all'||(mode==='eyes'?q.kind==='eyes':q.kind!=='eyes'));gameIndex=0;gameScore=0;gameAnswered=null}
  const titles={all:'SEEN<span>QUIZ</span>',eyes:'EYES<span>ONLY</span>',films:'FILM<span>CLUB</span>'};
  document.querySelector('#game-title').innerHTML=titles[mode];document.querySelector('.game-marquee p').textContent=`${gameQuestions.length} questions. ${gameQuestions.length} points. How closely were you watching?`;
  renderGame();gameRoom.showModal();document.querySelector('#leave-game').focus({preventScroll:true});document.dispatchEvent(new Event('seen-quiz-open'));
 }
 function leaveGame(){if(!gameRoom.open)return;gameRoom.close();document.querySelector('#arcade-world').focus({preventScroll:true})}
-function leaveArcade(){if(gameRoom.open)gameRoom.close();closeScene('arcade-room');keys.clear();lobbyVelocity={x:0,y:0};target=null;lobbyWaypoints=[];player={x:1.8,y:6};setNear();canvas.focus({preventScroll:true})}
+function leaveArcade(){if(quizConfirm.open){quizConfirm.close();requestedQuiz=null}if(gameRoom.open)gameRoom.close();closeScene('arcade-room');keys.clear();lobbyVelocity={x:0,y:0};target=null;lobbyWaypoints=[];player={x:1.8,y:6};setNear();canvas.focus({preventScroll:true})}
  document.querySelector('#leave-game').onclick=leaveGame;gameRoom.addEventListener('cancel',e=>{e.preventDefault();leaveGame()});arcadeRoom.addEventListener('cancel',e=>{e.preventDefault();leaveArcade()});
 
 function roomApproach(r){return{x:r.x+.8,y:r.y+1.5}}
