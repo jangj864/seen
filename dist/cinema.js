@@ -58,7 +58,7 @@ function sign(value,y,z,size,color){const q=p(.44,y,z);ctx.save();ctx.transform(
 box(.12,5.1,1.85,.28,1.8,.35,'#ddcda3','#516a46','#364e37');sign('GAME ROOM',6,1.95,.19,'#f3dfaa');ctx.save();ctx.globalAlpha=1-gameOpen;sign('?',6,1.03,.58,'#e2c78d');sign('SEEN QUIZ',6,.54,.14,'#e2c78d');ctx.restore();}
 function walkToGame(){keys.clear();walkLobbyTo({x:.56,y:6});canvas.focus({preventScroll:true})}
 const quizThemes={
- all:{title:'SEEN QUIZ',accent:'#c25c3c',light:'#e9bb68',onAccent:'#fff3dc',description:'Film trivia and actor eye details. Eight questions.'},
+ all:{title:'SEEN QUIZ',accent:'#b74239',light:'#f0b39d',onAccent:'#fff3dc',description:'Film trivia and actor eye details. Eight questions.'},
  eyes:{title:'EYES ONLY',accent:'#428b7e',light:'#a4d4b2',onAccent:'#fff3dc',description:'Guess the actor from their eyes. Two questions.'},
  films:{title:'FILM CLUB',accent:'#b1893e',light:'#efcf82',onAccent:'#172a20',description:'Six questions for the film enthusiast.'}
 };
