@@ -130,3 +130,7 @@
 .game-confirm-mark svg{width:28px;height:28px;display:block;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
 #game-confirm h2{font-size:21px;line-height:1.45;word-break:normal}
 @media(max-width:700px){#game-confirm h2{font-size:19px}}
+
+/* Keep room views focused on their interactive scenes. */
+.auditorium-bottom .room-actions[hidden],#arcade-near[hidden]{display:none!important}
+.auditorium-bottom{grid-template-columns:1fr;grid-template-rows:auto;height:112px;min-height:112px;max-height:112px;gap:0;padding:12px 4%}
