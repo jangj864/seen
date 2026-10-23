@@ -10,7 +10,7 @@ const chairDrawOrder=[...chairs].sort((a,b)=>(a.x+a.y)-(b.x+b.y)),chairHitOrder=
 const chairById=new Map(chairs.map(seat=>[seat.id,seat]));
 const navigation=createSeenRoomNavigation(chairs),roomJump=createSeenJump();
 function jump(){if(!active()||seated||motion)return;roomJump.start();world.focus({preventScroll:true})}
-const active=()=>!document.hidden&&dialog.open&&!room.hidden&&!articleDialog.open;
+const active=()=>!document.hidden&&isSceneOpen('screening')&&!room.hidden&&!articleDialog.open;
 function size(){roomRevision++;width=world.clientWidth;height=world.clientHeight;if(!width||!height)return;const ratio=Math.min(devicePixelRatio||1,2);world.width=width*ratio;world.height=height*ratio;g.setTransform(ratio,0,0,ratio,0,0);unit=Math.min(width/22.5,height/18.3);cx=width/2;cy=Math.max(unit*5.3+12,height*.29);}
 new ResizeObserver(size).observe(world);
 function point(x,y,z=0){return{x:cx+(x-y)*unit*.86,y:cy+(x+y)*unit*.43-z*unit}}
