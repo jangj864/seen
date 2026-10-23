@@ -169,3 +169,5 @@
 #game-confirm{background:#f6f0e7;border-radius:20px;color:#252b3b}
 #game-confirm .game-confirm-actions button:first-child{background:#fffdf9;color:#53596d;border-color:#c7c9d5;box-shadow:0 4px 0 #c7c9d5}
 @media(max-width:700px){#game-room .arcade-machine{padding:14px;border-radius:15px}#game-room .game-options{gap:10px}#game-room .game-options button{min-height:82px;padding:11px 8px;gap:7px}#game-room .game-options button strong{font-size:11px}#game-room .game-options button span{width:22px;height:22px}#game-room #game-quiz h3{font-size:27px}}
+
+#game-room .game-next{display:block;margin-left:auto}
