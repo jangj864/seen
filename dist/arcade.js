@@ -55,7 +55,7 @@
  }
  function approach(m){return{x:m.x+.8,y:m.y+1.95}}
  function offerMachine(machine){held.clear();path=[];pending=null;offeredMachine=machine;requestQuiz(machine.mode)}
- function walkToMachine(i){offerMachine(machines[i])}
+ function walkToMachine(i){if(!active())return;const machine=machines[i];held.clear();pending=machine;path=navigation.route(visitor,approach(machine));if(!path.length){pending=null;if(Math.hypot(visitor.x-approach(machine).x,visitor.y-approach(machine).y)<1)offerMachine(machine)}canvas.focus({preventScroll:true})}
  document.querySelectorAll('[data-arcade-machine]').forEach(button=>button.onclick=()=>walkToMachine(+button.dataset.arcadeMachine));
  function turn(angle,dt){heading+=Math.atan2(Math.sin(angle-heading),Math.cos(angle-heading))*(1-Math.exp(-12*dt))}
  function frame(t){const dt=Math.min((t-last)/1000,.04);last=t;if(active()){
