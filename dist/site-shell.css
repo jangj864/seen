@@ -23,3 +23,9 @@
 #issue-menu{top:64px;max-height:calc(100dvh - 80px)}
 .cinema-page>main{height:calc(100dvh - 102px);min-height:0}
 @media(max-width:700px){.site-header{height:56px}.site-header .logo{font-size:34px}.site-header button{font-size:9px}.site-footer{height:34px;font-size:7px}.cinema-page>main{height:calc(100dvh - 90px)}#issue-menu{top:56px;max-height:calc(100dvh - 72px)}}
+
+/* The persistent header belongs to the current room, without a second title bar. */
+.cinema-page[data-scene="screening"]>.site-header{background:#191818;color:#f6edda;border-bottom-color:#ffffff1a}
+.cinema-page[data-scene="arcade-room"]>.site-header{background:#203527;color:#e9d5aa;border-bottom-color:#82926d55}
+.cinema-page[data-scene="screening"]>.site-header .issue i,.cinema-page[data-scene="arcade-room"]>.site-header .issue i{background:#d2b279}
+.cinema-page[data-scene="screening"]>.site-header :focus-visible,.cinema-page[data-scene="arcade-room"]>.site-header :focus-visible{outline-color:#d2b279}

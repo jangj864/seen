@@ -77,3 +77,9 @@
 .auditorium-bottom #start-program{width:170px;height:38px;justify-content:center;text-align:center;gap:12px;padding-inline:14px;justify-self:end}
 @media(max-width:1100px){.auditorium-bottom{grid-template-columns:1fr}}
 @media(max-width:800px){.room-actions{grid-template-columns:repeat(4,minmax(0,1fr))}.auditorium-bottom #start-program{width:170px;max-width:100%;height:36px}}
+
+/* Room names sit inside the scene, leaving the themed main header as the only bar. */
+.room-help .room-context{display:block;font:600 10px/1.5 'DM Sans',sans-serif;letter-spacing:1px;color:#f6edda;margin:0 0 16px;max-width:420px}
+.room-help>strong{display:block;font:inherit;letter-spacing:inherit}
+@media(max-width:700px){.room-help .room-context{font-size:8px;max-width:250px;margin-bottom:12px}}
+#film-details{outline:none;overflow:auto;overscroll-behavior:contain}#film-details .film-detail-top{position:sticky;top:0;z-index:3;background:#f0e8d9}
