@@ -89,7 +89,7 @@ function openQuiz(mode='all'){
 }
 function leaveGame(){if(!gameRoom.open)return;gameRoom.close();document.querySelector('#arcade-world').focus({preventScroll:true})}
 function leaveArcade(){if(gameRoom.open)gameRoom.close();closeScene('arcade-room');keys.clear();lobbyVelocity={x:0,y:0};target=null;lobbyWaypoints=[];player={x:1.8,y:6};setNear();canvas.focus({preventScroll:true})}
- document.querySelector('#leave-game').onclick=leaveGame;gameRoom.addEventListener('cancel',e=>{e.preventDefault();leaveGame()});document.querySelector('#leave-arcade').onclick=leaveArcade;arcadeRoom.addEventListener('cancel',e=>{e.preventDefault();leaveArcade()});
+ document.querySelector('#leave-game').onclick=leaveGame;gameRoom.addEventListener('cancel',e=>{e.preventDefault();leaveGame()});arcadeRoom.addEventListener('cancel',e=>{e.preventDefault();leaveArcade()});
 
 function roomApproach(r){return{x:r.x+.8,y:r.y+1.5}}
 function person(){drawSeenCharacter({ctx,unit:scale,project:p,x:player.x,y:player.y,heading:lobbyHeading,gait:reduced?0:lobbyGait,phase,jump:lobbyJump.height,jumpCrouch:lobbyJump.crouch,jumpTuck:lobbyJump.tuck,jumping:lobbyJump.active,tagColor:'#a44731',shadowColor:'#493e2826'})}

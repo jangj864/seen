@@ -14,4 +14,4 @@ function closeScene(id){
 }
 showScene('lobby-scene');
 
-addEventListener('keydown',event=>{if(event.key!=='Escape'||document.querySelector('dialog[open]')||!document.querySelector('#directory').hidden)return;if(document.body.dataset.scene==='screening'){event.preventDefault();leaveScreening();return}const buttons={'arcade-room':'leave-arcade','film-details':'close-film'};const id=buttons[document.body.dataset.scene];if(id){event.preventDefault();document.getElementById(id).click()}});
+addEventListener('keydown',event=>{if(event.key!=='Escape'||document.querySelector('dialog[open]')||!document.querySelector('#directory').hidden)return;if(document.body.dataset.scene==='screening'){event.preventDefault();leaveScreening();return}if(document.body.dataset.scene==='arcade-room'){event.preventDefault();leaveArcade();return}const buttons={'film-details':'close-film'};const id=buttons[document.body.dataset.scene];if(id){event.preventDefault();document.getElementById(id).click()}});
