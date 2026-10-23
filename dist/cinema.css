@@ -188,3 +188,8 @@
 #game-room #game-quiz[data-state="complete"] .game-feedback{max-width:300px;margin:0 auto 8px}
 #game-room #game-quiz[data-state="complete"] .game-next{margin:0 auto;min-width:160px}
 @media(max-width:700px){.result-art{width:140px}.result-score strong{font-size:76px}#game-room #game-quiz .game-result h3{font-size:25px}}
+
+/* Article and poster dialogs share the rounded popup shell. */
+#screen-article,#film-details{padding:0;border:0;border-radius:20px;outline:none;box-shadow:none;overflow:auto;overscroll-behavior:contain}
+#screen-article .screen-article-toolbar,#film-details .film-detail-top{border-radius:20px 20px 0 0}
+@media(max-width:700px){#screen-article,#film-details{border-radius:16px}#screen-article .screen-article-toolbar,#film-details .film-detail-top{border-radius:16px 16px 0 0}}
