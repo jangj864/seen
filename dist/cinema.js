@@ -88,6 +88,14 @@ function renderGame(){
  root.dataset.state=complete?'complete':gameAnswered===null?'question':gameAnswered===q.answer?'correct':'wrong';
  root.replaceChildren();const question=document.createElement('div');question.className='game-question';
  const heading=document.createElement('h3');heading.textContent=complete?`${gameScore} / ${total}. ${gameScore===total?'You’ve been paying attention.':'Good company for a film night.'}`:q.q;question.append(heading);
+ if(complete){
+  question.classList.add('game-result');heading.textContent=gameScore===total?'Perfect screening!':gameScore>=3?'Great eye for cinema!':'There’s more to discover.';
+  const art=document.createElement('div');art.className='result-art';art.innerHTML='<svg viewBox="0 0 180 140" aria-hidden="true"><circle cx="90" cy="68" r="57" fill="currentColor" opacity=".10"/><path d="M61 28h58v34c0 23-13 36-29 36S61 85 61 62Z" fill="currentColor"/><path d="M61 39H43v14c0 19 14 27 27 27M119 39h18v14c0 19-14 27-27 27" fill="none" stroke="currentColor" stroke-width="7" stroke-linejoin="round"/><path d="M90 95v20m-22 8h44" stroke="currentColor" stroke-width="8" stroke-linecap="round"/><path d="m90 43 5 11 13 2-9 9 2 13-11-6-11 6 2-13-9-9 13-2Z" fill="#fff6dd"/><path d="m29 18 3 7 8 1-6 5 2 8-7-4-7 4 2-8-6-5 8-1Zm119 67 3 7 8 1-6 5 2 8-7-4-7 4 2-8-6-5 8-1Z" fill="currentColor"/><path d="m145 25 7 5m-123 72 6-5M49 9l2 7m105 41 7-1" stroke="currentColor" stroke-width="4" stroke-linecap="round"/></svg>';
+  const label=document.createElement('span');label.className='result-kicker';label.textContent='ROUND COMPLETE';
+  const score=document.createElement('div');score.className='result-score';score.innerHTML=`<strong>${gameScore}</strong><span>/ ${total}</span>`;score.setAttribute('aria-label',`${gameScore} out of ${total} correct answers`);
+  const stars=document.createElement('div');stars.className='result-stars';stars.setAttribute('aria-hidden','true');stars.innerHTML=Array.from({length:total},(_,i)=>`<svg class="${i<gameScore?'is-earned':''}" viewBox="0 0 24 24"><path d="m12 2 3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1Z"/></svg>`).join('');
+  question.replaceChildren(art,label,score,stars,heading);
+ }
  if(!complete&&q.kind==='eyes'){
   const ns='http://www.w3.org/2000/svg',visual=document.createElementNS(ns,'svg'),image=document.createElementNS(ns,'image');
   visual.classList.add('game-eyes');visual.setAttribute('viewBox',q.crop.join(' '));visual.setAttribute('role','img');visual.setAttribute('aria-label',gameAnswered===null?'Eye detail from a film publicity still. Choose the actor below.':`Eye detail: ${q.options[q.answer]}`);
