@@ -1,4 +1,5 @@
 'use strict';
+const seenCloseIcon='<svg class="close-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m6 6 12 12M18 6 6 18"/></svg>';
 function seenNavigationKey(event){return ({KeyW:'w',KeyA:'a',KeyS:'s',KeyD:'d'})[event.code]||(/^[wasd]$/i.test(event.key)?event.key.toLowerCase():event.key)}
 function seenTypingTarget(target){return target instanceof Element&&!!target.closest('input,textarea,select,[contenteditable="true"]')}
 

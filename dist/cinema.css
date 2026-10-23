@@ -126,3 +126,7 @@
 #game-room .game-eyes{height:80px;margin-bottom:12px}
 #game-room .game-options button{padding:7px 10px}
 @media(max-width:700px){#game-room #game-quiz h3{font-size:26px}}
+
+.game-confirm-mark svg{width:28px;height:28px;display:block;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+#game-confirm h2{font-size:21px;line-height:1.45;word-break:normal}
+@media(max-width:700px){#game-confirm h2{font-size:19px}}

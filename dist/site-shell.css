@@ -29,3 +29,8 @@
 .cinema-page[data-scene="arcade-room"]>.site-header{background:#203527;color:#e9d5aa;border-bottom-color:#82926d55}
 .cinema-page[data-scene="screening"]>.site-header .issue i,.cinema-page[data-scene="arcade-room"]>.site-header .issue i{background:#d2b279}
 .cinema-page[data-scene="screening"]>.site-header :focus-visible,.cinema-page[data-scene="arcade-room"]>.site-header :focus-visible{outline-color:#d2b279}
+
+/* A single X icon replaces verbose close/return controls in every popup. */
+button.icon-close{display:inline-grid;place-items:center;width:32px;height:32px;min-width:32px;flex:0 0 32px;padding:0;border:0;background:transparent;color:inherit;line-height:1;cursor:pointer}
+.close-icon{display:block;width:18px;height:18px;pointer-events:none}.close-icon path{fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round}
+button.article-end.icon-close,button[data-close-reading].icon-close{display:grid;margin:28px auto}

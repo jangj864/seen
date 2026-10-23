@@ -25,6 +25,8 @@
   // Side moulding follows the cabinet silhouette instead of a rectangular box.
   ctx.beginPath();profile.slice(1,9).forEach(([dy,z],i)=>{const q=p(x+1.605,y+dy,z);i?ctx.lineTo(q.x,q.y):ctx.moveTo(q.x,q.y)});ctx.strokeStyle=m.color;ctx.lineWidth=unit*.055;ctx.lineJoin='round';ctx.stroke();
 
+  // An opaque monitor surround closes the seam between the CRT and the side panel.
+  polygon([[x,y+.70,2.28],[x+1.6,y+.70,2.28],[x+1.6,y+1.04,1.35],[x,y+1.04,1.35]],'#13261d');
   const a=p(x+.16,y+.70,2.28),b=p(x+1.44,y+.70,2.28),c=p(x+.16,y+1.04,1.35);ctx.save();ctx.transform((b.x-a.x)/160,(b.y-a.y)/160,(c.x-a.x)/120,(c.y-a.y)/120,a.x,a.y);
   ctx.fillStyle='#101916';ctx.beginPath();ctx.roundRect(-9,-9,178,138,9);ctx.fill();ctx.strokeStyle='#567461';ctx.lineWidth=2;ctx.stroke();ctx.beginPath();ctx.roundRect(0,0,160,120,7);ctx.clip();const glow=ctx.createRadialGradient(80,55,0,80,55,100);glow.addColorStop(0,m.mode==='eyes'?'#396a56':'#4b5539');glow.addColorStop(1,'#15291f');ctx.fillStyle=glow;ctx.fillRect(0,0,160,120);
   ctx.strokeStyle=m.light;ctx.lineWidth=2;if(m.symbol==='eye'){ctx.beginPath();ctx.moveTo(31,55);ctx.quadraticCurveTo(80,6,129,55);ctx.quadraticCurveTo(80,104,31,55);ctx.stroke();ctx.beginPath();ctx.arc(80,55,16,0,Math.PI*2);ctx.stroke()}else{ctx.fillStyle=m.light;ctx.font='700 58px "Barlow Condensed",sans-serif';ctx.textAlign='center';ctx.fillText(m.symbol,80,76)}
