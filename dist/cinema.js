@@ -85,6 +85,7 @@ function renderGame(){
  document.querySelector('#game-progress').textContent=complete?'YOUR RESULT':`QUESTION ${String(gameIndex+1).padStart(2,'0')} / ${String(total).padStart(2,'0')}`;
  document.querySelector('#game-score').textContent=`SCORE ${gameScore}`;
  document.querySelector('#game-progress-bar').style.width=`${Math.min(gameIndex+1,total)/total*100}%`;
+ root.dataset.state=complete?'complete':gameAnswered===null?'question':gameAnswered===q.answer?'correct':'wrong';
  root.replaceChildren();const question=document.createElement('div');question.className='game-question';
  const heading=document.createElement('h3');heading.textContent=complete?`${gameScore} / ${total}. ${gameScore===total?'You’ve been paying attention.':'Good company for a film night.'}`:q.q;question.append(heading);
  if(!complete&&q.kind==='eyes'){
@@ -93,12 +94,12 @@ function renderGame(){
   image.setAttribute('href',`assets/${q.image}.jpg`);image.setAttribute('width',String(q.imageSize?.[0]||2000));image.setAttribute('height',String(q.imageSize?.[1]||1125));visual.append(image);question.append(visual);
  }
  if(!complete){const options=document.createElement('div');options.className='game-options';q.options.forEach((value,i)=>{
-  const button=document.createElement('button');button.dataset.gameAnswer=String(i);const letter=document.createElement('span');letter.textContent='ABCD'[i];button.append(letter,document.createTextNode(value));
-  if(gameAnswered!==null){button.disabled=true;if(i===q.answer)button.classList.add('correct');if(i===gameAnswered&&i!==q.answer)button.classList.add('wrong')}
+  const button=document.createElement('button');button.dataset.gameAnswer=String(i);const letter=document.createElement('span');letter.textContent='ABCD'[i];const label=document.createElement('strong');label.textContent=value;button.append(letter,label);button.setAttribute('aria-pressed',String(gameAnswered===i));
+  if(gameAnswered!==null){button.disabled=true;if(i===q.answer)button.classList.add('correct');if(i===gameAnswered&&i!==q.answer)button.classList.add('wrong');if(i!==q.answer&&i!==gameAnswered)button.classList.add('is-muted');if(i===q.answer||i===gameAnswered){const mark=document.createElement('b');mark.className='answer-mark';mark.textContent=i===q.answer?'✓':'×';mark.setAttribute('aria-label',i===q.answer?'Correct answer':'Incorrect answer');button.append(mark)}}
   button.onclick=()=>{if(gameAnswered!==null)return;gameAnswered=i;if(i===q.answer)gameScore++;renderGame();root.querySelector('.game-next').focus({preventScroll:true})};options.append(button)
  });question.append(options)}root.append(question);
  const slot=document.createElement('div');slot.className='game-answer-slot';root.append(slot);
- if(complete||gameAnswered!==null){const feedback=document.createElement('p');feedback.className='game-feedback';feedback.setAttribute('role','status');feedback.textContent=complete?'Pass the quiz to a friend. There is always another film to discover.':`${gameAnswered===q.answer?'That’s it.':'Not quite.'} ${q.note}`;
+ if(complete||gameAnswered!==null){const feedback=document.createElement('p');feedback.className='game-feedback';feedback.setAttribute('role','status');feedback.textContent=complete?'Pass the quiz to a friend. There is always another film to discover.':`${gameAnswered===q.answer?'CORRECT! +1 POINT':'ANSWER: '+q.options[q.answer]} — ${q.note}`;
  const next=document.createElement('button');next.className='game-next';next.textContent=complete?'PLAY AGAIN ↻':gameIndex===total-1?'SEE YOUR RESULT →':'NEXT QUESTION →';next.onclick=()=>{if(complete){gameIndex=0;gameScore=0}else gameIndex++;gameAnswered=null;renderGame();root.querySelector('button').focus({preventScroll:true})};slot.append(feedback,next)}
 }
 function enterGame(){if(isSceneOpen('arcade-room'))return;keys.clear();target=null;lobbyWaypoints=[];lobbyVelocity={x:0,y:0};lobbyJump.reset();showScene('arcade-room');document.dispatchEvent(new Event('seen-arcade-enter'))}

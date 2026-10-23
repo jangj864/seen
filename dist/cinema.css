@@ -134,3 +134,38 @@
 /* Keep room views focused on their interactive scenes. */
 .auditorium-bottom .room-actions[hidden],#arcade-near[hidden]{display:none!important}
 .auditorium-bottom{grid-template-columns:1fr;grid-template-rows:auto;height:112px;min-height:112px;max-height:112px;gap:0;padding:12px 4%}
+
+/* Quiz cards: four choices, clear answer reveals, and a light arcade palette. */
+#game-room{background:#f6f0e7;border-radius:20px;color:#252b3b}
+#game-room .game-room-body{background:radial-gradient(circle at 85% 15%,color-mix(in srgb,var(--game-accent) 12%,transparent),transparent 55%),#f6f0e7}
+#game-room .game-marquee h2{color:#252b3b}
+#game-room .arcade-machine{background:#e9eaf2;color:#252b3b;border:2px solid color-mix(in srgb,var(--game-accent) 45%,#fff);border-radius:20px;box-shadow:0 6px 0 #c5c6d1;padding:22px}
+#game-room .arcade-top{color:#53596d;font-weight:700}
+#game-room #game-score{background:var(--game-accent);color:var(--game-on-accent);border-radius:20px;padding:7px 12px}
+#game-room .arcade-top{align-items:center}
+#game-room .game-progress-track{background:#d3d5e0;border-radius:12px;height:6px;margin:14px 0 20px;overflow:hidden}
+#game-room .game-progress-track span{background:var(--game-accent);border-radius:12px}
+#game-room #game-quiz h3{font-size:30px;line-height:1.12;color:#252b3b}
+#game-room .game-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;padding:3px 2px 8px}
+#game-room .game-options button{position:relative;min-height:88px;padding:14px 12px;gap:10px;background:#fffdf9;color:#303548;border:2px solid #d0d2de;border-radius:13px;box-shadow:0 4px 0 #bfc2d1;transition:transform .15s,box-shadow .15s,border-color .15s,background .15s}
+#game-room .game-options button strong{font:600 12px/1.4 'DM Sans',sans-serif;overflow-wrap:anywhere}
+#game-room .game-options button span{width:26px;height:26px;border:0;border-radius:8px;background:color-mix(in srgb,var(--game-accent) 12%,#fff);color:var(--game-accent);font-weight:700}
+#game-room .game-options button:hover:not(:disabled){background:#fff;border-color:var(--game-accent);transform:translateY(-3px);box-shadow:0 7px 0 color-mix(in srgb,var(--game-accent) 35%,#c6c8d4)}
+#game-room .game-options button:active:not(:disabled){transform:translateY(3px);box-shadow:0 1px 0 #bfc2d1}
+#game-room .game-options button.correct{background:#e5f2e9;border-color:#3e8661;box-shadow:0 4px 0 #a3cbb2;color:#235039}
+#game-room .game-options button.wrong{background:#f9e6e7;border-color:#c65365;box-shadow:0 4px 0 #e2adb5;color:#8a3040}
+#game-room .game-options button.is-muted{opacity:.45;box-shadow:none}
+#game-room .answer-mark{position:absolute;top:5px;right:8px;font-size:17px}
+#game-room .game-answer-slot .game-feedback{color:#4b5269;font-size:10px;line-height:1.5;padding:7px 0 10px}
+#game-room .game-next,.game-confirm-actions button{border-radius:11px;border:2px solid color-mix(in srgb,var(--game-accent) 70%,#292b3a);box-shadow:0 4px 0 color-mix(in srgb,var(--game-accent) 65%,#292b3a);background:var(--game-accent);color:var(--game-on-accent);padding:11px 16px}
+#game-room .game-next:hover{transform:translateY(-2px)}
+#game-room .game-next:active,.game-confirm-actions button:active{transform:translateY(3px);box-shadow:none}
+#game-room .arcade-controls{border-color:#c9ccd9;padding-top:13px}
+#game-room .arcade-controls b{color:#71788c}
+#game-room .quiz-dot{border-color:var(--game-accent)}
+#game-room .quiz-dot.is-answered{background:var(--game-accent)}
+#game-room .quiz-dot.is-current{outline-color:var(--game-accent)}
+#game-room .game-eyes{border-radius:12px;background:#d7d9e5}
+#game-confirm{background:#f6f0e7;border-radius:20px;color:#252b3b}
+#game-confirm .game-confirm-actions button:first-child{background:#fffdf9;color:#53596d;border-color:#c7c9d5;box-shadow:0 4px 0 #c7c9d5}
+@media(max-width:700px){#game-room .arcade-machine{padding:14px;border-radius:15px}#game-room .game-options{gap:10px}#game-room .game-options button{min-height:82px;padding:11px 8px;gap:7px}#game-room .game-options button strong{font-size:11px}#game-room .game-options button span{width:22px;height:22px}#game-room #game-quiz h3{font-size:27px}}
