@@ -193,3 +193,26 @@
 #screen-article,#film-details{padding:0;border:0;border-radius:20px;outline:none;box-shadow:none;overflow:auto;overscroll-behavior:contain}
 #screen-article .screen-article-toolbar,#film-details .film-detail-top{border-radius:20px 20px 0 0}
 @media(max-width:700px){#screen-article,#film-details{border-radius:16px}#screen-article .screen-article-toolbar,#film-details .film-detail-top{border-radius:16px 16px 0 0}}
+
+/* Touch navigation uses the same obstacle-aware routes as mouse clicks. */
+#world,#room-world,#arcade-world{touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+.mobile-walk-hint,.mobile-room-hint{display:none!important}
+@media(max-width:700px){
+ .desktop-room-hint{display:none!important}
+ .mobile-room-hint{display:block!important;font-size:10px!important;line-height:1.7!important;max-width:90vw}
+ .mobile-walk-hint{display:block!important;position:absolute;bottom:82px;left:5%;right:5%;text-align:center;font-size:11px;line-height:1.5;color:#68665e;pointer-events:none}
+ .controls{bottom:18px;gap:7px;white-space:nowrap}
+ .controls .key{width:44px;height:44px;min-width:44px;font-size:20px;border-radius:8px}
+ .controls .jump-key{width:66px;font-size:10px}
+ .location{bottom:115px;font-size:8px}
+ .intro{top:22px}.intro .eyebrow{font-size:8px}
+ .corner-note{display:none}
+ .room-help{top:18px}.room-help strong{font-size:8px}
+ .arcade-room-intro{top:18px;gap:8px}.arcade-room-intro strong{font-size:28px}
+ #directory{width:100%;max-width:100%;overflow-y:auto;overscroll-behavior:contain}
+ #directory button{min-height:44px}
+}
+@media(max-width:360px){.controls{gap:5px}.controls .jump-key{width:58px}.mobile-walk-hint{font-size:10px}}
+@media(max-height:500px) and (max-width:950px){.intro,.corner-note,.location,.mobile-walk-hint{display:none!important}.controls{bottom:10px}.room-help,.arcade-room-intro{top:10px}.room-help span,.arcade-room-intro small{max-width:280px}}
+@media(max-height:500px) and (max-width:950px){.auditorium-bottom{height:46px;min-height:46px;max-height:46px;padding:5px 4%}.auditorium-bottom>div:first-child{display:flex;align-items:center;gap:12px}.auditorium-bottom .ticket-label{display:none}.auditorium-bottom strong{font-size:13px;margin:0;flex-shrink:0}.auditorium-bottom small{height:auto;font-size:8px}}
+@media(max-width:700px),(max-height:600px){#game-room .arcade-machine{display:block}#game-room #game-quiz{display:block}#game-room .game-question{min-height:min-content}#game-room .game-result{display:flex}#game-room #game-quiz[data-state="complete"] .game-answer-slot{margin-top:18px}}
