@@ -34,15 +34,3 @@
 button.icon-close{display:inline-grid;place-items:center;width:32px;height:32px;min-width:32px;flex:0 0 32px;padding:0;border:0;background:transparent;color:inherit;line-height:1;cursor:pointer}
 .close-icon{display:block;width:18px;height:18px;pointer-events:none}.close-icon path{fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round}
 button.article-end.icon-close,button[data-close-reading].icon-close{display:grid;margin:28px auto}
-
-/* Let the scene use the space remaining after navigation and safe-area insets. */
-.cinema-page{height:100dvh;display:flex;flex-direction:column;padding-top:env(safe-area-inset-top)}
-.cinema-page>.site-header,.cinema-page>.site-footer{flex-shrink:0}
-.cinema-page>main{height:auto;flex:1;min-height:0;min-width:0}
-.cinema-page>.site-footer{height:auto;min-height:38px;padding-top:10px;padding-bottom:calc(10px + env(safe-area-inset-bottom));flex-wrap:wrap}
-@media(max-width:700px){
- .cinema-page>.site-header{gap:8px}
- .cinema-page>.site-header button{min-height:44px}
- .cinema-page>.site-footer{min-height:34px;gap:8px;font-size:7px;line-height:1.6}
- button.icon-close{min-width:44px;width:44px;height:44px;flex-basis:44px}
-}
