@@ -187,3 +187,5 @@ const directory=document.querySelector('#directory'),toggle=document.querySelect
 const touchMap={up:'ArrowUp',down:'ArrowDown',left:'ArrowLeft',right:'ArrowRight'};document.querySelectorAll('[data-dir]').forEach(b=>{b.addEventListener('pointerdown',e=>{e.preventDefault();b.setPointerCapture(e.pointerId);keys.add(touchMap[b.dataset.dir])});for(const event of ['pointerup','pointercancel','lostpointercapture'])b.addEventListener(event,()=>keys.delete(touchMap[b.dataset.dir]))});
 
 document.querySelector('#jump-lobby').onclick=()=>{if(isSceneOpen('arcade-room')||gameRoom.open||filmDialog.open||isSceneOpen('screening')||!directory.hidden)return;lobbyJump.start();canvas.focus({preventScroll:true})};
+
+createSeenTouchGamepad({scene:document.querySelector("#lobby-scene"),keys,active:()=>!document.querySelector("#lobby-scene").hidden&&!document.querySelector("dialog[open]")&&directory.hidden,jump:()=>lobbyJump.start()});

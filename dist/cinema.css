@@ -236,3 +236,23 @@ html[data-input="pointer"] #game-confirm button:focus-visible,html[data-input="p
  #game-room .arcade-controls{margin-top:18px;padding-bottom:12px}
  #game-confirm,#film-details,#screen-article{max-height:calc(100dvh - 40px - env(safe-area-inset-top) - env(safe-area-inset-bottom));max-width:calc(100vw - 28px)}
 }
+
+.touch-gamepad{display:none}
+@media(any-pointer:coarse) and (max-width:1100px){
+ .controls,.room-touch{display:none!important}
+ .touch-gamepad{position:absolute;left:22px;right:22px;bottom:max(18px,env(safe-area-inset-bottom));z-index:8;display:flex;align-items:center;justify-content:space-between;pointer-events:none;user-select:none;-webkit-user-select:none}
+ .touch-stick{position:relative;width:106px;height:106px;border:2px solid #a69e8c66;border-radius:50%;background:#eee6d7b8;box-shadow:inset 0 2px 9px #443c2922,0 4px 0 #a69e8c44;pointer-events:auto;touch-action:none;outline-offset:4px}
+ .stick-track{position:absolute;inset:20px;border:1px solid #aaa28f66;border-radius:50%}
+ .stick-thumb{position:absolute;left:27px;top:27px;width:48px;height:48px;border-radius:50%;background:linear-gradient(#fcf7ed,#d7cebb);border:1px solid #a79e88;box-shadow:0 4px 0 #a69e8c,0 6px 8px #392f2426;will-change:transform;pointer-events:none}
+ .touch-stick.is-held .stick-thumb{background:#fcf7ed}
+ .touch-jump{pointer-events:auto;touch-action:none;width:74px;height:74px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:3px;border-radius:50%;border:2px solid #a14536;background:#c85e48;color:#fff2d6;box-shadow:0 5px 0 #813e32;font:700 10px 'DM Sans',sans-serif;letter-spacing:1px}
+ .touch-jump svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+ .touch-jump.is-held{transform:translateY(4px);box-shadow:0 1px 0 #813e32}
+ #screening .touch-gamepad,#arcade-room .touch-gamepad{bottom:18px}
+ #screening .auditorium-bottom{height:142px;min-height:142px;max-height:142px;padding:8px 4%;align-items:start;pointer-events:none}
+ #screening .auditorium-bottom>div:first-child{align-self:start;margin-left:125px}
+ #screening .auditorium-bottom strong{font-size:14px}
+ #screening .auditorium-bottom small{font-size:8px}
+ .location{bottom:143px}.mobile-walk-hint{bottom:158px!important}
+}
+@media(any-pointer:coarse) and (max-height:500px){.touch-gamepad{left:16px;right:16px;bottom:12px}.touch-stick{width:86px;height:86px}.stick-thumb{left:22px;top:22px;width:38px;height:38px}.touch-jump{width:64px;height:64px}#screening .auditorium-bottom{display:none}}

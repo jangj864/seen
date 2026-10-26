@@ -1,0 +1,14 @@
+'use strict';
+// Real pointer capture supports a thumb on the stick and another on jump.
+function createSeenTouchGamepad({scene,keys,active,jump}){
+ const hud=document.createElement('div');hud.className='touch-gamepad';hud.setAttribute('aria-label','Touch game controls');
+ hud.innerHTML='<div class="touch-stick" role="button" tabindex="0" aria-label="Movement stick: drag to walk"><span class="stick-track" aria-hidden="true"></span><span class="stick-thumb" aria-hidden="true"></span></div><button class="touch-jump" type="button" aria-label="Jump"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5m-6 6 6-6 6 6M5 20h14"/></svg><span>JUMP</span></button>';
+ scene.append(hud);const stick=hud.querySelector('.touch-stick'),thumb=hud.querySelector('.stick-thumb'),button=hud.querySelector('.touch-jump'),directions=['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'];let pointer=null;
+ function reset(){pointer=null;for(const key of directions)keys.delete(key);thumb.style.transform='translate(0px,0px)';stick.classList.remove('is-held');button.classList.remove('is-held')}
+ function move(e){if(e.pointerId!==pointer)return;if(!active()){reset();return}const r=stick.getBoundingClientRect(),radius=r.width*.29;let x=e.clientX-r.left-r.width/2,y=e.clientY-r.top-r.height/2;const length=Math.hypot(x,y);if(length>radius){x*=radius/length;y*=radius/length}thumb.style.transform=`translate(${x}px,${y}px)`;for(const key of directions)keys.delete(key);if(length<radius*.22)return;const angle=Math.atan2(y,x),dx=Math.cos(angle),dy=Math.sin(angle);if(dx>.38)keys.add('ArrowRight');if(dx<-.38)keys.add('ArrowLeft');if(dy>.38)keys.add('ArrowDown');if(dy<-.38)keys.add('ArrowUp')}
+ stick.addEventListener('pointerdown',e=>{if(!active()||pointer!==null)return;e.preventDefault();pointer=e.pointerId;stick.setPointerCapture(pointer);stick.classList.add('is-held');move(e)});
+ stick.addEventListener('pointermove',move);for(const event of ['pointerup','pointercancel','lostpointercapture'])stick.addEventListener(event,e=>{if(e.pointerId===pointer)reset()});
+ stick.addEventListener('keydown',e=>{if(active()&&directions.includes(e.key)){e.preventDefault();keys.add(e.key)}});stick.addEventListener('keyup',e=>keys.delete(e.key));stick.addEventListener('blur',reset);
+ button.addEventListener('pointerdown',e=>{if(!active())return;e.preventDefault();button.setPointerCapture(e.pointerId);button.classList.add('is-held');jump()});for(const event of ['pointerup','pointercancel','lostpointercapture'])button.addEventListener(event,()=>button.classList.remove('is-held'));button.addEventListener('click',e=>{if(e.detail===0&&active())jump()});
+ addEventListener('blur',reset);document.addEventListener('visibilitychange',reset);document.addEventListener('toggle',e=>{if(e.target instanceof HTMLDialogElement&&e.target.open)reset()},true);new MutationObserver(reset).observe(scene,{attributes:true,attributeFilter:['hidden']});
+}
