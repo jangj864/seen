@@ -216,3 +216,23 @@
 @media(max-height:500px) and (max-width:950px){.intro,.corner-note,.location,.mobile-walk-hint{display:none!important}.controls{bottom:10px}.room-help,.arcade-room-intro{top:10px}.room-help span,.arcade-room-intro small{max-width:280px}}
 @media(max-height:500px) and (max-width:950px){.auditorium-bottom{height:46px;min-height:46px;max-height:46px;padding:5px 4%}.auditorium-bottom>div:first-child{display:flex;align-items:center;gap:12px}.auditorium-bottom .ticket-label{display:none}.auditorium-bottom strong{font-size:13px;margin:0;flex-shrink:0}.auditorium-bottom small{height:auto;font-size:8px}}
 @media(max-width:700px),(max-height:600px){#game-room .arcade-machine{display:block}#game-room #game-quiz{display:block}#game-room .game-question{min-height:min-content}#game-room .game-result{display:flex}#game-room #game-quiz[data-state="complete"] .game-answer-slot{margin-top:18px}}
+
+/* Touch focus stays clean; keyboard focus uses a single inset indicator. */
+html[data-input="pointer"] #game-confirm button:focus-visible,html[data-input="pointer"] #game-room button:focus-visible,html[data-input="pointer"] #film-details :focus-visible,html[data-input="pointer"] #screen-article :focus-visible{outline:none}
+#film-details button.icon-close:focus-visible,#screen-article button.icon-close:focus-visible{outline:none;background:#29272012;border-radius:8px}
+#game-confirm button:focus-visible,#game-room button:focus-visible{outline-offset:-4px}
+#game-confirm{box-sizing:border-box;max-width:calc(100vw - 28px)}
+#game-room .arcade-controls{padding:14px 4px 12px;min-height:48px}
+#game-room #game-indicators{padding:5px}
+@media(max-width:700px),(max-height:600px){
+ #game-room[open]{display:block;overflow-x:hidden;overflow-y:auto;-webkit-overflow-scrolling:touch;scroll-padding-block:68px 24px}
+ #game-room{height:auto;max-height:calc(100dvh - 40px - env(safe-area-inset-top) - env(safe-area-inset-bottom));width:calc(100vw - 28px);max-width:880px}
+ #game-room .game-toolbar{position:sticky;top:0;flex-shrink:0}
+ #game-room .game-room-body{display:block;overflow:visible;height:auto;min-height:0;padding:12px 12px 28px}
+ #game-room .arcade-machine{display:block;height:auto;min-height:0;max-height:none;overflow:visible;padding:14px;box-sizing:border-box}
+ #game-room #game-quiz{display:block;overflow:visible;min-height:0}
+ #game-room .game-question{min-height:0;overflow:visible}
+ #game-room .game-answer-slot{height:auto;min-height:0;overflow:visible;padding:12px 0 4px}
+ #game-room .arcade-controls{margin-top:18px;padding-bottom:12px}
+ #game-confirm,#film-details,#screen-article{max-height:calc(100dvh - 40px - env(safe-area-inset-top) - env(safe-area-inset-bottom));max-width:calc(100vw - 28px)}
+}

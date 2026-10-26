@@ -1,4 +1,9 @@
 'use strict';
+// Programmatic focus after touch must not draw keyboard-only focus rings.
+ document.documentElement.dataset.input='pointer';
+ document.addEventListener('pointerdown',()=>{document.documentElement.dataset.input='pointer'},true);
+ document.addEventListener('keydown',e=>{if(e.key==='Tab')document.documentElement.dataset.input='keyboard'},true);
+
 const lobbyJump=createSeenJump();
 let lobbyRevision=0,lobbyPaintKey='';
 const lobbyLocation=document.querySelector('#location'),screeningDialog=document.querySelector('#screening');
