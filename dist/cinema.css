@@ -193,3 +193,31 @@
 #screen-article,#film-details{padding:0;border:0;border-radius:20px;outline:none;box-shadow:none;overflow:auto;overscroll-behavior:contain}
 #screen-article .screen-article-toolbar,#film-details .film-detail-top{border-radius:20px 20px 0 0}
 @media(max-width:700px){#screen-article,#film-details{border-radius:16px}#screen-article .screen-article-toolbar,#film-details .film-detail-top{border-radius:16px 16px 0 0}}
+
+/* Size the quiz within its dialog, keeping the cabinet footer inside the frame. */
+#game-room{height:min(760px,calc(100dvh - 32px));max-height:calc(100dvh - 32px - env(safe-area-inset-top) - env(safe-area-inset-bottom));max-width:calc(100vw - 24px);margin:auto}
+#game-room .game-room-body{grid-template-rows:minmax(0,1fr);min-width:0;padding:20px 20px 26px}
+#game-room .arcade-machine{height:100%;min-height:0;max-width:100%}
+#game-room .arcade-controls{flex-wrap:wrap;gap:12px;min-height:38px;padding-bottom:6px}
+#game-room .arcade-controls b{white-space:nowrap}
+#game-room #game-indicators{padding:4px;gap:10px}
+#game-room .game-toolbar button{width:44px;height:44px;flex-basis:44px}
+#game-room .game-toolbar{padding-block:6px}
+#game-room .game-marquee{min-width:0}
+#game-confirm{max-height:calc(100dvh - 24px - env(safe-area-inset-top) - env(safe-area-inset-bottom))}
+@media(max-width:700px),(max-height:600px){
+ #game-room{width:calc(100vw - 20px);height:calc(100dvh - 24px);max-width:880px;border-radius:16px}
+ #game-room .game-marquee{display:none}
+ #game-room .game-room-body{display:block;overflow-y:auto;overflow-x:hidden;padding:12px 12px 22px;-webkit-overflow-scrolling:touch}
+ #game-room .arcade-machine{height:auto;min-height:100%;padding:14px;box-shadow:0 4px 0 #c5c6d1}
+ #game-room #game-quiz{flex:1 0 auto;overflow:visible;gap:8px}
+ #game-room .game-question{flex:0 0 auto;overflow:visible;padding-right:0}
+ #game-room .game-answer-slot{height:auto;flex:0 0 auto;min-height:56px;overflow:visible;padding-block:8px}
+ #game-room .game-options button{min-height:76px;min-width:0;overflow-wrap:anywhere}
+ #game-room .game-options button strong{min-width:0}
+ #game-room .game-next{min-height:44px;max-width:100%;white-space:normal}
+ #game-room .game-result{overflow:visible;flex-shrink:0}
+ #game-room .arcade-controls{margin-top:16px}
+ #screen-article,#film-details{width:calc(100vw - 20px);max-height:calc(100dvh - 24px - env(safe-area-inset-top) - env(safe-area-inset-bottom))}
+ #directory{padding-bottom:calc(24px + env(safe-area-inset-bottom))}
+}
