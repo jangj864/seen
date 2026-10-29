@@ -50,19 +50,19 @@ function drawExit(){for(const x of [5.23,6.65])cube(x,11.72,0,.12,.12,1.85,'#d4c
 function walkToExit(){requestAction(()=>{pendingSeat=null;autoSpeed=0;path=navigation.route(visitor,exitZone);status.textContent='Walking to the exit…'});world.focus({preventScroll:true})}
 function leaveThroughExit(){if(exiting)return;exiting=true;held.clear();path=[];velocity={x:0,y:0};leaveScreening()}
 function render(){if(!width||!height)return;g.clearRect(0,0,width,height);const gradient=g.createRadialGradient(width*.5,height*.4,0,width*.5,height*.4,width*.8);gradient.addColorStop(0,'#353d33');gradient.addColorStop(1,'#171d1b');g.fillStyle=gradient;g.fillRect(0,0,width,height);cube(0,0,-.14,12,12,.14,'#3c3731','#272c28','#212723');for(let y=0;y<12;y++)polygon([[0,y,.005],[12,y,.005],[12,y+.025,.005],[0,y+.025,.005]],'#d6b78209');cube(0,-.12,0,12,.24,5.1,'#51403a','#292326','#201e21');cube(-.12,0,0,.18,11.6,1.05,'#655b49','#374333','#29372d');drawScreen();drawCurtains();for(const x of [.8,5.65,6.4,11.1])for(let y=3;y<11.7;y+=.6)cube(x,y,.015,.035,.18,.02,'#bd9c5d','#bd9c5d','#bd9c5d');if(path.length){const dest=path[path.length-1];oval(dest.x,dest.y,.02,.22,.09,'#e8c28b55')}
-drawExitMat();// Seats have a fixed depth order; merge the visitor and exit without per-frame sorting.
+drawExitMat();// Depth-sort seated hosts, live visitors, chairs, and the exit together.
 const visitorDepth=seated&&posture>.45&&motion?.kind!=='transfer'?seated.x+seated.y+.45:visitor.x+visitor.y;
-let visitorDrawn=false,exitDrawn=false;
-for(const seat of chairDrawOrder){const depth=seat.x+seat.y+.5;if(!visitorDrawn&&visitorDepth<Math.min(depth,exitDrawn?Infinity:17.9)){character();visitorDrawn=true}if(!exitDrawn&&17.9<depth){drawExit();exitDrawn=true}if(!visitorDrawn&&visitorDepth<depth){character();visitorDrawn=true}chair(seat)}
-if(!visitorDrawn&&visitorDepth<17.9){character();visitorDrawn=true}if(!exitDrawn)drawExit();if(!visitorDrawn)character();}
+const figures=[...SeenHub.drawPeople({ctx:g,unit,project:point,scene:'screen-'+currentRoom.n}),{depth:visitorDepth,paint:character},{depth:17.9,paint:drawExit},...chairDrawOrder.map(seat=>({depth:seat.x+seat.y+.5,paint:()=>chair(seat)}))];figures.sort((a,b)=>a.depth-b.depth).forEach(o=>o.paint());}
+
 function occupied(x,y){return navigation.blocked(x,y)}
 function ease(t){return t*t*(3-2*t)}
 function turnToward(angle,dt){let difference=Math.atan2(Math.sin(angle-heading),Math.cos(angle-heading));heading+=difference*(1-Math.exp(-dt*12))}
 function stand(){if(motion)return;if(!seated){afterStand?.();afterStand=null;return}motion={kind:'stand',elapsed:0,duration:reduced ? .01 : .55,from:{...visitor},to:{x:seated.x+.33,y:seated.y-.33}};path=[];velocity={x:0,y:0};seenSetText(status,'Standing up…');sit.disabled=true;}
 function requestAction(action){if(seated||motion){afterStand=action;if(!motion)stand()}else action()}
-function nearest(){return chairs.find(s=>Math.hypot(visitor.x-(s.x+.33),visitor.y-(s.y-.33))<.44)||null}
-function sitHere(){if(motion)return;roomJump.reset();if(seated){stand();return}if(!closeSeat)return;seated=closeSeat;seatChoices.set(currentRoom.n,seated.id);updateSeat();picker.value=seated.id;path=[];velocity={x:0,y:0};motion={kind:'sit',elapsed:0,duration:reduced ? .01 : .65,from:{...visitor},to:{x:seated.x+.33,y:seated.y+.22}};seenSetText(status,`Taking seat ${seated.id}…`);sit.disabled=true;}
-function planSeat(id){const seat=chairById.get(id);if(!seat)return;
+function hostSeat(s){return SeenHub.people('screen-'+currentRoom.n).some(v=>v.posture>.5&&Math.hypot(v.x-(s.x+.33),v.y-(s.y+.22))<.3)}
+function nearest(){return chairs.find(s=>!hostSeat(s)&&Math.hypot(visitor.x-(s.x+.33),visitor.y-(s.y-.33))<.44)||null}
+function sitHere(){if(motion)return;roomJump.reset();if(seated){stand();return}if(!closeSeat)return;if(hostSeat(closeSeat)){seenSetText(status,'This seat is occupied. Please choose another.');return}seated=closeSeat;seatChoices.set(currentRoom.n,seated.id);updateSeat();picker.value=seated.id;path=[];velocity={x:0,y:0};motion={kind:'sit',elapsed:0,duration:reduced ? .01 : .65,from:{...visitor},to:{x:seated.x+.33,y:seated.y+.22}};seenSetText(status,`Taking seat ${seated.id}…`);sit.disabled=true;}
+function planSeat(id){const seat=chairById.get(id);if(!seat)return;if(hostSeat(seat)){seenSetText(status,'This seat is occupied. Please choose another.');return}
 // Staying in the same seat needs no animation; neighbours share one short aisle transfer.
 if(seated?.id===seat.id&&!motion){world.focus({preventScroll:true});return}
 if(seated&&!motion&&seat.y===seated.y&&Math.abs(seat.x-seated.x)<1.6){
@@ -121,7 +121,8 @@ else{gait=0;isWalking=false;turnToward(-Math.PI/2,dt)}
 closeSeat=seated||nearest();sit.hidden=!closeSeat&&!motion;if(!motion&&!seated&&closeSeat)seenSetText(status,`Seat ${closeSeat.id} nearby. Enter to sit.`);else if(!motion&&!seated&&!pendingSeat)seenSetText(status,'Walk the aisles or choose a seat.');
 if(!seated&&!motion&&!exiting&&visitor.x>5.3&&visitor.x<6.7&&visitor.y>11.34){leaveThroughExit();requestAnimationFrame(loop);return}
 seenSetData(world,'jumpPhase',roomJump.active?'active':'idle');seenSetData(world,'jumpCrouch',roomJump.crouch.toFixed(3));seenSetData(world,'jumpTuck',roomJump.tuck.toFixed(3));seenSetData(world,'jump',roomJump.height.toFixed(3));seenSetData(world,'motion',motion?.kind||(seated?'seated':isWalking?'walking':'idle'));seenSetData(world,'position',`${visitor.x.toFixed(3)},${visitor.y.toFixed(3)}`);
-const paintKey=[roomRevision,seenFontRevision,roomJump.height.toFixed(3),roomJump.crouch.toFixed(3),roomJump.tuck.toFixed(3),currentRoom?.n,seatChoices.get(currentRoom?.n),world.dataset.position,heading.toFixed(3),gait.toFixed(3),posture.toFixed(3),tick.toFixed(3),path.at(-1)?.x,path.at(-1)?.y].join('|');
+SeenHub.publish({scene:'screen-'+currentRoom.n,x:visitor.x,y:visitor.y,heading,posture,jump:roomJump.height,moving:isWalking});
+const paintKey=[SeenHub.revision,roomRevision,seenFontRevision,roomJump.height.toFixed(3),roomJump.crouch.toFixed(3),roomJump.tuck.toFixed(3),currentRoom?.n,seatChoices.get(currentRoom?.n),world.dataset.position,heading.toFixed(3),gait.toFixed(3),posture.toFixed(3),tick.toFixed(3),path.at(-1)?.x,path.at(-1)?.y].join('|');
 if(paintKey!==roomPaintKey){render();roomPaintKey=paintKey}}
 requestAnimationFrame(loop)}requestAnimationFrame(loop);
 // Test actual projected chair faces instead of a large rectangle covering nearby aisles.

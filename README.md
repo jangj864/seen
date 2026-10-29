@@ -40,3 +40,17 @@ Use `/Users/ddoazoo/Documents/GitHub/seen` as the only project folder. Edit site
 Repository: https://github.com/jangj864/seen
 
 Live site: https://jangj864.github.io/seen/
+
+## Shared cinema (October 2026 update)
+
+The lobby now offers **Today’s stories** and **Upcoming films**. Tapping a screening-room door opens an article preview before entering. Approaching a room also reveals its title and deck. Posters identify upcoming films and open the existing film-detail dialog.
+
+`community.js` adds clearly labelled NPC hosts, a staffed ticket booth, a popcorn counter, seated auditorium visitors, and live visitors. Live avatars use a Supabase Presence channel (`seen-cinema-v1`) for membership and throttled Broadcast messages for movement; each auditorium is a separate scene (`screen-01` through `screen-04`). NPCs are never included in the live visitor count. Motion respects reduced-motion preferences. The mobile thumbstick, touch-floor navigation, and desktop controls remain available.
+
+Public guest comments appear below each article. They persist in **only** `public.seen_comments` on the existing `unicorn-vs-dragon` project, with independent RLS policies, length/article checks, link rejection, and a 30-second per-visitor posting limit. Public clients can read and insert, but cannot update or delete. The visitor rate limit is a basic guest control, not authenticated identity verification. Moderate/remove comments through the Supabase dashboard. No fabricated reader comments are seeded. The applied schema is recorded in `backend/seen-comments.sql`; it is not a script to run repeatedly.
+
+`community-config.js` contains the project URL and browser-safe publishable key. Never put a service-role/secret key in this file. The browser SDK is vendored at **@supabase/supabase-js 2.118.0** with its MIT license in `dist/vendor/`. Existing project tables, RPCs, auth configuration, and data were not changed.
+
+**Sound off/on** starts/stops locally synthesized room ambience after an explicit user gesture. The lobby, screening room, and arcade use different low-volume sound patterns; quizzes add answer sounds. Background tabs suspend audio. No sound files, microphone, or autoplay permissions are required.
+
+Validation included two independent browser contexts for live presence/movement, comment sharing and persistence after reload, API tests for comment constraints and denied update/delete, mobile multi-touch movement/jump in all rooms, stable/unclipped quizzes at 320×568, 393×852, 844×390, and 1440×900, and the existing navigation/jump unit suite. Test comments were removed after verification.
