@@ -373,3 +373,6 @@ html[data-input="pointer"] #game-confirm button:focus-visible,html[data-input="p
 @media(max-height:600px){#game-room .game-options button strong{font-size:6px;line-height:1.6}#game-room .game-answer-slot .game-feedback{font-size:9px;line-height:1.45}}
 #game-room{height:min(600px,calc(100svh - 28px))}
 @media(max-width:360px){.cinema-page>.site-header{gap:8px;padding-inline:14px}.cinema-page .community-badge{max-width:58px;margin-right:0;font-size:6px}.cinema-page .sound-toggle{margin-right:0;font-size:6px!important;padding:6px!important}.cinema-page .site-header #index-toggle{font-size:7px}.cinema-page .site-header #index-toggle span{margin-left:4px}.cinema-page .site-header .logo{font-size:31px}.cinema-page .site-footer{font-size:6px;padding-inline:14px;gap:8px}}
+/* Navigation overlays should not expose unrelated room controls or captions. */
+body:has(#directory:not([hidden])) .touch-gamepad,body:has(#directory:not([hidden])) .controls{visibility:hidden;pointer-events:none}
+#lobby-scene:has(#lobby-board:not([hidden])) .corner-note,#lobby-scene:has(#lobby-board:not([hidden])) .mobile-walk-hint,#lobby-scene:has(#lobby-board:not([hidden])) .location{visibility:hidden}
