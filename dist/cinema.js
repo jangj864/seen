@@ -140,7 +140,7 @@ poly([[0,0,-.2],[18.8,0,-.2],[18.8,9,-.2],[0,9,-.2]],'#a99b80');box(0,0,-.15,18.
 // Cutaway architecture: the entire lobby is visible, with real floor-space navigation.
 box(-.16,-.15,0,18.96,.35,3.3,'#eddfc3','#b8b49c','#93947c');box(-.16,0,0,.28,7.1,1.25,'#e0d4b9','#bdaf8d','#a79a7a');
 for(let x=.4;x<18.4;x+=.55)box(x,.22,.2,.025,.025,2.8,'#b2ac94','#a4a38c','#a4a38c');
-text('S E E N   C I N E M A',9.4,.26,3.06,.30,'#a84832','wall');
+text('S E E N   C I N E M A',posterPositions[Math.floor(posterPositions.length/2)]+.55,.26,3.06,.30,'#a84832','wall');
 upcomingFilms.forEach((film,i)=>poster(posterPositions[i],film));rooms.forEach(door);gameEntrance();
 // Side screening room, brought into the open as a freestanding entrance.
 
