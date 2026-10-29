@@ -43,7 +43,7 @@ Live site: https://jangj864.github.io/seen/
 
 ## Shared cinema (October 2026 update)
 
-The lobby now offers **Today’s stories** and **Upcoming films**. Tapping a screening-room door opens an article preview before entering. Approaching a room also reveals its title and deck. Posters identify upcoming films and open the existing film-detail dialog.
+The lobby offers **Upcoming films**. Hovering or approaching a screening-room door reveals an angled story speech bubble; clicking the door walks directly into the screening. Posters identify upcoming films and open the film-detail dialog.
 
 `community.js` adds clearly labelled NPC hosts, a staffed ticket booth, a popcorn counter, seated auditorium visitors, and live visitors. Live avatars use a Supabase Presence channel (`seen-cinema-v1`) for membership and throttled Broadcast messages for movement; each auditorium is a separate scene (`screen-01` through `screen-04`). NPCs are never included in the live visitor count. Motion respects reduced-motion preferences. The mobile thumbstick, touch-floor navigation, and desktop controls remain available.
 
@@ -54,3 +54,9 @@ Public guest comments appear below each article. They persist in **only** `publi
 **Sound off/on** starts/stops locally synthesized room ambience after an explicit user gesture. The lobby, screening room, and arcade use different low-volume sound patterns; quizzes add answer sounds. Background tabs suspend audio. No sound files, microphone, or autoplay permissions are required.
 
 Validation included two independent browser contexts for live presence/movement, comment sharing and persistence after reload, API tests for comment constraints and denied update/delete, mobile multi-touch movement/jump in all rooms, stable/unclipped quizzes at 320×568, 393×852, 844×390, and 1440×900, and the existing navigation/jump unit suite. Test comments were removed after verification.
+
+## Entry, NPC conversations, and pixel arcade
+
+Visitors enter a 2–20 character nickname through a loading/onboarding ticket before joining live presence. Names appear above avatars. Ticket and popcorn staff offer conversations; seated NPCs can accept or decline seat requests. Live visitors receive a Yes/No request and only move after accepting. Auditorium guests face the screen; the lobby bench guest faces the open side of the bench.
+
+Quiz panels use a local Press Start 2P font (OFL license in `dist/assets/`) and pixel borders, cards, progress indicators, and CRT styling. Fixed question/feedback regions preserve the panel height before and after answers, with whole-dialog scrolling on short screens. Validation covered all 15 questions at four viewport sizes, NPC Yes/No responses, live visitor request/reply, and navigation/jump tests.
