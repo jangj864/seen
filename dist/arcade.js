@@ -6,7 +6,7 @@
  const exit={x:11.4,y:6.9};
  const held=new Set(),jump=createSeenJump();let visitor={x:11.6,y:6.9},path=[],pending=null,near=null,width=0,height=0,unit=1,ox=0,oy=0,last=0,phase=0,gait=0,heading=-Math.PI/2,paintKey='',revision=0,entranceTime=0,offeredMachine=null;
  const active=()=>SeenHub.entered&&!document.querySelector('dialog[open]')&&isSceneOpen('arcade-room')&&!gameRoom.open&&!quizConfirm.open&&!document.hidden;
- function resize(){width=canvas.clientWidth;height=canvas.clientHeight;if(!width||!height)return;const d=Math.min(devicePixelRatio||1,2);canvas.width=width*d;canvas.height=height*d;ctx.setTransform(d,0,0,d,0,0);unit=Math.min(width/21,height/16);ox=width/2-unit;oy=height*.32;revision++}
+ function resize(){width=canvas.clientWidth;height=canvas.clientHeight;if(!width||!height)return;const d=Math.min(devicePixelRatio||1,2);canvas.width=width*d;canvas.height=height*d;ctx.setTransform(d,0,0,d,0,0);unit=Math.min(width/21,height/16);ox=width/2-unit;oy=height*.32+(width<700&&height>650?height*.05:0);revision++}
  new ResizeObserver(resize).observe(canvas);
  function p(x,y,z=0){return{x:ox+(x-y)*unit*.86,y:oy+(x+y)*unit*.43-z*unit}}
  function polygon(points,color){ctx.beginPath();points.forEach((v,i)=>{const q=p(...v);i?ctx.lineTo(q.x,q.y):ctx.moveTo(q.x,q.y)});ctx.closePath();ctx.fillStyle=color;ctx.fill()}

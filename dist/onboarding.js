@@ -4,6 +4,7 @@
  document.querySelectorAll('body>.site-header,body>main,body>.site-footer').forEach(e=>e.inert=true);
  input.value=SeenHub.name.startsWith('Guest ')?'':SeenHub.name.slice(0,20);
  const mobile=matchMedia('(any-pointer:coarse)').matches;document.querySelector('#welcome-controls').textContent=mobile?'Use the left stick to walk and the round button to jump. You can also tap the floor.':'Use arrow keys or WASD to walk, Space to jump, or click the floor.';
+ document.querySelectorAll('.welcome-steps li')[1].lastChild.textContent=mobile?' Walk up to a screening door to preview its story. Tap the door to enter.':' Hover over a screening door to preview its story. Click to enter.';
  const artwork=[...new Set([...Object.values(images),...[...document.images].filter(im=>im.getAttribute('src'))])];let done=0,failed=0;
  function update(){bar.value=Math.round(done/Math.max(artwork.length,1)*100);status.textContent=`Preparing the cinema · ${bar.value}%`;}
  const tasks=artwork.map(im=>new Promise(resolve=>{let settled=false;const finish=ok=>{if(settled)return;settled=true;clearTimeout(timer);if(!ok)failed++;done++;update();resolve()};const timer=setTimeout(()=>finish(false),8000);if(im.complete){finish(im.naturalWidth>0);return}im.addEventListener('load',()=>finish(true),{once:true});im.addEventListener('error',()=>finish(false),{once:true})}));

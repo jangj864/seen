@@ -44,7 +44,7 @@ function walkLobbyTo(destination){
 }
 function propDepth(left,right,top,bottom){return Math.max(left,Math.min(right,player.x))+Math.max(top,Math.min(bottom,player.y))}
 const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
-function resize(){lobbyRevision++;w=canvas.clientWidth;h=canvas.clientHeight;const d=Math.min(devicePixelRatio||1,2);canvas.width=w*d;canvas.height=h*d;ctx.setTransform(d,0,0,d,0,0);scale=Math.min(w/(w<700?28:27),h/17.5);ox=w/2-4.2*scale;oy=h*.36-1.7*scale;}
+function resize(){lobbyRevision++;w=canvas.clientWidth;h=canvas.clientHeight;const d=Math.min(devicePixelRatio||1,2);canvas.width=w*d;canvas.height=h*d;ctx.setTransform(d,0,0,d,0,0);scale=Math.min(w/(w<700?28:27),h/17.5);ox=w/2-4.2*scale;oy=h*.36-1.7*scale+(w<700&&h>650?h*.05:0);}
 addEventListener('resize',resize);resize();
 function p(x,y,z=0){return{x:ox+(x-y)*scale*.86,y:oy+(x+y)*scale*.43-z*scale}}
 function poly(points,color,stroke){ctx.beginPath();points.forEach((a,i)=>{const q=p(...a);i?ctx.lineTo(q.x,q.y):ctx.moveTo(q.x,q.y)});ctx.closePath();ctx.fillStyle=color;ctx.fill();if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=.6;ctx.stroke()}}
