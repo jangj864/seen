@@ -37,7 +37,7 @@ const lobbyNavigation=createSeenCrowdNavigation(createSeenRoomNavigation([], [
  {left:8.90,right:11.48,top:6.80,bottom:7.88},
  {left:13.3,right:16.2,top:7.0,bottom:8.6},
  {left:11.78,right:12.77,top:7.18,bottom:8.17},
- {left:6.2,right:8.7,top:4.8,bottom:5.3}
+ {left:0,right:2.2,top:8.5,bottom:9}
 ]),()=>SeenHub.people('lobby'));
 function walkLobbyTo(destination){
  const end=lobbyNavigation.destination(player,destination),route=end?lobbyNavigation.route(player,end):[];
@@ -134,7 +134,7 @@ function leaveArcade(){if(quizConfirm.open){quizConfirm.close();requestedQuiz=nu
 function roomApproach(r){return{x:r.x+.8,y:r.y+1.5}}
 function person(){drawSeenCharacter({ctx,unit:scale,project:p,x:player.x,y:player.y,heading:lobbyHeading,nameTag:SeenHub.name,gait:reduced?0:lobbyGait,phase,jump:lobbyJump.height,jumpCrouch:lobbyJump.crouch,jumpTuck:lobbyJump.tuck,jumping:lobbyJump.active,tagColor:'#a44731',shadowColor:'#493e2826'})}
 function offsetProp(paint,dx,dy){ctx.save();ctx.translate((dx-dy)*scale*.86,(dx+dy)*scale*.43);paint();ctx.restore()}
-function upcomingSign(){shadow(6.4,5,2.1,.25);for(const x of [6.55,8.25])box(x,5,0,.075,.09,1.2,'#b69b6b','#8d7554','#736047');box(6.4,4.97,.55,2.1,.12,.75,'#f0dfba','#d1bb93','#ac9064');const button=document.querySelector('#browse-upcoming'),q=p(6.4,5.1,1.3);button.style.left=q.x+'px';button.style.top=q.y+'px';button.style.width=2.1*scale+'px';button.style.height=.75*scale+'px';button.style.fontSize=Math.max(4.5,scale*.18)+'px'}
+function upcomingSign(){shadow(.2,8.7,1.8,.25);for(const x of [.35,1.75])box(x,8.7,0,.075,.09,1.2,'#b69b6b','#8d7554','#736047');box(.2,8.67,.55,1.8,.12,.75,'#f0dfba','#d1bb93','#ac9064');const button=document.querySelector('#browse-upcoming'),q=p(.2,8.8,1.3);button.style.left=q.x+'px';button.style.top=q.y+'px';button.style.width=1.8*scale+'px';button.style.height=.75*scale+'px';button.style.fontSize=Math.max(4.5,scale*.18)+'px'}
 function counter(){shadow(.7,5.6,2.8,.95);box(.7,5.6,0,2.8,.95,1.05,'#f1dfb7','#b64d36','#8d382b');for(let x=.85;x<3.4;x+=.18)box(x,6.56,.1,.045,.015,.77,'#edc793','#d38b60','#b66f4c');box(.6,5.5,1.05,3,.99,.13,'#3c4c40','#26382e','#243a2c');box(1.15,5.65,1.18,.5,.3,.35,'#e2c994','#e5b87c','#b48e58');text('TICKETS',2.1,6.59,.57,.29,'#f8e4b7','wall');for(const x of [.82,3.25])box(x,5.8,1.18,.065,.065,1.62,'#c6aa73','#9b804e','#836d44');box(.65,5.8,2.65,2.9,.15,.54,'#f7e5bc','#c84833','#9f3529');text('EVERYONE IS WELCOME',2.1,5.97,2.84,.18,'#ffe7b3','wall');}
 function bench(){shadow(9.1,7,2.25,.72);for(const x of [9.26,11.03])for(const y of [7.10,7.55])box(x,y,0,.1,.12,.45,'#625e4c','#4f5043','#404337');for(const y of [7.04,7.27,7.50])box(9.1,y,.45,2.2,.19,.105,'#bb7950','#945537','#7f4932');for(const x of [9.27,11.03])box(x,7,.44,.075,.09,.65,'#6c6550','#5a5948','#484b3d');for(const z of [.69,.91])box(9.1,6.99,z,2.2,.09,.17,'#bd7950','#a26440','#805033');for(const x of [9.10,11.19]){box(x,7.06,.58,.065,.54,.07,'#746a50','#5b5b45','#4c503d');box(x,7.48,.48,.065,.065,.14,'#6b614a','#565741','#434935');}}
 function planter(x,y){shadow(x,y,.55,.55,.09);box(x,y,0,.55,.55,.55,'#d2b986','#b79162','#9a774d');for(let j=0;j<5;j++){const q=p(x+.25+(j-2)*.1,y+.25,.65+j%3*.23);ctx.strokeStyle=j%2?'#647351':'#7d8558';ctx.lineWidth=scale*.09;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(p(x+.25,y+.25,.5).x,p(x+.25,y+.25,.5).y);ctx.quadraticCurveTo(q.x-scale*.17,q.y-scale*.3,q.x,q.y);ctx.stroke()}}
@@ -149,7 +149,7 @@ upcomingFilms.forEach((film,i)=>poster(posterPositions[i],film));rooms.forEach(d
 // Side screening room, brought into the open as a freestanding entrance.
 
 // Draw movable and freestanding pieces back-to-front on the shared floor plane.
-const props=[{depth:propDepth(6.2,8.7,4.8,5.3),paint:upcomingSign},...SeenHub.drawPeople({ctx,unit:scale,project:p,scene:'lobby'}),{depth:propDepth(13.5,16,7.2,8.4),paint:popcornShop},{depth:propDepth(3.6,6.6,6.5,7.58),paint:()=>offsetProp(counter,3,1)},{depth:propDepth(7.5,8.7,7.98,8.02),paint:()=>offsetProp(queuePosts,3,1)},{depth:17.1,paint:bench},{depth:20,paint:()=>planter(12,7.4)},{depth:player.x+player.y,paint:person}];
+const props=[{depth:propDepth(0,2.2,8.5,9),paint:upcomingSign},...SeenHub.drawPeople({ctx,unit:scale,project:p,scene:'lobby'}),{depth:propDepth(13.5,16,7.2,8.4),paint:popcornShop},{depth:propDepth(3.6,6.6,6.5,7.58),paint:()=>offsetProp(counter,3,1)},{depth:propDepth(7.5,8.7,7.98,8.02),paint:()=>offsetProp(queuePosts,3,1)},{depth:17.1,paint:bench},{depth:20,paint:()=>planter(12,7.4)},{depth:player.x+player.y,paint:person}];
 if(target){ellipse(target.x,target.y,.025,.24,.10,'#d74a3538');ellipse(target.x,target.y,.027,.07,.03,'#d74a35')}
 props.sort((a,b)=>a.depth-b.depth).forEach(item=>item.paint());positionDoorPreview();
 
