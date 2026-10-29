@@ -4,7 +4,7 @@ function seenNavigationKey(event){return ({KeyW:'w',KeyA:'a',KeyS:'s',KeyD:'d'})
 function seenTypingTarget(target){return target instanceof Element&&!!target.closest('input,textarea,select,[contenteditable="true"]')}
 
 // Avoid replacing text nodes or attributes when the visible state has not changed.
-function seenSetText(node,value){if(node.textContent!==value)node.textContent=value}
+function seenSetText(node,value){SeenI18n.text(node,value)}
 function seenSetData(node,key,value){if(node.dataset[key]!==value)node.dataset[key]=value}
 let seenFontRevision=0;
 document.fonts.ready.then(()=>{seenFontRevision++});

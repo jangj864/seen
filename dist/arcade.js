@@ -11,7 +11,7 @@
  function p(x,y,z=0){return{x:ox+(x-y)*unit*.86,y:oy+(x+y)*unit*.43-z*unit}}
  function polygon(points,color){ctx.beginPath();points.forEach((v,i)=>{const q=p(...v);i?ctx.lineTo(q.x,q.y):ctx.moveTo(q.x,q.y)});ctx.closePath();ctx.fillStyle=color;ctx.fill()}
  function box(x,y,z,dx,dy,dz,top,front,side){polygon([[x,y,z+dz],[x+dx,y,z+dz],[x+dx,y+dy,z+dz],[x,y+dy,z+dz]],top);polygon([[x,y+dy,z],[x+dx,y+dy,z],[x+dx,y+dy,z+dz],[x,y+dy,z+dz]],front);polygon([[x+dx,y,z],[x+dx,y+dy,z],[x+dx,y+dy,z+dz],[x+dx,y,z+dz]],side)}
- function label(value,x,y,z,size,color,side=false){const q=p(x,y,z);ctx.save();ctx.transform(.86,side?-.43:.43,0,1,q.x,q.y);ctx.font=`700 ${unit*size}px "Barlow Condensed",sans-serif`;ctx.fillStyle=color;ctx.textAlign='center';ctx.fillText(value,0,0);ctx.restore()}
+ function label(value,x,y,z,size,color,side=false){value=SeenI18n.t(value);const q=p(x,y,z);ctx.save();ctx.transform(.86,side?-.43:.43,0,1,q.x,q.y);ctx.font=`700 ${unit*size}px "Barlow Condensed",sans-serif`;ctx.fillStyle=color;ctx.textAlign='center';ctx.fillText(value,0,0);ctx.restore()}
  function cabinet(m){
   const x=m.x,y=m.y;polygon([[x-.1,y+.1,.01],[x+1.8,y+.1,.01],[x+1.95,y+1.5,.01],[x-.1,y+1.5,.01]],'#0003');
   box(x+.06,y+.05,0,1.48,1.02,.19,'#26382b','#101e18','#101e18');
@@ -31,7 +31,7 @@
   const a=p(x+.16,y+.70,2.28),b=p(x+1.44,y+.70,2.28),c=p(x+.16,y+1.04,1.35);ctx.save();ctx.transform((b.x-a.x)/160,(b.y-a.y)/160,(c.x-a.x)/120,(c.y-a.y)/120,a.x,a.y);
   ctx.fillStyle='#101916';ctx.beginPath();ctx.roundRect(-9,-9,178,138,9);ctx.fill();ctx.strokeStyle='#1e3027';ctx.lineWidth=2;ctx.stroke();ctx.beginPath();ctx.roundRect(0,0,160,120,7);ctx.clip();const glow=ctx.createRadialGradient(80,55,0,80,55,100);glow.addColorStop(0,m.mode==='eyes'?'#396a56':'#4b5539');glow.addColorStop(1,'#15291f');ctx.fillStyle=glow;ctx.fillRect(0,0,160,120);
   ctx.strokeStyle=m.light;ctx.lineWidth=2;if(m.symbol==='eye'){ctx.beginPath();ctx.moveTo(31,55);ctx.quadraticCurveTo(80,6,129,55);ctx.quadraticCurveTo(80,104,31,55);ctx.stroke();ctx.beginPath();ctx.arc(80,55,16,0,Math.PI*2);ctx.stroke()}else{ctx.fillStyle=m.light;ctx.font='700 58px "Barlow Condensed",sans-serif';ctx.textAlign='center';ctx.fillText(m.symbol,80,76)}
-  ctx.fillStyle='#d9f4be0b';for(let line=3;line<120;line+=5)ctx.fillRect(0,line,160,1);ctx.fillStyle='#ffffff0c';ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(110,0);ctx.lineTo(40,120);ctx.lineTo(0,120);ctx.fill();ctx.fillStyle=m.light;ctx.font='8px "DM Sans",sans-serif';ctx.textAlign='center';ctx.fillText('PRESS START',80,106);ctx.restore();
+  ctx.fillStyle='#d9f4be0b';for(let line=3;line<120;line+=5)ctx.fillRect(0,line,160,1);ctx.fillStyle='#ffffff0c';ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(110,0);ctx.lineTo(40,120);ctx.lineTo(0,120);ctx.fill();ctx.fillStyle=m.light;ctx.font='8px "DM Sans",sans-serif';ctx.textAlign='center';ctx.fillText(SeenI18n.t('PRESS START'),80,106);ctx.restore();
   box(x-.04,y,2.43,1.68,1.1,.34,m.roof,m.color,m.side);polygon([[x+.08,y+1.105,2.48],[x+1.52,y+1.105,2.48],[x+1.52,y+1.105,2.71],[x+.08,y+1.105,2.71]],'#23382d');label(m.title,x+.8,y+1.115,2.53,.21,m.light);
   // Sloped control deck with a recessed joystick and three individual buttons.
   polygon([[x-.04,y+.96,1.35],[x+1.64,y+.96,1.35],[x+1.64,y+1.40,1.14],[x-.04,y+1.40,1.14]],m.deck);
