@@ -270,3 +270,16 @@ html[data-input="pointer"] #game-confirm button:focus-visible,html[data-input="p
  #game-room #game-quiz h3{min-height:61px}
  #game-room #game-quiz .game-result h3{min-height:0}
 }
+/* One scroll container for the entire quiz: cards are never cropped internally. */
+#game-room[open]{display:block;overflow-x:hidden;overflow-y:auto;scroll-padding-block:64px 24px}
+#game-room{height:min(880px,calc(100dvh - 40px));max-height:calc(100dvh - 40px - env(safe-area-inset-top) - env(safe-area-inset-bottom))}
+#game-room .game-toolbar{position:sticky;top:0;z-index:3}
+#game-room .game-room-body{height:auto;min-height:0;overflow:visible;grid-template-rows:auto;padding-bottom:28px}
+#game-room .arcade-machine{display:block;height:auto;min-height:0;overflow:visible}
+#game-room #game-quiz,#game-room #game-quiz[data-state="complete"]{display:grid;grid-template-rows:430px 150px;gap:8px;overflow:visible;min-height:0;justify-content:stretch}
+#game-room .game-question{height:430px;min-height:0;overflow:visible;padding-right:0;box-sizing:border-box}
+#game-room .game-answer-slot,#game-room #game-quiz[data-state="complete"] .game-answer-slot{height:150px;min-height:0;margin:0;padding:12px 0 6px;overflow:visible;box-sizing:border-box}
+#game-room #game-quiz h3{min-height:68px}
+#game-room .game-result{display:flex;justify-content:center;overflow:visible}
+#game-room #game-quiz .game-result h3{min-height:0}
+@media(max-width:360px){#game-room #game-quiz,#game-room #game-quiz[data-state="complete"]{grid-template-rows:460px 180px}#game-room .game-question{height:460px}#game-room .game-answer-slot,#game-room #game-quiz[data-state="complete"] .game-answer-slot{height:180px}}
