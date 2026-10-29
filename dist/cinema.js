@@ -31,12 +31,13 @@ upcomingFilms.forEach(film=>film.button.addEventListener('click',()=>openFilm(fi
 document.querySelector('#close-film').onclick=()=>filmDialog.close();filmDialog.addEventListener('close',()=>{keys.clear();posterReturnFocus?.focus({preventScroll:true})});filmDialog.addEventListener('click',e=>{if(e.target===filmDialog){const r=filmDialog.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)filmDialog.close()}});
 let w=0,h=0,scale=1,ox=0,oy=0,player={x:9.4,y:4.5},target=null,near=null,keys=new Set(),last=0,phase=0,walk=false,lobbyHeading=-Math.PI/2,lobbyGait=0,lobbyVelocity={x:0,y:0};
 // Collision bounds include the visitor's width and the rendered prop offsets.
-const lobbyNavigation=createSeenRoomNavigation([], [
+const lobbyNavigation=createSeenCrowdNavigation(createSeenRoomNavigation([], [
  {left:3.42,right:6.78,top:6.32,bottom:7.77},
  {left:7.28,right:8.92,top:7.78,bottom:8.22},
  {left:8.90,right:11.48,top:6.80,bottom:7.88},
- {left:13.3,right:16.2,top:7.0,bottom:8.6}
-]);
+ {left:13.3,right:16.2,top:7.0,bottom:8.6},
+ {left:11.78,right:12.77,top:7.18,bottom:8.17}
+]),()=>SeenHub.people('lobby'));
 function walkLobbyTo(destination){
  const end=lobbyNavigation.destination(player,destination),route=end?lobbyNavigation.route(player,end):[];
  target=route.shift()||null;lobbyWaypoints=route;lobbyVelocity={x:0,y:0};
@@ -168,6 +169,7 @@ gameOpen+=((Math.hypot(player.x-.5,player.y-6)<2?1:0)-gameOpen)*(reduced?1:1-Mat
 for(const r of rooms){const open=Math.hypot(player.x-(r.x+.8),player.y-(r.y+.65))<1.9?1:0;r.open+=(open-r.open)*(reduced?1:1-Math.exp(-dt*10));}if(!paused){const passage=rooms.find(r=>Math.abs(player.x-(r.x+.8))<.45&&player.y<r.y+.70&&r.open>.65);if(passage){near=passage;enter();}}
 seenSetData(canvas,'jumpPhase',lobbyJump.active?'active':'idle');seenSetData(canvas,'jumpCrouch',lobbyJump.crouch.toFixed(3));seenSetData(canvas,'jumpTuck',lobbyJump.tuck.toFixed(3));seenSetData(canvas,'jump',lobbyJump.height.toFixed(3));seenSetData(canvas,'gameDoor',gameOpen.toFixed(2));seenSetData(canvas,'doors',rooms.map(r=>r.open.toFixed(2)).join(','));seenSetData(canvas,'position',`${player.x.toFixed(3)},${player.y.toFixed(3)}`);seenSetData(canvas,'motion',walk?'walking':'idle');
 // Repaint only when projected geometry, images, fonts, or navigation change.
+if(isSceneOpen('lobby-scene')&&SeenHub.entered)SeenTalk?.nearby({scene:'lobby',x:player.x,y:player.y,project:p,canvas});
 if(!paused)SeenHub.publish({scene:'lobby',x:player.x,y:player.y,heading:lobbyHeading,posture:0,jump:lobbyJump.height,moving:walk});
 const paintKey=[SeenHub.revision,lobbyRevision,seenFontRevision,lobbyJump.height.toFixed(3),lobbyJump.crouch.toFixed(3),lobbyJump.tuck.toFixed(3),canvas.dataset.position,canvas.dataset.doors,canvas.dataset.gameDoor,lobbyHeading.toFixed(3),lobbyGait.toFixed(3),phase.toFixed(3),target?.x,target?.y].join('|');
 if(paintKey!==lobbyPaintKey){draw();lobbyPaintKey=paintKey} requestAnimationFrame(frame)}requestAnimationFrame(frame);
@@ -201,8 +203,8 @@ function popcornShop(){
  text('POPCORN',14.75,8.34,.46,.26,'#f8e7c5','wall');
 }
 const preview=document.querySelector('#door-preview'),board=document.querySelector('#lobby-board');let previewRoom=null,hoveredDoor=null;
-function positionDoorPreview(){if(!previewRoom||preview.hidden)return;const q=p(previewRoom.x+.8,previewRoom.y+.32,2.95);preview.style.left=`${q.x}px`;preview.style.top=`${q.y}px`;preview.style.transform='matrix(.86,.43,0,1,0,0) translate(-50%,calc(-100% - 14px))';const bounds=preview.getBoundingClientRect(),parent=preview.parentElement.getBoundingClientRect();const dx=Math.max(8-(bounds.left-parent.left),Math.min(0,parent.right-bounds.right-8)),dy=Math.max(0,parent.top+8-bounds.top);preview.style.left=`${q.x+dx}px`;preview.style.top=`${q.y+dy}px`}
-function showDoorPreview(r){if(!r||!board.hidden||!SeenHub.entered)return;if(previewRoom!==r){previewRoom=r;const article=screeningArticles[r.article];preview.replaceChildren();const small=document.createElement('small'),title=document.createElement('h2'),deck=document.createElement('p'),hint=document.createElement('span');small.textContent='SCREEN '+r.n+' / TODAY’S STORY';title.textContent=r.name;deck.textContent=article.deck;hint.textContent='CLICK THE DOOR TO ENTER ↗';preview.append(small,title,deck,hint)}preview.hidden=false;positionDoorPreview()}
+function positionDoorPreview(){}
+function showDoorPreview(r){if(!r||!board.hidden||!SeenHub.entered)return;previewRoom=r;preview.hidden=true;const note=document.querySelector('.corner-note'),article=screeningArticles[r.article];note.replaceChildren();note.append(document.createTextNode('SCREEN '+r.n+' / NOW SHOWING'));const title=document.createElement('strong'),deck=document.createElement('span');title.textContent=r.name;deck.textContent=article.deck;note.append(title,deck)}
 function doorUnderPointer(px,py){return rooms.find(r=>{const a=p(r.x-.08,r.y+.3,2.85),b=p(r.x+1.65,r.y+.3,2.85),c=p(r.x-.08,r.y+.3,0),u=(px-a.x)/(b.x-a.x),v=(py-a.y-u*(b.y-a.y))/(c.y-a.y);return u>=0&&u<=1&&v>=0&&v<=1})||null}
 canvas.addEventListener('pointermove',e=>{if(e.pointerType==='touch'||!SeenHub.entered||!isSceneOpen('lobby-scene'))return;const r=canvas.getBoundingClientRect();hoveredDoor=doorUnderPointer(e.clientX-r.left,e.clientY-r.top);if(hoveredDoor)showDoorPreview(hoveredDoor);else if(!near)preview.hidden=true});canvas.addEventListener('pointerleave',()=>{hoveredDoor=null;if(!near)preview.hidden=true});
 function browse(kind){const control=document.querySelector(kind==='stories'?'#browse-stories':'#browse-upcoming');if(!board.hidden&&board.dataset.kind===kind){board.hidden=true;control.setAttribute('aria-expanded','false');return}board.dataset.kind=kind;board.replaceChildren();preview.hidden=true;const heading=document.createElement('h2');heading.textContent=kind==='stories'?'Pick your next conversation.':'Coming to the cinema.';const close=document.createElement('button');close.className='board-close';close.textContent='×';close.setAttribute('aria-label','Close program');close.onclick=()=>{board.hidden=true;control.setAttribute('aria-expanded','false')};board.append(heading,close);const grid=document.createElement('div');grid.className='program-cards';for(const item of kind==='stories'?rooms:upcomingFilms){const card=document.createElement('button'),image=document.createElement('img'),meta=document.createElement('small'),title=document.createElement('strong'),deck=document.createElement('span');if(kind==='stories'){const article=screeningArticles[item.article];image.src=`assets/${article.image}.jpg`;meta.textContent='SCREEN '+item.n;title.textContent=item.name;deck.textContent=article.deck;card.onclick=()=>showDoorPreview(item,true)}else{image.src=`assets/${item.image}.${item.ext||'jpg'}`;meta.textContent='UPCOMING · '+item.date;title.textContent=item.title;deck.textContent='Film details & trailer ↗';card.onclick=()=>openFilm(item)}image.alt='';card.append(image,meta,title,deck);grid.append(card)}board.append(grid);board.hidden=false;control.setAttribute('aria-expanded','true')}

@@ -72,5 +72,13 @@ function createSeenRoomNavigation(chairs,obstacles=null){
   const r=rectangles.find(r=>point.x>r.left&&point.x<r.right&&point.y>r.top&&point.y<r.bottom),gap=.08;
   return [{x:point.x,y:r.top-gap},{x:point.x,y:r.bottom+gap},{x:r.left-gap,y:point.y},{x:r.right+gap,y:point.y}].filter(p=>!blocked(p.x,p.y)).sort((a,b)=>distance(point,a)-distance(point,b))[0]||null;
  }
- return {route,blocked,clear,destination,advance,landing};
+ return {route,blocked,clear,destination,advance,landing,bounds:rectangles};
+}
+
+// Use the same body footprints for manual movement and click-to-walk routes.
+function createSeenCrowdNavigation(base, people){
+ const bodies=()=>people().filter(v=>v.posture<.5).map(v=>({left:v.x-.34,right:v.x+.34,top:v.y-.34,bottom:v.y+.34}));
+ const inside=(r,p)=>p.x>r.left&&p.x<r.right&&p.y>r.top&&p.y<r.bottom;
+ const snapshot=start=>createSeenRoomNavigation([], [...base.bounds,...bodies().filter(r=>!start||!inside(r,start))]);
+ return {...base,blocked:(x,y)=>base.blocked(x,y)||bodies().some(r=>inside(r,{x,y})),clear:(a,b)=>snapshot(a).clear(a,b),route:(a,b)=>snapshot(a).route(a,b),destination:(a,b)=>snapshot(a).destination(a,b),advance:(start,path,budget)=>{const nav=snapshot(start);if(path.length&&!nav.clear(start,path[0])){const next=nav.route(start,path.at(-1));if(!next.length)return {...start};path.splice(0,path.length,...next)}return nav.advance(start,path,budget)}};
 }

@@ -48,3 +48,15 @@ test('lobby routes avoid the expanded counter and rope footprints',()=>{
  let position=start,frames=0;while(route.length&&frames++<1000){position=lobby.advance(position,route,.1);assert.ok(!lobby.blocked(position.x,position.y))}
  assert.equal(position.x,end.x);assert.equal(position.y,end.y);assert.equal(lobby.blocked(8,8),true);
 });
+test('crowd routes avoid people, and reroute when a person enters the path',()=>{
+ const people=[{x:2,y:2,posture:0}];
+ const crowd=context.createSeenCrowdNavigation(context.createSeenRoomNavigation([]),()=>people);
+ assert.equal(crowd.blocked(2,2),true);
+ const start={x:0,y:2},end={x:4,y:2},path=crowd.route(start,end);
+ assert.ok(path.length>1);
+ let position=start;
+ for(let i=0;i<100&&path.length;i++){position=crowd.advance(position,path,.1);assert.ok(Math.hypot(position.x-2,position.y-2)>=.33)}
+ assert.ok(Math.hypot(position.x-end.x,position.y-end.y)<.01);
+ const direct=[{x:4,y:4}];people[0]={x:2,y:4,posture:0};
+ position=crowd.advance({x:0,y:4},direct,.1);assert.ok(direct.length>1);assert.equal(crowd.blocked(position.x,position.y),false);
+});

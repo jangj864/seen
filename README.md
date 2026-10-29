@@ -43,7 +43,7 @@ Live site: https://jangj864.github.io/seen/
 
 ## Shared cinema (October 2026 update)
 
-The lobby offers **Upcoming films**. Hovering or approaching a screening-room door reveals an angled story speech bubble; clicking the door walks directly into the screening. Posters identify upcoming films and open the film-detail dialog.
+The lobby offers **Upcoming films**. Hovering or approaching a screening-room door updates the NOW SHOWING article panel; clicking the door walks directly into the screening. Posters identify upcoming films and open the film-detail dialog.
 
 `community.js` adds clearly labelled NPC hosts, a staffed ticket booth, a popcorn counter, seated auditorium visitors, and live visitors. Live avatars use a Supabase Presence channel (`seen-cinema-v1`) for membership and throttled Broadcast messages for movement; each auditorium is a separate scene (`screen-01` through `screen-04`). NPCs are never included in the live visitor count. Motion respects reduced-motion preferences. The mobile thumbstick, touch-floor navigation, and desktop controls remain available.
 
@@ -59,4 +59,6 @@ Validation included two independent browser contexts for live presence/movement,
 
 Visitors enter a 2–20 character nickname through a loading/onboarding ticket before joining live presence. Names appear above avatars. Ticket and popcorn staff offer conversations; seated NPCs can accept or decline seat requests. Live visitors receive a Yes/No request and only move after accepting. Auditorium guests face the screen; the lobby bench guest faces the open side of the bench.
 
-Quiz panels use a local Press Start 2P font (OFL license in `dist/assets/`) and pixel borders, cards, progress indicators, and CRT styling. Fixed question/feedback regions preserve the panel height before and after answers, with whole-dialog scrolling on short screens. Validation covered all 15 questions at four viewport sizes, NPC Yes/No responses, live visitor request/reply, and navigation/jump tests.
+Quiz panels use a local Press Start 2P font (OFL license in `dist/assets/`) and pixel borders, cards, progress indicators, and CRT styling. Responsive question/feedback regions preserve panel height before and after answers. The compact CRT playfield removes the side marquee and segmented progress bar, keeping questions and answer cards together. Validation covered all 15 questions at four viewport sizes, NPC Yes/No responses, live visitor request/reply, and navigation/jump tests.
+
+NPC identities appear within interaction range. Click a character or press Enter nearby for an anchored, non-modal dialogue bubble with branching choices. Staff wear red uniforms, cream aprons and caps. The red arcade machine has no foreground NPC. Walking guests turn with their travel direction and use a faster walking cycle. Shared crowd navigation adds standing-person footprints to click routes and manual collision checks, including the lobby planter; moving guests pause rather than cross the local visitor.

@@ -2,7 +2,7 @@
 (()=>{
  const canvas=document.querySelector('#arcade-world'),ctx=canvas.getContext('2d'),notice=document.querySelector('#arcade-near');
  const machines=[{x:1.5,y:1.3,title:'SEEN QUIZ',mode:'all',color:'#b74239',light:'#f0b39d',roof:'#cf5b4c',deck:'#d97864',side:'#7e302c',symbol:'?'},{x:5.2,y:1.3,title:'EYES ONLY',mode:'eyes',color:'#428b7e',light:'#a4d4b2',roof:'#a4d4b2',deck:'#a4d4b2',side:'#2b635a',symbol:'eye'},{x:8.9,y:1.3,title:'FILM CLUB',mode:'films',color:'#b1893e',light:'#efcf82',roof:'#efcf82',deck:'#efcf82',side:'#80632e',symbol:'03'}];
- const navigation=createSeenRoomNavigation([],machines.map(m=>({left:m.x-.18,right:m.x+1.78,top:m.y-.18,bottom:m.y+1.55})));
+ const navigation=createSeenCrowdNavigation(createSeenRoomNavigation([],machines.map(m=>({left:m.x-.18,right:m.x+1.78,top:m.y-.18,bottom:m.y+1.55}))),()=>SeenHub.people('arcade'));
  const exit={x:11.4,y:6.9};
  const held=new Set(),jump=createSeenJump();let visitor={x:11.6,y:6.9},path=[],pending=null,near=null,width=0,height=0,unit=1,ox=0,oy=0,last=0,phase=0,gait=0,heading=-Math.PI/2,paintKey='',revision=0,entranceTime=0,offeredMachine=null;
  const active=()=>SeenHub.entered&&!document.querySelector('dialog[open]')&&isSceneOpen('arcade-room')&&!gameRoom.open&&!quizConfirm.open&&!document.hidden;
@@ -68,7 +68,7 @@
   seenSetData(canvas,'jump',jump.height.toFixed(3));seenSetData(canvas,'jumpPhase',jump.active?'active':'idle');
   seenSetData(canvas,'position',`${visitor.x.toFixed(3)},${visitor.y.toFixed(3)}`);
   if(entranceTime===0&&visitor.x>11.2&&visitor.y>6.2&&visitor.y<7.6){leaveArcade();requestAnimationFrame(frame);return}
-  SeenHub.publish({scene:'arcade',x:visitor.x,y:visitor.y,heading,posture:0,jump:jump.height,moving:moved>.0005});
+  SeenTalk.nearby({scene:'arcade',x:visitor.x,y:visitor.y,project:p,canvas});SeenHub.publish({scene:'arcade',x:visitor.x,y:visitor.y,heading,posture:0,jump:jump.height,moving:moved>.0005});
   const key=[SeenHub.revision,revision,seenFontRevision,canvas.dataset.position,heading.toFixed(3),gait.toFixed(3),phase.toFixed(3),jump.height.toFixed(3),jump.crouch.toFixed(3),jump.tuck.toFixed(3),path.at(-1)?.x,path.at(-1)?.y].join('|');if(key!==paintKey){draw();paintKey=key}
  }requestAnimationFrame(frame)}requestAnimationFrame(frame);
  canvas.addEventListener('pointerdown',e=>{if(!e.isPrimary||e.button>0)return;if(e.pointerType==='touch')e.preventDefault();if(!active())return;const r=canvas.getBoundingClientRect(),px=e.clientX-r.x,py=e.clientY-r.y;const person=SeenHub.hitPerson({scene:'arcade',project:p,unit,px,py});if(person){held.clear();path=[];SeenTalk.staff(person);return}for(const m of [...machines].reverse()){const a=p(m.x,m.y+1.16,2.85),b=p(m.x+1.6,m.y+1.16,2.85),c=p(m.x,m.y+1.16,0),u=(px-a.x)/(b.x-a.x),v=(py-a.y-u*(b.y-a.y))/(c.y-a.y);if(u>=0&&u<=1&&v>=0&&v<=1){walkToMachine(machines.indexOf(m));return}}const gate=p(11.8,6.9,1.1);if(Math.abs(px-gate.x)<unit*.9&&Math.abs(py-gate.y)<unit){pending=null;path=navigation.route(visitor,exit);return}const sx=(px-ox)/unit/.86,sy=(py-oy)/unit/.43,target=navigation.destination(visitor,{x:Math.max(.6,Math.min(11.4,(sx+sy)/2)),y:Math.max(.7,Math.min(9.6,(sy-sx)/2))});held.clear();pending=null;path=target?navigation.route(visitor,target):[];canvas.focus({preventScroll:true})});
