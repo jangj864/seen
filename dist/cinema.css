@@ -376,3 +376,12 @@ html[data-input="pointer"] #game-confirm button:focus-visible,html[data-input="p
 /* Navigation overlays should not expose unrelated room controls or captions. */
 body:has(#directory:not([hidden])) .touch-gamepad,body:has(#directory:not([hidden])) .controls{visibility:hidden;pointer-events:none}
 #lobby-scene:has(#lobby-board:not([hidden])) .corner-note,#lobby-scene:has(#lobby-board:not([hidden])) .mobile-walk-hint,#lobby-scene:has(#lobby-board:not([hidden])) .location{visibility:hidden}
+/* A freestanding cinema sign replaces the floating browse button. */
+.map-upcoming-sign{position:absolute;z-index:1;transform:matrix(.86,.43,0,1,0,0);transform-origin:0 0;padding:0;border:1px solid #a88d61;border-radius:1px;background:#efdfbb;color:#58472e;font-family:'Barlow Condensed',sans-serif;font-weight:700;line-height:1.2;letter-spacing:.06em;cursor:pointer;box-shadow:none;touch-action:manipulation}.map-upcoming-sign:hover{background:#fff0cf;color:#9d4431}.map-upcoming-sign:focus-visible{outline:2px solid #ad523a;outline-offset:2px}
+#lobby-board{position:fixed;inset:0;margin:auto;width:min(1150px,94vw);height:fit-content;max-height:calc(100svh - 48px);padding:26px;overflow:auto;background:#f7f0e2;border:1px solid #d1c0a1;border-radius:18px;backdrop-filter:none;box-shadow:0 18px 60px #1a1e1633}
+#lobby-board::backdrop{background:#18201855;backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px)}
+@media(max-width:700px){#lobby-board{padding:18px;width:calc(100vw - 28px);max-height:calc(100svh - 40px)}#lobby-board h2{margin-bottom:18px}}
+@media(max-height:500px){#lobby-board{max-height:calc(100svh - 24px)}}
+#lobby-board .upcoming-toolbar{position:sticky;top:-26px;z-index:2;display:flex;align-items:center;justify-content:space-between;gap:16px;background:#f7f0e2;margin:-26px -26px 20px;padding:20px 26px 14px;border-bottom:1px solid #d1c0a155}#lobby-board .upcoming-toolbar h2{margin:0}#lobby-board .upcoming-toolbar .board-close{position:static;flex:0 0 40px;width:40px;height:40px;border-radius:50%}#lobby-board .board-close:hover{background:#aa96701a}
+@media(max-width:700px){#lobby-board .upcoming-toolbar{top:-18px;margin:-18px -18px 18px;padding:12px 18px}}
+@media(any-pointer:coarse){.map-upcoming-sign::before{content:'';position:absolute;inset:-17px -8px}}
