@@ -259,3 +259,14 @@ html[data-input="pointer"] #game-confirm button:focus-visible,html[data-input="p
 
 @media(any-pointer:coarse) and (max-width:1100px){#lobby-scene .location{left:22px;right:22px;bottom:145px;max-width:none;min-height:18px;line-height:18px;white-space:nowrap}#lobby-scene .location i{flex-shrink:0}#lobby-scene .mobile-walk-hint{left:22px;right:22px;bottom:179px!important;margin:0;line-height:18px;text-align:left}}
 @media(any-pointer:coarse) and (max-width:1100px){#screening .auditorium-bottom>div:first-child{position:absolute;left:22px;right:22px;bottom:145px;margin:0;display:block;max-width:none}#screening .auditorium-bottom .ticket-label{display:block}#screening .auditorium-bottom strong{display:block;margin:4px 0}#screening .auditorium-bottom small{height:auto;min-height:16px;max-width:none;line-height:16px}}
+/* Reserve answer feedback before selection so quiz cards never change height. */
+@media(max-width:700px),(max-height:600px){
+ #game-room{height:calc(100dvh - 40px - env(safe-area-inset-top) - env(safe-area-inset-bottom))}
+ #game-room #game-quiz{display:grid;grid-template-rows:390px 150px;gap:8px}
+ #game-room .game-question{height:390px;min-height:0;overflow:auto;box-sizing:border-box}
+ #game-room .game-answer-slot,#game-room #game-quiz[data-state="complete"] .game-answer-slot{height:150px;min-height:0;margin:0;overflow:auto;box-sizing:border-box;padding:12px 0 6px}
+ #game-room #game-quiz[data-state="complete"]{gap:8px;justify-content:stretch}
+ #game-room .game-result{justify-content:center}
+ #game-room #game-quiz h3{min-height:61px}
+ #game-room #game-quiz .game-result h3{min-height:0}
+}
