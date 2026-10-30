@@ -17,7 +17,7 @@ function point(x,y,z=0){return{x:cx+(x-y)*unit*.86,y:cy+(x+y)*unit*.43-z*unit}}
 function polygon(vertices,color){g.beginPath();vertices.forEach((v,i)=>{const p=point(...v);i?g.lineTo(p.x,p.y):g.moveTo(p.x,p.y)});g.closePath();g.fillStyle=color;g.fill()}
 function cube(x,y,z,dx,dy,dz,top,front,side){polygon([[x,y,z+dz],[x+dx,y,z+dz],[x+dx,y+dy,z+dz],[x,y+dy,z+dz]],top);polygon([[x,y+dy,z],[x+dx,y+dy,z],[x+dx,y+dy,z+dz],[x,y+dy,z+dz]],front);polygon([[x+dx,y,z],[x+dx,y+dy,z],[x+dx,y+dy,z+dz],[x+dx,y,z+dz]],side)}
 function oval(x,y,z,rx,ry,color){const p=point(x,y,z);g.beginPath();g.ellipse(p.x,p.y,rx*unit,ry*unit,0,0,Math.PI*2);g.fillStyle=color;g.fill()}
-function label(text,x,y,z,font,color,wall=false){text=SeenI18n.t(text);const p=point(x,y,z);g.save();g.translate(p.x,p.y);if(wall)g.transform(.86,.43,0,1,0,0);g.font=`600 ${font*unit}px "Barlow Condensed",sans-serif`;g.fillStyle=color;g.textAlign='center';g.fillText(text,0,0);g.restore()}
+function label(text,x,y,z,font,color,wall=false){text=SeenI18n.t(text);const p=point(x,y,z);g.save();g.translate(p.x,p.y);if(wall)g.transform(.86,.43,0,1,0,0);g.font=`600 ${font*unit}px "Barlow Condensed","Pretendard",sans-serif`;g.fillStyle=color;g.textAlign='center';g.fillText(text,0,0);g.restore()}
 function drawCurtains(){
 // Project the fabric onto the same wall plane as the screen.
 function fabric(x,z,w,h,mirror=false,valance=false){const a=point(x,.30,z+h),b=point(x+w,.30,z+h),c=point(x,.30,z);g.save();g.transform((b.x-a.x)/200,(b.y-a.y)/200,(c.x-a.x)/400,(c.y-a.y)/400,a.x,a.y);if(mirror){g.translate(200,0);g.scale(-1,1)}g.beginPath();g.moveTo(0,0);g.lineTo(200,0);if(valance){g.lineTo(200,350);for(let i=200;i>0;i-=40)g.quadraticCurveTo(i-20,405,i-40,350)}else{g.bezierCurveTo(180,105,132,210,178,385);g.quadraticCurveTo(90,410,0,385)}g.closePath();g.clip();const velvet=g.createLinearGradient(0,0,200,0);for(let i=0;i<=10;i++){velvet.addColorStop(i/10,i%2?'#b94038':'#591e27')}g.fillStyle=velvet;g.fillRect(0,0,200,420);const shade=g.createLinearGradient(0,0,0,400);shade.addColorStop(0,'#240e2545');shade.addColorStop(.4,'#b4593a10');shade.addColorStop(1,'#260c2066');g.fillStyle=shade;g.fillRect(0,0,200,420);g.strokeStyle='#d6aa6a';g.lineWidth=valance?10:3;g.beginPath();if(valance){g.moveTo(0,348);for(let i=0;i<200;i+=40)g.quadraticCurveTo(i+20,403,i+40,348)}else{g.moveTo(0,380);g.quadraticCurveTo(90,405,178,380)}g.stroke();if(!valance){g.strokeStyle='#ca9b5e';g.lineWidth=5;g.beginPath();g.moveTo(4,250);g.quadraticCurveTo(88,282,151,255);g.stroke()}g.restore()}
@@ -30,9 +30,9 @@ function drawScreen(){
  g.save();g.transform((b.x-a.x)/W,(b.y-a.y)/W,(c.x-a.x)/H,(c.y-a.y)/H,a.x,a.y);
  g.fillStyle='#090c0d';g.fillRect(-13,-13,W+26,H+26);
  const im=screenStill;if(im.complete&&im.naturalWidth){const ratio=16/9,ir=im.naturalWidth/im.naturalHeight;let sx=0,sy=0,sw=im.naturalWidth,sh=im.naturalHeight;if(ir>ratio){sw=sh*ratio;sx=(im.naturalWidth-sw)/2}else{sh=sw/ratio;sy=(im.naturalHeight-sh)/2}g.drawImage(im,sx,sy,sw,sh,0,0,W,H)}
- g.fillStyle='#101611a6';g.fillRect(0,0,W,H);g.fillStyle='#e3c18b';g.font='500 15px "DM Sans",sans-serif';g.fillText(`SEEN / SCREEN ${currentRoom?.n||'01'}`,40,65);
- g.fillStyle='#fff0d2';g.font='600 46px "Barlow Condensed",sans-serif';g.fillText(SeenI18n.t(currentRoom?.name||'SEEN CINEMA'),40,215,W-80);
- g.fillStyle='#ebc58e';g.font='500 14px "DM Sans",sans-serif';g.fillText(SeenI18n.t('READ THE STORY  ↗'),40,380);g.restore();
+ g.fillStyle='#101611a6';g.fillRect(0,0,W,H);g.fillStyle='#e3c18b';g.font='500 15px "DM Sans","Pretendard",sans-serif';g.fillText(`SEEN / SCREEN ${currentRoom?.n||'01'}`,40,65);
+ g.fillStyle='#fff0d2';g.font='600 46px "Barlow Condensed","Pretendard",sans-serif';g.fillText(SeenI18n.t(currentRoom?.name||'SEEN CINEMA'),40,215,W-80);
+ g.fillStyle='#ebc58e';g.font='500 14px "DM Sans","Pretendard",sans-serif';g.fillText(SeenI18n.t('READ THE STORY  ↗'),40,380);g.restore();
  polygon([[s.left,.38,s.bottom-.07],[s.right,.38,s.bottom-.07],[s.right,.47,s.bottom-.07],[s.left,.47,s.bottom-.07]],'#c9b085');
 }
 function chair(seat){const selected=seatChoices.get(currentRoom?.n)===seat.id,x=seat.x,y=seat.y;
