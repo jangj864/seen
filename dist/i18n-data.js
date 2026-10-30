@@ -1,5 +1,6 @@
 'use strict';
 window.SEEN_KO={
+ "A QUICK GUIDE": "이용 안내",
  "SEEN Cinema — Issue 02": "SEEN 시네마 — 02호",
  "ISSUE 02 / NOVEMBER 2026": "02호 / 2026년 11월",
  "ISSUE 02": "02호",

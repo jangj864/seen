@@ -8,6 +8,7 @@ function seenSetText(node,value){SeenI18n.text(node,value)}
 function seenSetData(node,key,value){if(node.dataset[key]!==value)node.dataset[key]=value}
 let seenFontRevision=0;
 document.fonts.ready.then(()=>{seenFontRevision++});
+document.fonts.addEventListener('loadingdone',()=>{seenFontRevision++});
 
 function createSeenJump(){
  const prepare=.14,flight=11.6/14,land=.20,total=prepare+flight+land;

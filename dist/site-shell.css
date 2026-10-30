@@ -60,3 +60,27 @@ html[lang="ko"] .screen-article-header>p,html[lang="ko"] .article-deck,html[lang
 .cinema-page[data-scene="arcade-room"]>.site-footer{background:#222239;color:#efdbf2;border-top-color:#9e82b433}
 .cinema-page>.site-footer a{border-bottom-color:currentColor}
 .cinema-page>.site-footer a:focus-visible{outline:2px solid currentColor;outline-offset:4px}
+
+/* One Korean bitmap family keeps Hangul, Latin and spaces on the same pixel grid. */
+@font-face{font-family:'SEEN Korean Pixel';src:url('assets/fonts/neodgm.woff2') format('woff2');font-weight:400;font-style:normal;font-display:swap}
+html[lang="ko"] #game-confirm,html[lang="ko"] #game-confirm :is(h2,p,button,span),html[lang="ko"] #game-room,html[lang="ko"] #game-room :is(h2,h3,p,button,span,strong,b,div,a){font-family:'SEEN Korean Pixel',monospace!important;font-weight:400!important;font-synthesis:none;letter-spacing:0!important;word-spacing:0!important;text-transform:none}
+html[lang="ko"] #game-confirm{height:fit-content;min-height:0;padding:32px 24px 24px}
+html[lang="ko"] #game-confirm h2{font-size:24px!important;line-height:1.35!important;text-wrap:balance}
+html[lang="ko"] #game-confirm p{font-size:16px;line-height:1.5;margin:16px 0 24px}
+html[lang="ko"] #game-confirm .game-confirm-kicker{font-size:12px;line-height:1.5}
+html[lang="ko"] #game-confirm .game-confirm-actions button{font-size:16px;line-height:1.25;padding:10px 8px;min-height:42px}
+html[lang="ko"] #game-room .game-feedback{font-size:14px;line-height:1.5}
+html[lang="ko"] #game-room .game-toolbar,html[lang="ko"] #game-room .arcade-top{font-size:12px;line-height:1.5}
+html[lang="ko"] #game-room .game-next{font-size:14px;line-height:1.5}
+html[lang="ko"] #game-room .language-toggle,html[lang="ko"] #game-confirm .language-toggle{font-size:12px!important}
+@media(max-width:700px){html[lang="ko"] #game-confirm h2{font-size:20px!important}html[lang="ko"] #game-confirm{padding:32px 18px 20px}html[lang="ko"] #game-room .game-toolbar,html[lang="ko"] #game-room .arcade-top{font-size:10px}html[lang="ko"] #game-room .game-feedback{font-size:12px}html[lang="ko"] #game-room .game-next{font-size:12px}}
+@media(max-height:600px){html[lang="ko"] #game-room .game-feedback{font-size:11px;line-height:1.3}html[lang="ko"] #game-room .game-next{font-size:11px;padding:6px 8px;min-height:30px}html[lang="ko"] #game-confirm{padding-block:26px 18px}html[lang="ko"] #game-confirm .game-confirm-mark{margin:8px auto 12px}html[lang="ko"] #game-confirm p{margin:12px 0 18px}}
+
+#game-confirm{height:fit-content;min-height:0}
+#game-confirm .game-confirm-actions{grid-template-columns:repeat(2,minmax(0,1fr))}
+#game-confirm .game-confirm-actions button{height:auto;min-height:44px}
+html[lang="ko"] .arcade-room-intro,html[lang="ko"] .arcade-room-intro *,html[lang="ko"] .arcade-near{font-family:'SEEN Korean Pixel',monospace!important;font-weight:400;font-synthesis:none;letter-spacing:0;word-spacing:0}
+@media(max-height:600px){html[lang="ko"] #game-room #game-quiz,html[lang="ko"] #game-room #game-quiz[data-state="complete"]{grid-template-rows:minmax(0,1fr) 84px}html[lang="ko"] #game-room .game-answer-slot,html[lang="ko"] #game-room #game-quiz[data-state="complete"] .game-answer-slot{height:84px}}
+
+/* Identity already appears above the speaker; the bubble holds only speech and replies. */
+#npc-dialog .talk-line{margin-top:30px}

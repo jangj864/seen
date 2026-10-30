@@ -1,0 +1,87 @@
+/* A compact admission ticket: the story on the left, the visitor's ticket on the right. */
+#welcome{padding:32px 24px;place-items:center;background:radial-gradient(ellipse at 50% 0,#3a493b 0,#1c2a22 60%,#142019 100%)}
+.welcome-ticket{width:min(900px,100%);margin:auto;border-radius:18px;box-shadow:0 24px 80px #0004}
+.welcome-top{padding:24px 36px;gap:20px}
+.welcome-top>strong{font-size:52px;letter-spacing:-1.5px}
+.welcome-top>span{margin-left:auto;font-size:9px;letter-spacing:1.2px}
+.welcome-top .language-toggle{width:36px;min-height:36px;flex-shrink:0;padding:0;border-radius:7px;margin-left:4px;font-size:11px!important}
+.welcome-body{display:grid;grid-template-columns:minmax(0,1.08fr) minmax(0,1fr);padding:36px;gap:32px}
+.welcome-story{align-self:center;min-width:0}
+.welcome-kicker{font-size:9px;letter-spacing:1.6px;line-height:1.5}
+.welcome-story h1{font-size:60px;line-height:.99;letter-spacing:-1px;margin:20px 0 18px}
+.welcome-story>p{max-width:330px;margin:0;font-size:12px;line-height:1.8;color:#756750;text-wrap:pretty}
+.welcome-admission{align-self:start;min-width:0;padding-left:32px;border-left:1px dashed #c6b38e}
+.welcome-admission-label{display:flex;align-items:center;gap:10px;margin:0 0 22px;font-size:9px;font-weight:700;letter-spacing:2px;color:#a34d38}
+.welcome-admission-label:after{content:"";height:1px;background:#cebda0;flex:1}
+#welcome-form{gap:10px}
+#welcome-form label{font-size:11px;letter-spacing:1px;line-height:1.5}
+#welcome-name{width:100%;min-height:48px;padding:12px 14px;border-radius:8px;background:#fffaf0;font-size:16px}
+#welcome-form small{font-size:11px;line-height:1.6;letter-spacing:0}
+#welcome-enter{min-height:48px;margin-top:10px;border-bottom-width:3px;border-radius:8px;font-size:11px;letter-spacing:.6px;transition:background .15s,transform .15s,box-shadow .15s}
+#welcome-enter:not(:disabled):hover{background:#97432f;box-shadow:0 3px 9px #7f3c2524}
+#welcome-enter:not(:disabled):active{transform:translateY(1px)}
+.welcome-loading{margin:18px 0 12px}
+.welcome-loading label{font-size:10px;line-height:1.5;margin-bottom:7px}
+.welcome-loading progress{height:3px}
+.welcome-footnote{display:block;font-size:9px;line-height:1.7;letter-spacing:0;color:#84765e}
+.welcome-guide{margin-top:26px}
+.welcome-guide summary{display:flex;align-items:center;gap:9px;cursor:pointer;list-style:none;width:fit-content;min-height:28px;font-size:10px;font-weight:700;letter-spacing:1px;color:#655b48;text-underline-offset:4px}
+.welcome-guide summary::-webkit-details-marker{display:none}
+.welcome-guide summary:after{content:"+";font-size:17px;line-height:1;font-weight:400;color:#a34d38}
+.welcome-guide[open] summary:after{content:"−"}
+.welcome-guide summary:hover{text-decoration:underline}
+.welcome-guide summary:focus-visible{outline:2px solid #8f6345;outline-offset:4px;border-radius:2px}
+.welcome-steps{margin:14px 0 0;gap:10px}
+.welcome-steps li{gap:8px;font-size:10px;line-height:1.7}
+.welcome-steps b{flex-basis:18px;font-size:9px}
+.welcome-stub{position:relative;padding:15px 36px;font-size:8px;letter-spacing:1.4px;background:#e7d9bb}
+.welcome-stub:before,.welcome-stub:after{content:"";position:absolute;top:-8px;width:16px;height:16px;border:1px solid #c8b38b;border-radius:50%;background:#213026}
+.welcome-stub:before{left:-9px}.welcome-stub:after{right:-9px}
+html[lang="ko"] .welcome-story h1{font-size:42px;line-height:1.22;letter-spacing:-1.5px}
+html[lang="ko"] .welcome-story>p{font-size:12px;line-height:1.8}
+html[lang="ko"] .welcome-kicker,html[lang="ko"] .welcome-top>span,html[lang="ko"] #welcome-form label,html[lang="ko"] .welcome-guide summary{letter-spacing:0}
+@media(max-width:700px){
+ #welcome{padding:18px 16px;place-items:start center}
+ .welcome-ticket{width:min(440px,100%);border-radius:14px}
+ .welcome-top{padding:18px 22px;gap:12px}
+ .welcome-top>strong{font-size:42px}
+ .welcome-top>span{font-size:7px;letter-spacing:.6px}
+ .welcome-top .language-toggle{width:32px;min-height:32px;font-size:10px!important}
+ .welcome-body{display:flex;flex-direction:column;gap:24px;padding:25px 22px 24px}
+ .welcome-story{align-self:auto}
+ .welcome-kicker{font-size:8px;letter-spacing:1.4px}
+ .welcome-story h1{font-size:47px;line-height:1;margin:14px 0 13px}
+ .welcome-story>p{max-width:none;font-size:11px;line-height:1.7}
+ html[lang="ko"] .welcome-story h1{font-size:34px;line-height:1.2;letter-spacing:-1px}
+ html[lang="ko"] .welcome-story>p{font-size:11px;line-height:1.75}
+ .welcome-guide{margin-top:12px}
+ .welcome-guide summary{font-size:9px;min-height:24px}
+ .welcome-admission{align-self:stretch;padding:22px 0 0;border-left:0;border-top:1px dashed #c6b38e}
+ .welcome-admission-label{display:none}
+ #welcome-form{gap:8px}
+ #welcome-form label{font-size:10px}
+ #welcome-form small{font-size:10px}
+ #welcome-enter{margin-top:7px;font-size:11px}
+ .welcome-loading{margin:14px 0 10px}
+ .welcome-loading label{font-size:9px}
+ .welcome-footnote{font-size:8px}
+ .welcome-stub{padding:14px 22px;font-size:6px;letter-spacing:.8px}
+}
+@media(max-width:700px) and (max-height:680px){
+ #welcome{padding:12px}
+ .welcome-top{padding:14px 18px}
+ .welcome-top>strong{font-size:36px}
+ .welcome-body{padding:18px;gap:15px}
+ .welcome-story h1{font-size:40px;margin:10px 0}
+ html[lang="ko"] .welcome-story h1{font-size:29px;line-height:1.18}
+ .welcome-story>p,html[lang="ko"] .welcome-story>p{font-size:10px;line-height:1.65}
+ .welcome-guide{margin-top:6px}
+ .welcome-admission{padding-top:15px}
+ #welcome-form small{font-size:9px}
+ #welcome-name{min-height:43px;padding:10px 12px}
+ #welcome-enter{min-height:43px;margin-top:4px;padding:10px}
+ .welcome-loading{margin:10px 0 8px}
+ .welcome-loading label{font-size:8px;margin-bottom:5px}
+ .welcome-footnote{font-size:7px;line-height:1.5}
+ .welcome-stub{padding:11px 18px}
+}
