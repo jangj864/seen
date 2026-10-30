@@ -1,6 +1,6 @@
 'use strict';
 const SeenTalk=(()=>{
- const dialog=document.createElement('dialog');dialog.id='npc-dialog';dialog.setAttribute('aria-describedby','npc-line');dialog.innerHTML='<button class="icon-close talk-close" type="button" aria-label="Close conversation">'+seenCloseIcon+'</button><p id="npc-line" class="talk-line" role="status"></p><div class="talk-options"></div>';dialog.append(dialog.querySelector('.talk-close'));document.body.append(dialog);let afterClose=null,anchor=null,context=null,placementKey='',placementFrame=0;
+ const dialog=document.createElement('dialog');dialog.id='npc-dialog';dialog.setAttribute('aria-describedby','npc-line');dialog.innerHTML='<button class="icon-close talk-close" type="button" aria-label="Close conversation">'+seenCloseIcon+'</button><p id="npc-line" class="talk-line" role="status"></p><div class="talk-options"></div>';document.body.append(dialog);let afterClose=null,anchor=null,context=null,placementKey='',placementFrame=0;
  function requestPlacement(){placementKey='';if(!placementFrame)placementFrame=requestAnimationFrame(()=>{placementFrame=0;if(context&&dialog.open)nearby(context)})}
  const placementObserver=new ResizeObserver(requestPlacement);for(const element of [dialog,document.querySelector('.site-header'),document.querySelector('#scene-content')])placementObserver.observe(element);
  function close(){if(dialog.open)dialog.close()}
