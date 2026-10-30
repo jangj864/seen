@@ -1,7 +1,7 @@
 'use strict';
 (()=>{
  const canvas=document.querySelector('#arcade-world'),ctx=canvas.getContext('2d'),notice=document.querySelector('#arcade-near');
- const machines=[{x:1.5,y:1.3,title:'SEEN QUIZ',mode:'all',color:'#b74239',light:'#f0b39d',roof:'#cf5b4c',deck:'#d97864',side:'#7e302c',symbol:'?'},{x:5.2,y:1.3,title:'EYES ONLY',mode:'eyes',color:'#428b7e',light:'#a4d4b2',roof:'#a4d4b2',deck:'#a4d4b2',side:'#2b635a',symbol:'eye'},{x:8.9,y:1.3,title:'FILM CLUB',mode:'films',color:'#b1893e',light:'#efcf82',roof:'#efcf82',deck:'#efcf82',side:'#80632e',symbol:'slate'}];
+ const machines=[{x:1.5,y:1.3,title:'SEEN QUIZ',mode:'all',color:'#b74239',light:'#f0b39d',roof:'#cf5b4c',deck:'#d97864',side:'#7e302c'},{x:5.2,y:1.3,title:'EYES ONLY',mode:'eyes',color:'#428b7e',light:'#a4d4b2',roof:'#a4d4b2',deck:'#a4d4b2',side:'#2b635a'},{x:8.9,y:1.3,title:'FILM CLUB',mode:'films',color:'#b1893e',light:'#efcf82',roof:'#efcf82',deck:'#efcf82',side:'#80632e'}];
  const navigation=createSeenCrowdNavigation(createSeenRoomNavigation([],machines.map(m=>({left:m.x-.18,right:m.x+1.78,top:m.y-.18,bottom:m.y+1.55}))),()=>SeenHub.people('arcade'));
  const exit={x:11.4,y:6.9};
  const held=new Set(),jump=createSeenJump();let visitor={x:11.6,y:6.9},path=[],pending=null,near=null,width=0,height=0,unit=1,ox=0,oy=0,last=0,phase=0,gait=0,heading=-Math.PI/2,paintKey='',revision=0,entranceTime=0,offeredMachine=null;
@@ -30,7 +30,7 @@
   polygon([[x,y+.70,2.28],[x+1.6,y+.70,2.28],[x+1.6,y+1.04,1.35],[x,y+1.04,1.35]],'#13261d');
   const a=p(x+.16,y+.70,2.28),b=p(x+1.44,y+.70,2.28),c=p(x+.16,y+1.04,1.35);ctx.save();ctx.transform((b.x-a.x)/160,(b.y-a.y)/160,(c.x-a.x)/120,(c.y-a.y)/120,a.x,a.y);
   ctx.fillStyle='#101916';ctx.beginPath();ctx.roundRect(-9,-9,178,138,9);ctx.fill();ctx.strokeStyle='#1e3027';ctx.lineWidth=2;ctx.stroke();ctx.beginPath();ctx.roundRect(0,0,160,120,7);ctx.clip();const glow=ctx.createRadialGradient(80,55,0,80,55,100);glow.addColorStop(0,m.mode==='eyes'?'#396a56':'#4b5539');glow.addColorStop(1,'#15291f');ctx.fillStyle=glow;ctx.fillRect(0,0,160,120);
-  ctx.strokeStyle=m.light;ctx.lineWidth=2;if(m.symbol==='eye'){ctx.beginPath();ctx.moveTo(31,55);ctx.quadraticCurveTo(80,6,129,55);ctx.quadraticCurveTo(80,104,31,55);ctx.stroke();ctx.beginPath();ctx.arc(80,55,16,0,Math.PI*2);ctx.stroke()}else if(m.symbol==='slate'){ctx.save();ctx.translate(39,20);ctx.scale(3.5,3.5);ctx.lineWidth=1.5;ctx.lineJoin='miter';ctx.lineCap='square';for(const d of ['M3 11h18v10H3z','M3 11 2 6l18-4 1 5-18 4Z','M7 5l4 4m3-6 4 4M7 16h6'])ctx.stroke(new Path2D(d));ctx.restore()}else{ctx.fillStyle=m.light;ctx.font='700 58px "Barlow Condensed","SEEN Korean Pixel","Pretendard",sans-serif';ctx.textAlign='center';ctx.fillText(m.symbol,80,76)}
+  SeenIcons.draw(ctx,m.mode,38,13,84,m.light);
   ctx.fillStyle='#d9f4be0b';for(let line=3;line<120;line+=5)ctx.fillRect(0,line,160,1);ctx.fillStyle='#ffffff0c';ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(110,0);ctx.lineTo(40,120);ctx.lineTo(0,120);ctx.fill();ctx.fillStyle=m.light;ctx.font='8px "DM Sans","SEEN Korean Pixel","Pretendard",sans-serif';ctx.textAlign='center';ctx.fillText(SeenI18n.t('PRESS START'),80,106);ctx.restore();
   box(x-.04,y,2.43,1.68,1.1,.34,m.roof,m.color,m.side);polygon([[x+.08,y+1.105,2.48],[x+1.52,y+1.105,2.48],[x+1.52,y+1.105,2.71],[x+.08,y+1.105,2.71]],'#23382d');label(m.title,x+.8,y+1.115,2.53,.21,m.light);
   // Sloped control deck with a recessed joystick and three individual buttons.

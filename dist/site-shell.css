@@ -83,4 +83,16 @@ html[lang="ko"] .arcade-room-intro,html[lang="ko"] .arcade-room-intro *,html[lan
 @media(max-height:600px){html[lang="ko"] #game-room #game-quiz,html[lang="ko"] #game-room #game-quiz[data-state="complete"]{grid-template-rows:minmax(0,1fr) 84px}html[lang="ko"] #game-room .game-answer-slot,html[lang="ko"] #game-room #game-quiz[data-state="complete"] .game-answer-slot{height:84px}}
 
 /* Identity already appears above the speaker; the bubble holds only speech and replies. */
-#npc-dialog .talk-line{margin-top:30px}
+#npc-dialog{padding:12px}
+#npc-dialog .talk-line{margin:0 0 10px;flex:0 0 auto}
+#npc-dialog .talk-options{gap:5px}
+#npc-dialog .talk-options button{min-height:32px;padding:7px 10px}
+#npc-dialog .talk-options{max-height:none;padding-right:3px}
+#npc-dialog .talk-close{position:static;align-self:flex-end;margin:4px -4px -4px 0;width:28px;height:28px;min-width:28px;flex:0 0 28px}
+#npc-dialog .talk-options::-webkit-scrollbar{width:4px}
+#npc-dialog .talk-options::-webkit-scrollbar-track{background:#eee4cf;border-radius:4px}
+#npc-dialog .talk-options::-webkit-scrollbar-thumb{background:#a38d69;border-radius:4px}
+#npc-dialog .talk-options{scrollbar-width:thin;scrollbar-color:#a38d69 #eee4cf}
+@media(max-height:600px){#npc-dialog .talk-line{font-size:11px;line-height:1.4;margin-bottom:8px}#npc-dialog .talk-options button{min-height:29px;padding:6px 8px;font-size:10px}}
+
+@media(max-width:700px){.ballot-copy h2{font-size:clamp(42px,12vw,64px);line-height:1.05}}

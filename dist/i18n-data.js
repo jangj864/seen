@@ -70,7 +70,7 @@ window.SEEN_KO={
  "Choose a room to walk over.": "상영관을 고르면 문까지 걸어갑니다.",
  "Your seat is always waiting.": "언제든 편하게 들러주세요.",
  "SEEN ARCADE / READY TO PLAY": "SEEN 게임방 / 준비 완료",
- "NOT NOW": "다음에 할게요",
+ "NOT NOW": "나중에",
  "PLAY →": "시작 →",
  "SEEN / THE GAME ROOM": "SEEN / 게임방",
  "ONE MORE ROUND BEFORE THE MOVIE": "영화 시작 전, 한 게임 더",
