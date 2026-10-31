@@ -96,3 +96,24 @@ html[lang="ko"] .arcade-room-intro,html[lang="ko"] .arcade-room-intro *,html[lan
 @media(max-height:600px){#npc-dialog .talk-line{font-size:11px;line-height:1.4;margin-bottom:8px}#npc-dialog .talk-options button{min-height:29px;padding:6px 8px;font-size:10px}}
 
 @media(max-width:700px){.ballot-copy h2{font-size:clamp(42px,12vw,64px);line-height:1.05}}
+
+/* Stronger Korean wayfinding and a more legible cinema introduction. */
+#screening .room-help .room-context,#screening .auditorium-bottom #seat-label{font-weight:800}
+html[lang="ko"] #screening .room-context,html[lang="ko"] #screening #seat-label{font-family:'Pretendard',sans-serif}
+html[lang="ko"] #lobby-scene .corner-note strong{font-family:'Noto Serif KR',serif;font-weight:700}
+#lobby-scene .intro>.eyebrow{display:block;font-size:12px;line-height:1.5;letter-spacing:.06em}
+@media(max-width:700px){#lobby-scene .intro>.eyebrow{font-size:10px;letter-spacing:.03em}}
+.map-upcoming-sign{white-space:nowrap;letter-spacing:0}
+
+/* Anchor the arcade progress row close to the cabinet's lower edge. */
+#game-room .arcade-controls{min-height:0;padding:9px 3px 0;align-items:center}
+#game-room .arcade-controls b{font-size:9px;line-height:1.5}
+html[lang="ko"] #game-room .arcade-controls b{font-size:12px;line-height:1.4}
+@media(max-width:700px){#game-room .arcade-controls{padding-top:8px}#game-room .arcade-controls b{font-size:7px}html[lang="ko"] #game-room .arcade-controls b{font-size:10px}}
+@media(max-height:600px){#game-room .arcade-controls{padding-top:5px}#game-room .arcade-controls b{font-size:7px}html[lang="ko"] #game-room .arcade-controls b{font-size:10px}}
+
+/* A warm cinema lightbox, set into a dark metal frame with a red marquee trim. */
+.map-upcoming-sign{border-color:#344333;border-radius:1px;background:linear-gradient(180deg,#fff8e5,#f2dfb4);color:#653b2c;font-weight:800;box-shadow:inset 0 0 7px #ffe4a877;letter-spacing:0}
+.map-upcoming-sign::after{content:'';position:absolute;left:0;right:0;top:0;height:var(--sign-trim,1px);background:#b14d38;pointer-events:none}
+.map-upcoming-sign:hover{background:linear-gradient(180deg,#fffdf2,#f6e6c5);color:#9a3d2e}
+.map-upcoming-sign:focus-visible{outline-color:#b14d38}

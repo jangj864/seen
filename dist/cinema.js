@@ -37,7 +37,7 @@ const lobbyNavigation=createSeenCrowdNavigation(createSeenRoomNavigation([], [
  {left:8.8,right:11.6,top:6.7,bottom:8.0},
  {left:13.3,right:16.2,top:7.0,bottom:8.6},
  {left:11.78,right:12.77,top:7.18,bottom:8.17},
- {left:.1,right:.85,top:2.3,bottom:4.5}
+ {left:.1,right:.85,top:2.3,bottom:5.1}
 ]),()=>SeenHub.people('lobby'));
 function walkLobbyTo(destination){
  const end=lobbyNavigation.destination(player,destination),route=end?lobbyNavigation.route(player,end):[];
@@ -86,7 +86,8 @@ function updateQuizIndicators(total,complete){
  const dots=document.querySelector('#game-indicators');dots.replaceChildren();
  for(let i=0;i<total;i++){const dot=document.createElement('li'),current=!complete&&i===gameIndex,answered=complete||i<gameIndex||(current&&gameAnswered!==null);dot.className='quiz-dot';dot.classList.toggle('is-current',current);dot.classList.toggle('is-answered',answered);dot.setAttribute('aria-label',`Question ${i+1}: ${current?'current question':answered?'completed':'not answered yet'}`);if(current)dot.setAttribute('aria-current','step');dots.append(dot)}
 }
-let gameIndex=0,gameScore=0,gameAnswered=null,gameMode='all',gameQuestions=seenQuizQuestions.filter(q=>q.mode==='all');
+let gameIndex=0,gameScore=0,gameAnswered=null,gameMode='all',gameQuestions=seenQuizQuestions.filter(q=>q.mode==='all'),gameRound=SeenScoreboard.createRound('all');
+function replayQuiz(){gameIndex=0;gameScore=0;gameAnswered=null;gameRound=SeenScoreboard.createRound(gameMode);renderGame();document.querySelector('#game-quiz button')?.focus({preventScroll:true})}
 function renderGame(){
  const total=gameQuestions.length,complete=gameIndex===total,q=gameQuestions[gameIndex],root=document.querySelector('#game-quiz');
  updateQuizIndicators(total,complete);
@@ -94,16 +95,9 @@ function renderGame(){
  document.querySelector('#game-score').textContent=`SCORE ${gameScore}`;
  document.querySelector('#game-progress-bar').style.width=`${Math.min(gameIndex+1,total)/total*100}%`;
  root.dataset.state=complete?'complete':gameAnswered===null?'question':gameAnswered===q.answer?'correct':'wrong';
+ if(complete){SeenScoreboard.show(root,{round:gameRound,score:gameScore,total,onReplay:replayQuiz});return}
  root.replaceChildren();const question=document.createElement('div');question.className='game-question';
- const heading=document.createElement('h3');heading.textContent=complete?`${gameScore} / ${total}. ${gameScore===total?'You’ve been paying attention.':'Good company for a film night.'}`:q.q;question.append(heading);
- if(complete){
-  question.classList.add('game-result');heading.textContent=gameScore===total?'Perfect screening!':gameScore>=3?'Great eye for cinema!':'There’s more to discover.';
-  const art=document.createElement('div');art.className='result-art';art.innerHTML='<svg viewBox="0 0 180 140" aria-hidden="true"><circle cx="90" cy="68" r="57" fill="currentColor" opacity=".10"/><path d="M61 28h58v34c0 23-13 36-29 36S61 85 61 62Z" fill="currentColor"/><path d="M61 39H43v14c0 19 14 27 27 27M119 39h18v14c0 19-14 27-27 27" fill="none" stroke="currentColor" stroke-width="7" stroke-linejoin="round"/><path d="M90 95v20m-22 8h44" stroke="currentColor" stroke-width="8" stroke-linecap="round"/><path d="m90 43 5 11 13 2-9 9 2 13-11-6-11 6 2-13-9-9 13-2Z" fill="#fff6dd"/><path d="m29 18 3 7 8 1-6 5 2 8-7-4-7 4 2-8-6-5 8-1Zm119 67 3 7 8 1-6 5 2 8-7-4-7 4 2-8-6-5 8-1Z" fill="currentColor"/><path d="m145 25 7 5m-123 72 6-5M49 9l2 7m105 41 7-1" stroke="currentColor" stroke-width="4" stroke-linecap="round"/></svg>';
-  const label=document.createElement('span');label.className='result-kicker';label.textContent='ROUND COMPLETE';
-  const score=document.createElement('div');score.className='result-score';score.innerHTML=`<strong>${gameScore}</strong><span>/ ${total}</span>`;score.setAttribute('aria-label',`${gameScore} out of ${total} correct answers`);
-  const stars=document.createElement('div');stars.className='result-stars';stars.setAttribute('aria-hidden','true');stars.innerHTML=Array.from({length:total},(_,i)=>`<svg class="${i<gameScore?'is-earned':''}" viewBox="0 0 24 24"><path d="m12 2 3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1Z"/></svg>`).join('');
-  question.replaceChildren(art,label,score,stars,heading);
- }
+ const heading=document.createElement('h3');heading.textContent=q.q;question.append(heading);
  if(!complete&&q.kind==='eyes'){
   const ns='http://www.w3.org/2000/svg',visual=document.createElementNS(ns,'svg'),image=document.createElementNS(ns,'image');
   visual.classList.add('game-eyes');visual.setAttribute('viewBox',q.crop.join(' '));visual.setAttribute('role','img');visual.setAttribute('aria-label',gameAnswered===null?'Eye detail from a film publicity still. Choose the actor below.':`Eye detail: ${q.options[q.answer]}`);
@@ -112,17 +106,17 @@ function renderGame(){
  if(!complete){const options=document.createElement('div');options.className='game-options';q.options.forEach((value,i)=>{
   const button=document.createElement('button');button.dataset.gameAnswer=String(i);const letter=document.createElement('span');letter.textContent='ABCD'[i];const label=document.createElement('strong');label.textContent=value;button.append(letter,label);button.setAttribute('aria-pressed',String(gameAnswered===i));
   if(gameAnswered!==null){button.disabled=true;if(i===q.answer)button.classList.add('correct');if(i===gameAnswered&&i!==q.answer)button.classList.add('wrong');if(i!==q.answer&&i!==gameAnswered)button.classList.add('is-muted');if(i===q.answer||i===gameAnswered){const mark=document.createElement('b');mark.className='answer-mark';mark.textContent=i===q.answer?'✓':'×';mark.setAttribute('aria-label',i===q.answer?'Correct answer':'Incorrect answer');button.append(mark)}}
-  button.onclick=()=>{if(gameAnswered!==null)return;gameAnswered=i;if(i===q.answer)gameScore++;SeenHub.fx(i===q.answer?'correct':'wrong');renderGame();root.querySelector('.game-next').focus({preventScroll:true})};options.append(button)
+  button.onclick=()=>{if(gameAnswered!==null)return;gameAnswered=i;gameRound.answers[gameIndex]=i;if(i===q.answer)gameScore++;SeenHub.fx(i===q.answer?'correct':'wrong');renderGame();root.querySelector('.game-next').focus({preventScroll:true})};options.append(button)
  });question.append(options)}root.append(question);
  const slot=document.createElement('div');slot.className='game-answer-slot';root.append(slot);
- if(complete||gameAnswered!==null){const feedback=document.createElement('p');feedback.className='game-feedback';feedback.setAttribute('role','status');feedback.textContent=complete?'Pass the quiz to a friend. There is always another film to discover.':`${gameAnswered===q.answer?'CORRECT! +1 POINT':'ANSWER: '+q.options[q.answer]} — ${q.note}`;
- const next=document.createElement('button');next.className='game-next';next.textContent=complete?'PLAY AGAIN ↻':gameIndex===total-1?'SEE YOUR RESULT →':'NEXT QUESTION →';next.onclick=()=>{if(complete){gameIndex=0;gameScore=0}else gameIndex++;gameAnswered=null;renderGame();root.querySelector('button').focus({preventScroll:true})};slot.append(feedback,next)}
+ if(gameAnswered!==null){const feedback=document.createElement('p');feedback.className='game-feedback';feedback.setAttribute('role','status');feedback.textContent=`${gameAnswered===q.answer?'CORRECT! +1 POINT':'ANSWER: '+q.options[q.answer]} — ${q.note}`;
+ const next=document.createElement('button');next.className='game-next';next.textContent=gameIndex===total-1?'SEE YOUR RESULT →':'NEXT QUESTION →';next.onclick=()=>{gameIndex++;gameAnswered=null;renderGame();root.querySelector('button').focus({preventScroll:true})};slot.append(feedback,next)}
 }
 function enterGame(){if(isSceneOpen('arcade-room'))return;keys.clear();target=null;lobbyWaypoints=[];lobbyVelocity={x:0,y:0};lobbyJump.reset();showScene('arcade-room');document.dispatchEvent(new Event('seen-arcade-enter'))}
 function openQuiz(mode='all'){
  if(gameRoom.open||!quizThemes[mode])return;
  applyQuizTheme(gameRoom,mode);document.querySelector('#game-room .game-toolbar>span').textContent=quizThemes[mode].title;
- if(mode!==gameMode){gameMode=mode;gameQuestions=seenQuizQuestions.filter(q=>q.mode===mode);gameIndex=0;gameScore=0;gameAnswered=null}
+ if(mode!==gameMode){gameMode=mode;gameQuestions=seenQuizQuestions.filter(q=>q.mode===mode);gameIndex=0;gameScore=0;gameAnswered=null;gameRound=SeenScoreboard.createRound(mode)}
  const titles={all:'SEEN<span>QUIZ</span>',eyes:'EYES<span>ONLY</span>',films:'FILM<span>CLUB</span>'};
  document.querySelector('#game-title').innerHTML=titles[mode];document.querySelector('.game-marquee p').textContent=`${gameQuestions.length} questions. ${gameQuestions.length} points. How closely were you watching?`;
  renderGame();gameRoom.showModal();document.querySelector('#leave-game').focus({preventScroll:true});document.dispatchEvent(new Event('seen-quiz-open'));
@@ -134,7 +128,7 @@ function leaveArcade(){if(quizConfirm.open){quizConfirm.close();requestedQuiz=nu
 function roomApproach(r){return{x:r.x+.8,y:r.y+1.5}}
 function person(){drawSeenCharacter({ctx,unit:scale,project:p,x:player.x,y:player.y,heading:lobbyHeading,nameTag:SeenHub.name,gait:reduced?0:lobbyGait,phase,jump:lobbyJump.height,jumpCrouch:lobbyJump.crouch,jumpTuck:lobbyJump.tuck,jumping:lobbyJump.active,tagColor:'#a44731',shadowColor:'#493e2826'})}
 function offsetProp(paint,dx,dy){ctx.save();ctx.translate((dx-dy)*scale*.86,(dx+dy)*scale*.43);paint();ctx.restore()}
-function upcomingSign(){shadow(.25,2.5,.3,1.8);for(const y of [2.65,4.05])box(.28,y,0,.075,.09,1.2,'#b69b6b','#8d7554','#736047');box(.25,2.5,.55,.12,1.8,.75,'#f0dfba','#ac9064','#d1bb93');const button=document.querySelector('#browse-upcoming'),q=p(.38,4.3,1.3);button.style.left=q.x+'px';button.style.top=q.y+'px';button.style.width=1.8*scale+'px';button.style.height=.75*scale+'px';button.style.transform='matrix(.86,-.43,0,1,0,0)';button.style.fontSize=Math.max(4.5,scale*.18)+'px'}
+function upcomingSign(){shadow(.18,2.5,.42,2.4);for(const y of [2.65,4.65]){box(.1,y-.13,0,.4,.34,.055,'#626456','#353e34','#293229');box(.28,y,.055,.075,.09,1.45,'#bca574','#6e705a','#404d3d')}box(.25,2.5,.85,.12,2.4,.75,'#56604e','#344333','#263528');box(.25,2.5,1.55,.12,2.4,.05,'#c46145','#b14d38','#7e3328');const button=document.querySelector('#browse-upcoming'),q=p(.38,4.9,1.6);button.style.left=q.x+'px';button.style.top=q.y+'px';button.style.width=2.4*scale+'px';button.style.height=.75*scale+'px';button.style.transform='matrix(.86,-.43,0,1,0,0)';button.style.fontSize=Math.max(3.5,scale*.18)+'px';button.style.setProperty('--sign-trim',Math.max(.65,scale*.045)+'px')}
 function counter(){shadow(.7,5.6,2.8,.95);box(.7,5.6,0,2.8,.95,1.05,'#f1dfb7','#b64d36','#8d382b');for(let x=.85;x<3.4;x+=.18)box(x,6.56,.1,.045,.015,.77,'#edc793','#d38b60','#b66f4c');box(.6,5.5,1.05,3,.99,.13,'#3c4c40','#26382e','#243a2c');box(1.15,5.65,1.18,.5,.3,.35,'#e2c994','#e5b87c','#b48e58');text('TICKETS',2.1,6.59,.57,.29,'#f8e4b7','wall');}
 function bench(){shadow(9.1,7,2.25,.72);for(const x of [9.26,11.03])for(const y of [7.10,7.55])box(x,y,0,.1,.12,.45,'#625e4c','#4f5043','#404337');for(const y of [7.04,7.27,7.50])box(9.1,y,.45,2.2,.19,.105,'#bb7950','#945537','#7f4932');for(const x of [9.27,11.03])box(x,7,.44,.075,.09,.65,'#6c6550','#5a5948','#484b3d');for(const z of [.69,.91])box(9.1,6.99,z,2.2,.09,.17,'#bd7950','#a26440','#805033');for(const x of [9.10,11.19]){box(x,7.06,.58,.065,.54,.07,'#746a50','#5b5b45','#4c503d');box(x,7.48,.48,.065,.065,.14,'#6b614a','#565741','#434935');}}
 function planter(x,y){shadow(x,y,.55,.55,.09);box(x,y,0,.55,.55,.55,'#d2b986','#b79162','#9a774d');for(let j=0;j<5;j++){const q=p(x+.25+(j-2)*.1,y+.25,.65+j%3*.23);ctx.strokeStyle=j%2?'#647351':'#7d8558';ctx.lineWidth=scale*.09;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(p(x+.25,y+.25,.5).x,p(x+.25,y+.25,.5).y);ctx.quadraticCurveTo(q.x-scale*.17,q.y-scale*.3,q.x,q.y);ctx.stroke()}}
@@ -150,8 +144,8 @@ upcomingFilms.forEach((film,i)=>poster(posterPositions[i],film));rooms.forEach(d
 
 // Draw movable and freestanding pieces back-to-front on the shared floor plane.
 const benchDepth=propDepth(8.8,11.6,6.7,8.0);
-const signCorners=[p(.25,2.5,1.3),p(.38,4.3,1.3),p(.25,2.5,.55),p(.38,4.3,.55)];p.nameTagObstacles=[{left:Math.min(...signCorners.map(q=>q.x))-4,right:Math.max(...signCorners.map(q=>q.x))+4,top:Math.min(...signCorners.map(q=>q.y))-4,bottom:Math.max(...signCorners.map(q=>q.y))+4}];
-const props=[{depth:propDepth(.1,.85,2.3,4.5),paint:upcomingSign},...SeenHub.drawPeople({ctx,unit:scale,project:p,scene:'lobby'}).map(item=>item.id==='lobby:npc:2'?{...item,depth:benchDepth+.01}:item),{depth:propDepth(13.5,16,7.2,8.4),paint:popcornShop},{depth:propDepth(3.6,6.6,6.5,7.58),paint:()=>offsetProp(counter,3,1)},{depth:propDepth(7.5,8.7,7.98,8.02),paint:()=>offsetProp(queuePosts,3,1)},{depth:benchDepth,paint:bench},{depth:20,paint:()=>planter(12,7.4)},{depth:player.x+player.y,paint:person}];
+const signCorners=[p(.25,2.5,1.6),p(.38,4.9,1.6),p(.25,2.5,.85),p(.38,4.9,.85)];p.nameTagObstacles=[{left:Math.min(...signCorners.map(q=>q.x))-4,right:Math.max(...signCorners.map(q=>q.x))+4,top:Math.min(...signCorners.map(q=>q.y))-4,bottom:Math.max(...signCorners.map(q=>q.y))+4}];
+const props=[{depth:propDepth(.1,.85,2.3,5.1),paint:upcomingSign},...SeenHub.drawPeople({ctx,unit:scale,project:p,scene:'lobby'}).map(item=>item.id==='lobby:npc:2'?{...item,depth:benchDepth+.01}:item),{depth:propDepth(13.5,16,7.2,8.4),paint:popcornShop},{depth:propDepth(3.6,6.6,6.5,7.58),paint:()=>offsetProp(counter,3,1)},{depth:propDepth(7.5,8.7,7.98,8.02),paint:()=>offsetProp(queuePosts,3,1)},{depth:benchDepth,paint:bench},{depth:20,paint:()=>planter(12,7.4)},{depth:player.x+player.y,paint:person}];
 if(target){ellipse(target.x,target.y,.025,.24,.10,'#d74a3538');ellipse(target.x,target.y,.027,.07,.03,'#d74a35')}
 props.sort((a,b)=>a.depth-b.depth).forEach(item=>item.paint());positionDoorPreview();
 

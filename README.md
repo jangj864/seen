@@ -55,6 +55,12 @@ Public guest comments appear below each article. They persist in **only** `publi
 
 Validation included two independent browser contexts for live presence/movement, comment sharing and persistence after reload, API tests for comment constraints and denied update/delete, mobile multi-touch movement/jump in all rooms, stable/unclipped quizzes at 320×568, 393×852, 844×390, and 1440×900, and the existing navigation/jump unit suite. Test comments were removed after verification.
 
+## Arcade high scores
+
+Each of the three five-question quizzes shows a shared Top 10 after completion, using the nickname entered on the admission ticket. The best score per nickname and quiz is ranked first; equal scores use the time that record was achieved. Replaying starts a new run; reopening a result or changing language keeps the same run id and does not submit again. Empty positions remain empty.
+
+`quiz-scores.js` submits the five answer choices to `public.seen_quiz_scores`; the database derives the score and supplies its own timestamp. Public clients can insert only run id, nickname, mode and choices, and can read public ranking fields. They cannot change scores, timestamps or existing records. The invoker RPC `seen_quiz_leaderboard` returns the Top 10 and the current nickname's best rank, including ranks below 10. Schema reference: `backend/seen-quiz-scores.sql`. The SQL verification fixtures roll back all test records. `scoreboard.js` and `scoreboard.css` supply the shared retro result view, including loading, retry and narrow-screen scrolling.
+
 ## Entry, NPC conversations, and pixel arcade
 
 Visitors enter a 2–20 character nickname through a loading/onboarding ticket before joining live presence. Names appear above avatars. Ticket and popcorn staff offer conversations; seated NPCs can accept or decline seat requests. Live visitors receive a Yes/No request and only move after accepting. Auditorium guests face the screen; the lobby bench guest faces the open side of the bench.

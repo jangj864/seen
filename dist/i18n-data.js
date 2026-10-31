@@ -1,5 +1,20 @@
 'use strict';
 window.SEEN_KO={
+ "SCORE": "점수",
+ "TRY AGAIN": "다시 시도",
+ "SCROLL FOR TOP 10 ↓": "아래로 내려 10위까지 보기 ↓",
+ "HIGH SCORES": "최고 기록",
+ "THIS ROUND": "이번 점수",
+ "Top 10 scores": "상위 10위 기록",
+ "RANK": "순위",
+ "PLAYER": "닉네임",
+ "YOUR BEST": "내 최고 순위",
+ "YOU": "나",
+ "No score recorded yet.": "아직 등록된 기록이 없어요.",
+ "Rankings unavailable. Please try again.": "순위를 불러오지 못했어요. 다시 시도해주세요.",
+ "Saving your score…": "기록을 저장하고 있어요…",
+ "Best per nickname · Ties: first to score": "닉네임별 최고 기록 · 동점은 달성순",
+
  "A QUICK GUIDE": "이용 안내",
  "SEEN Cinema — Issue 02": "SEEN 시네마 — 02호",
  "ISSUE 02 / NOVEMBER 2026": "02호 / 2026년 11월",
@@ -30,6 +45,7 @@ window.SEEN_KO={
  "THE PROGRAM": "프로그램",
  "A FILM MAGAZINE YOU CAN WALK INTO": "직접 걸어 들어가는 영화 매거진",
  "UPCOMING": "개봉 예정",
+ "UPCOMING FILMS ↗": "개봉 예정 영화 ↗",
  "FILMS ↗": "영화 ↗",
  "YOU ARE IN THE LOBBY": "지금은 로비입니다",
  "NOW SHOWING": "지금 만나는 이야기",
