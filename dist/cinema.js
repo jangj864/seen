@@ -12,15 +12,7 @@ const rooms=[{n:'01',name:'A Seat at the Table',sub:'THE COVER STORY',x:2.25,y:.
 rooms.forEach(r=>{r.open=0});
 const gameRoom=document.querySelector('#game-room'),arcadeRoom=document.querySelector('#arcade-room'),quizConfirm=document.querySelector('#game-confirm');let gameOpen=0,lobbyWaypoints=[];
 const images={};rooms.forEach(r=>{const im=new Image();im.onload=()=>lobbyRevision++;im.src=`assets/${r.img}.jpg`;images[r.img]=im});
-const upcomingFilms=[
-{id:'hunger',title:'The Hunger Games: Sunrise on the Reaping',short:'SUNRISE ON THE REAPING',date:'20 November 2026',stamp:'20 NOV',director:'Francis Lawrence',studio:'Lionsgate',image:'hunger',synopsis:'A return to Panem, 24 years before the original Hunger Games. A young Haymitch Abernathy faces the Fiftieth Games, the Second Quarter Quell.',question:'Who gets to tell a story—and who has to live inside it?',url:'https://hungergames.movie/'},
-{id:'hexed',title:'Hexed',short:'HEXED',date:'25 November 2026',stamp:'25 NOV',director:'Fawn Veerasunthorn & Jason Hand',studio:'Walt Disney Animation Studios',image:'hexed',synopsis:'Teenager Billie discovers magical powers that lead her into the witch realm of Hexe. With her mother Alice, she explores a family history with consequences for their new world.',question:'When did someone in your family surprise you?',url:'https://movies.disney.com/hexed'},
-{id:'focker',title:'Focker-In-Law',short:'FOCKER-IN-LAW',date:'25 November 2026',stamp:'25 NOV',director:'John Hamburg',studio:'Universal Pictures',image:'focker-poster',synopsis:'Ben Stiller and Robert De Niro reunite in a new Meet the Parents chapter, joined by Ariana Grande. Another generation brings new introductions to the extended family.',question:'What makes somebody feel welcome before they know the rules?',url:'https://www.universalpictures.com/movies/focker-in-law/'}
-];
-upcomingFilms.push(
-{id:'ebenezer',title:'Ebenezer',short:'EBENEZER',date:'13 November 2026',stamp:'13 NOV',director:'Ti West',studio:'Paramount Pictures',image:'ebenezer-poster',synopsis:'Johnny Depp plays Ebenezer Scrooge in Ti West’s take on Charles Dickens’s A Christmas Carol. A ghostly Christmas reckoning invites a man to confront the life he has made.',question:'What would you change if you could revisit one ordinary day?',url:'https://www.paramount.com/movies/ebenezer'},
-{id:'godzilla',title:'Godzilla Minus Zero',short:'GODZILLA MINUS ZERO',date:'6 November 2026',stamp:'06 NOV',director:'Takashi Yamazaki',studio:'TOHO / GKIDS',image:'godzilla-poster',ext:'png',synopsis:'In 1949, two years after Godzilla Minus One, the Shikishima family faces another catastrophe as Japan struggles to rebuild. Takashi Yamazaki returns for the sequel.',question:'What does it mean to rebuild a home after everything changes?',url:'https://gkids.com/2026/10/06/tickets-now-on-sale-for-godzilla-minus-zero/'}
-);
+const upcomingFilms=SeenFilmCatalog.createUpcoming();
 const posterPositions=[.25,4.15,8.30,12.45,16.85];
 const posterLayer=document.querySelector('#wall-posters');
 upcomingFilms.forEach((film,i)=>{const im=new Image();im.onload=()=>lobbyRevision++;im.src=`assets/${film.image}.${film.ext||'jpg'}`;images[film.image]=im;const button=document.createElement('button');button.className='wall-poster';button.dataset.film=film.id;button.setAttribute('aria-label',`View ${film.title}, in theaters ${film.date}`);button.title=`${film.title} · ${film.stamp} · Click for details`;posterLayer.append(button);film.button=button;});
@@ -30,6 +22,8 @@ function openFilm(film){keys.clear();target=null;posterReturnFocus=film.button;d
 upcomingFilms.forEach(film=>film.button.addEventListener('click',()=>openFilm(film)));
 document.querySelector('#close-film').onclick=()=>filmDialog.close();filmDialog.addEventListener('close',()=>{keys.clear();posterReturnFocus?.focus({preventScroll:true})});filmDialog.addEventListener('click',e=>{if(e.target===filmDialog){const r=filmDialog.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)filmDialog.close()}});
 let w=0,h=0,scale=1,ox=0,oy=0,player={x:9.4,y:4.5},target=null,near=null,keys=new Set(),last=0,phase=0,walk=false,lobbyHeading=-Math.PI/2,lobbyGait=0,lobbyVelocity={x:0,y:0};
+let lobbyViewport;
+const lobbyCamera=createSeenWorldCamera({scene:document.querySelector('#lobby-scene'),onChange:()=>{resize();lobbyRevision++}});
 const upcomingSignLayout={x:.48,y:3.52,size:1.12};
 const upcomingSignBounds={left:upcomingSignLayout.x-.2*upcomingSignLayout.size,right:upcomingSignLayout.x+.55*upcomingSignLayout.size,top:upcomingSignLayout.y-1.4*upcomingSignLayout.size,bottom:upcomingSignLayout.y+1.4*upcomingSignLayout.size};
 // Collision bounds include the visitor's width and the rendered prop offsets.
@@ -48,7 +42,8 @@ function walkLobbyTo(destination){
 function walkToScreen(room){if(!room)return;if(isSceneOpen('screening'))closeScene('screening');if(isSceneOpen('arcade-room'))leaveArcade();keys.clear();preview.hidden=true;hoveredDoor=null;walkLobbyTo({x:room.x+.8,y:room.y+.48});canvas.focus({preventScroll:true})}
 function propDepth(left,right,top,bottom){return Math.max(left,Math.min(right,player.x))+Math.max(top,Math.min(bottom,player.y))}
 const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
-function resize(){lobbyRevision++;w=canvas.clientWidth;h=canvas.clientHeight;const d=Math.min(devicePixelRatio||1,2);canvas.width=w*d;canvas.height=h*d;ctx.setTransform(d,0,0,d,0,0);scale=Math.min(w/(w<700?28:27),h/17.5);ox=w/2-4.2*scale;oy=h*.36-1.7*scale+(w<700&&h>650?h*.05:0);}
+function resize(){lobbyRevision++;w=canvas.clientWidth;h=canvas.clientHeight;const d=Math.min(devicePixelRatio||1,2);canvas.width=w*d;canvas.height=h*d;ctx.setTransform(d,0,0,d,0,0);scale=Math.min(w/(w<700?28:27),h/17.5);ox=w/2-4.2*scale;oy=h*.36-1.7*scale+(w<700&&h>650?h*.05:0);lobbyViewport={width:w,height:h,unit:scale,ox,oy};updateLobbyCamera(1);}
+function updateLobbyCamera(dt){const view=lobbyCamera.view({...lobbyViewport,x:player.x,y:player.y,dt});scale=view.unit;ox=view.ox;oy=view.oy;if(view.changed)lobbyRevision++}
 addEventListener('resize',resize);resize();
 function p(x,y,z=0){return{x:ox+(x-y)*scale*.86,y:oy+(x+y)*scale*.43-z*scale}}
 function poly(points,color,stroke){ctx.beginPath();points.forEach((a,i)=>{const q=p(...a);i?ctx.lineTo(q.x,q.y):ctx.moveTo(q.x,q.y)});ctx.closePath();ctx.fillStyle=color;ctx.fill();if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=.6;ctx.stroke()}}
@@ -180,14 +175,27 @@ const distance=Math.hypot(player.x-before.x,player.y-before.y);walk=distance>.00
 gameOpen+=((Math.hypot(player.x-.5,player.y-6)<2?1:0)-gameOpen)*(reduced?1:1-Math.exp(-dt*10));if(!paused&&player.x<.78&&Math.abs(player.y-6)<.58&&gameOpen>.65)enterGame();
 for(const r of rooms){const open=Math.hypot(player.x-(r.x+.8),player.y-(r.y+.65))<1.9?1:0;r.open+=(open-r.open)*(reduced?1:1-Math.exp(-dt*10));}if(!paused){const passage=rooms.find(r=>Math.abs(player.x-(r.x+.8))<.45&&player.y<r.y+.70&&r.open>.65);if(passage){near=passage;enter();}}
 if(!isSceneOpen('lobby-scene')){lobbyPaintKey='';requestAnimationFrame(frame);return}
+updateLobbyCamera(dt);
 seenSetData(canvas,'jumpPhase',lobbyJump.active?'active':'idle');seenSetData(canvas,'jumpCrouch',lobbyJump.crouch.toFixed(3));seenSetData(canvas,'jumpTuck',lobbyJump.tuck.toFixed(3));seenSetData(canvas,'jump',lobbyJump.height.toFixed(3));seenSetData(canvas,'gameDoor',gameOpen.toFixed(2));seenSetData(canvas,'doors',rooms.map(r=>r.open.toFixed(2)).join(','));seenSetData(canvas,'position',`${player.x.toFixed(3)},${player.y.toFixed(3)}`);seenSetData(canvas,'motion',walk?'walking':'idle');
 // Repaint only when projected geometry, images, fonts, or navigation change.
 if(isSceneOpen('lobby-scene')&&SeenHub.entered)SeenTalk?.nearby({scene:'lobby',x:player.x,y:player.y,project:p,canvas});
 if(!paused)SeenHub.publish({scene:'lobby',x:player.x,y:player.y,heading:lobbyHeading,posture:0,jump:lobbyJump.height,moving:walk});
 const paintKey=[SeenHub.revision,lobbyRevision,seenFontRevision,lobbyJump.height.toFixed(3),lobbyJump.crouch.toFixed(3),lobbyJump.tuck.toFixed(3),canvas.dataset.position,canvas.dataset.doors,canvas.dataset.gameDoor,lobbyHeading.toFixed(3),lobbyGait.toFixed(3),phase.toFixed(3),target?.x,target?.y].join('|');
 if(paintKey!==lobbyPaintKey){draw();lobbyPaintKey=paintKey} requestAnimationFrame(frame)}requestAnimationFrame(frame);
-canvas.addEventListener('pointerdown',e=>{if(!e.isPrimary||e.button>0)return;if(e.pointerType==='touch')e.preventDefault();const rect=canvas.getBoundingClientRect(),px=e.clientX-rect.left,py=e.clientY-rect.top;const host=SeenHub.hitPerson({scene:'lobby',project:p,unit:scale,px,py});if(host){keys.clear();target=null;lobbyWaypoints=[];if(SeenTalk.staff(host)===false)walkLobbyTo({x:host.x,y:host.y});return}const ga=p(.44,6.9,2.2),gb=p(.44,5.1,2.2),gc=p(.44,6.9,0),gu=(px-ga.x)/(gb.x-ga.x),gv=(py-ga.y-gu*(gb.y-ga.y))/(gc.y-ga.y);if(gu>=0&&gu<=1&&gv>=0&&gv<=1){walkToGame();return}lobbyWaypoints=[];for(const r of rooms){const a=p(r.x+.14,r.y+.3,2.4),b=p(r.x+1.46,r.y+.3,2.4),c=p(r.x+.14,r.y+.3,0),u=(px-a.x)/(b.x-a.x),v=(py-a.y-u*(b.y-a.y))/(c.y-a.y);if(u>=0&&u<=1&&v>=0&&v<=1){walkToScreen(r);return}}const sx=(px-ox)/scale/.86,sy=(py-oy)/scale/.43;walkLobbyTo({x:Math.max(.6,Math.min(18.1,(sx+sy)/2)),y:Math.max(1.1,Math.min(8.4,(sy-sx)/2))});canvas.focus({preventScroll:true});});
-addEventListener('keydown',e=>{if(!SeenHub.entered||isSceneOpen('arcade-room')||gameRoom.open||filmDialog.open||isSceneOpen('screening')||!document.querySelector('#directory').hidden||seenTypingTarget(e.target))return;const key=seenNavigationKey(e);if(e.code==='Space'||e.key===' '){e.preventDefault();if(!e.repeat)lobbyJump.start();canvas.focus({preventScroll:true});return}if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','w','a','s','d'].includes(key)){e.preventDefault();keys.add(key);canvas.focus({preventScroll:true})}if(key==='Enter'&&Math.hypot(player.x-1.4,player.y-6)<1.5&&document.activeElement===canvas){e.preventDefault();enterGame();return}if(key==='Enter'&&near&&document.activeElement===canvas){e.preventDefault();enter()}});addEventListener('keyup',e=>keys.delete(seenNavigationKey(e)));addEventListener('blur',()=>keys.clear());
+canvas.addEventListener('pointerdown',e=>{
+ if(!e.isPrimary||e.button>0||!SeenHub.entered||document.querySelector('dialog[open]'))return;
+ if(e.pointerType==='touch')e.preventDefault();
+ const rect=canvas.getBoundingClientRect(),px=e.clientX-rect.left,py=e.clientY-rect.top;
+ const host=SeenHub.hitPerson({scene:'lobby',project:p,unit:scale,px,py,touch:e.pointerType==='touch'});
+ if(host){keys.clear();target=null;lobbyWaypoints=[];if(SeenTalk.staff(host)===false)walkLobbyTo({x:host.x,y:host.y});return}
+ const panels=[{a:p(.44,6.9,2.2),b:p(.44,5.1,2.2),c:p(.44,6.9,0),walk:walkToGame},...rooms.map(room=>({a:p(room.x+.14,room.y+.3,2.4),b:p(room.x+1.46,room.y+.3,2.4),c:p(room.x+.14,room.y+.3,0),walk:()=>walkToScreen(room)}))];
+ let hit=panels.find(panel=>seenPanelHit(px,py,panel.a,panel.b,panel.c));
+ if(!hit&&e.pointerType==='touch')hit=panels.filter(panel=>seenPanelHit(px,py,panel.a,panel.b,panel.c,44)).sort((a,b)=>Math.hypot(px-(a.b.x+a.c.x)/2,py-(a.b.y+a.c.y)/2)-Math.hypot(px-(b.b.x+b.c.x)/2,py-(b.b.y+b.c.y)/2))[0];
+ if(hit){hit.walk();return}
+ const sx=(px-ox)/scale/.86,sy=(py-oy)/scale/.43;
+ walkLobbyTo({x:Math.max(.6,Math.min(18.1,(sx+sy)/2)),y:Math.max(1.1,Math.min(8.4,(sy-sx)/2))});canvas.focus({preventScroll:true});
+});
+addEventListener('keydown',e=>{if(!SeenHub.entered||isSceneOpen('arcade-room')||gameRoom.open||filmDialog.open||isSceneOpen('screening')||!document.querySelector('#directory').hidden||document.querySelector('dialog[open]')||seenControlTarget(e.target))return;const key=seenNavigationKey(e);if(e.code==='Space'||e.key===' '){e.preventDefault();if(!e.repeat)lobbyJump.start();canvas.focus({preventScroll:true});return}if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','w','a','s','d'].includes(key)){e.preventDefault();keys.add(key);canvas.focus({preventScroll:true})}if(key==='Enter'&&Math.hypot(player.x-1.4,player.y-6)<1.5&&document.activeElement===canvas){e.preventDefault();enterGame();return}if(key==='Enter'&&near&&document.activeElement===canvas){e.preventDefault();enter()}});addEventListener('keyup',e=>keys.delete(seenNavigationKey(e)));addEventListener('blur',()=>keys.clear());
 let currentRoom=null;
 const seatChoices=new Map();
 const seatRows=document.querySelector('#seat-rows');
@@ -196,10 +204,87 @@ function updateSeat(){const selected=seatChoices.get(currentRoom.n);seatRows.que
 seatRows.addEventListener('click',e=>{const seat=e.target.closest('[data-seat]');if(!seat||!currentRoom)return;seatChoices.set(currentRoom.n,seat.dataset.seat);updateSeat()});
 function enter(){if(!near)return;lobbyJump.reset();keys.clear();target=null;currentRoom=near;document.querySelector('#screening-title').textContent=`SCREEN ${near.n} / ${near.name.toUpperCase()}`;document.querySelector('#screen-name').textContent=near.name;document.querySelector('#screen-category').textContent=`SCREEN ${near.n} / ${near.sub}`;document.querySelector('#screen-still').src=`assets/${near.img}.jpg`;document.querySelector('#auditorium').hidden=false;updateSeat();showScene('screening');document.dispatchEvent(new Event('seen-room-enter'));}
 const screenArticle=document.querySelector('#screen-article');
-function openProgram(){if(!currentRoom||screenArticle.open)return;const article=screeningArticles[currentRoom.article];if(!article)return;document.querySelector('#screen-article-room').textContent=`SCREEN ${currentRoom.n} / SEEN · ISSUE 02`;const content=document.querySelector('#screen-article-content');content.replaceChildren();const header=document.createElement('header');header.className='screen-article-header';const tag=document.createElement('span');tag.className='screen-article-tag';tag.textContent=article.tag;const title=document.createElement('h2');title.id='screen-article-title';title.innerHTML=article.title;const deck=document.createElement('p');deck.textContent=article.deck;header.append(tag,title,deck);content.append(header);if(article.image){const figure=document.createElement('figure'),image=document.createElement('img'),caption=document.createElement('figcaption');image.src=`assets/${article.image}.jpg`;image.alt=article.credit;caption.textContent=article.credit;figure.append(image,caption);content.append(figure)}const body=document.createElement('div');body.className='screen-article-body';body.innerHTML=article.body;content.append(body);SeenHub.mountComments(content,currentRoom.article);screenArticle.showModal();screenArticle.scrollTop=0;document.querySelector('#back-to-seats').focus({preventScroll:true});}
-document.querySelector('#projection').onclick=openProgram;document.querySelector('#start-program').onclick=openProgram;
-document.querySelector('#back-to-seats').onclick=()=>screenArticle.close();screenArticle.addEventListener('close',()=>{keys.clear();document.querySelector('#room-world').focus({preventScroll:true})});screenArticle.addEventListener('click',e=>{if(e.target===screenArticle){const r=screenArticle.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)screenArticle.close()}});
-function leaveScreening(){closeScene('screening');canvas.focus({preventScroll:true})}document.querySelector('#screening').addEventListener('close',()=>{keys.clear();target=null;lobbyVelocity={x:0,y:0};if(currentRoom){const a=roomApproach(currentRoom);player={x:a.x,y:a.y+.35};}setNear();});
+let readingStorage;try{readingStorage=sessionStorage}catch{}
+const readingState=SeenReading.createStore(readingStorage);
+let activeArticle=null,articleRestoreToken=0,articleScrollTimer=0,restoringArticleScroll=false;
+function saveReading(){
+ if(!activeArticle)return;
+ const form=screenArticle.querySelector('.comment-form');
+ readingState.save(activeArticle,{scroll:screenArticle.scrollTop,...(form?{body:form.elements.body.value,author:form.elements.author.value}:{})});
+}
+function stopArticleRestore(){restoringArticleScroll=false;screenArticle.dataset.readingReady='true'}
+function closeProgram(updateHistory=true){
+ if(!screenArticle.open)return;
+ clearTimeout(articleScrollTimer);saveReading();articleRestoreToken++;activeArticle=null;stopArticleRestore();screenArticle.close();
+ if(updateHistory)articleHistory.close();
+}
+function openProgram(fromHistory=false){
+ if(!currentRoom)return;
+ const id=currentRoom.article,article=screeningArticles[id];if(!article)return;
+ if(fromHistory!==true){articleHistory.open(id);return}
+ if(screenArticle.open&&activeArticle===id)return;
+ if(screenArticle.open)closeProgram(false);
+ activeArticle=id;const saved=readingState.read(id),restoreToken=++articleRestoreToken;
+ document.querySelector('#screen-article-room').textContent=`SCREEN ${currentRoom.n} / SEEN · ISSUE 02`;
+ const content=document.querySelector('#screen-article-content');content.replaceChildren();
+ const header=document.createElement('header');header.className='screen-article-header';
+ const tag=document.createElement('span');tag.className='screen-article-tag';tag.textContent=article.tag;
+ const title=document.createElement('h2');title.id='screen-article-title';title.innerHTML=article.title;
+ const deck=document.createElement('p');deck.textContent=article.deck;header.append(tag,title,deck);content.append(header);
+ let artworkReady=Promise.resolve();
+ if(article.image){
+  const figure=document.createElement('figure'),image=document.createElement('img'),caption=document.createElement('figcaption');
+  image.alt=article.credit;caption.textContent=article.credit;
+  artworkReady=new Promise(resolve=>{image.addEventListener('load',resolve,{once:true});image.addEventListener('error',resolve,{once:true})});
+  image.src=`assets/${article.image}.jpg`;if(image.complete)artworkReady=Promise.resolve();
+  figure.append(image,caption);content.append(figure);
+ }
+ const body=document.createElement('div');body.className='screen-article-body';body.innerHTML=article.body;content.append(body);
+ const commentsReady=SeenHub.mountComments(content,id);
+ const form=content.querySelector('.comment-form');
+ if(form){form.elements.body.value=saved.body;if(saved.author)form.elements.author.value=saved.author}
+ screenArticle.showModal();restoringArticleScroll=true;screenArticle.dataset.readingReady='false';
+ document.querySelector('#back-to-seats').focus({preventScroll:true});
+ const restore=()=>{if(restoreToken===articleRestoreToken&&screenArticle.open&&restoringArticleScroll)screenArticle.scrollTop=saved.scroll};
+ requestAnimationFrame(restore);
+ Promise.allSettled([artworkReady,commentsReady,document.fonts?.ready]).then(()=>requestAnimationFrame(()=>{
+  restore();requestAnimationFrame(()=>{restore();if(restoreToken===articleRestoreToken)stopArticleRestore()});
+ }));
+}
+const articleHistory=SeenReading.createHistory({host:window,ids:rooms.map(room=>room.article),onChange:({article})=>{
+ if(!SeenHub.entered)return;
+ if(!article){closeProgram(false);return}
+ const destination=rooms.find(item=>item.article===article);if(!destination)return;
+ if(currentRoom!==destination||!isSceneOpen('screening')){
+  if(isSceneOpen('arcade-room'))leaveArcade();
+  if(filmDialog.open)filmDialog.close();
+  near=destination;enter();
+ }
+ openProgram(true);
+}});
+articleHistory.start();
+document.addEventListener('seen-welcome-complete',()=>articleHistory.sync());
+for(const id of ['projection','start-program','read-story']){const control=document.getElementById(id);if(control)control.onclick=openProgram}
+document.querySelector('#back-to-seats').onclick=()=>closeProgram();
+screenArticle.addEventListener('cancel',event=>{event.preventDefault();closeProgram()});
+screenArticle.addEventListener('close',()=>{keys.clear();if(!screenArticle.open)document.querySelector('#room-world').focus({preventScroll:true})});
+screenArticle.addEventListener('click',event=>{if(event.target===screenArticle){const rect=screenArticle.getBoundingClientRect();if(event.clientX<rect.left||event.clientX>rect.right||event.clientY<rect.top||event.clientY>rect.bottom)closeProgram()}});
+screenArticle.addEventListener('input',event=>{if(event.target.closest('.comment-form'))saveReading()});
+screenArticle.addEventListener('scroll',()=>{if(restoringArticleScroll)return;clearTimeout(articleScrollTimer);articleScrollTimer=setTimeout(saveReading,180)},{passive:true});
+for(const event of ['wheel','touchmove','pointerdown'])screenArticle.addEventListener(event,stopArticleRestore,{passive:true});
+screenArticle.addEventListener('keydown',event=>{if(['ArrowUp','ArrowDown','PageUp','PageDown','Home','End',' '].includes(event.key))stopArticleRestore()});
+addEventListener('pagehide',saveReading);
+document.addEventListener('seen-comment-posted',event=>{
+ const {articleId,body}=event.detail||{};if(typeof articleId!=='string'||typeof body!=='string')return;
+ readingState.posted(articleId,body);
+ if(activeArticle!==articleId)return;
+ const field=screenArticle.querySelector('.comment-form textarea[name="body"]');
+ if(field&&field.value.trim()===body.trim())field.value='';
+ saveReading();
+});
+function leaveScreening(){if(screenArticle.open)closeProgram();closeScene('screening');canvas.focus({preventScroll:true})}
+document.querySelector('#return-lobby')?.addEventListener('click',leaveScreening);
+document.querySelector('#screening').addEventListener('close',()=>{keys.clear();target=null;lobbyVelocity={x:0,y:0};if(currentRoom){const a=roomApproach(currentRoom);player={x:a.x,y:a.y+.35};}setNear();});
 const directory=document.querySelector('#directory'),toggle=document.querySelector('#index-toggle');function closeIndex(){directory.hidden=true;toggle.setAttribute('aria-expanded','false');toggle.focus()}toggle.onclick=()=>{directory.hidden=!directory.hidden;toggle.setAttribute('aria-expanded',String(!directory.hidden));if(!directory.hidden)document.querySelector('#close-index').focus()};document.querySelector('#close-index').onclick=closeIndex;document.querySelector('#room-list').innerHTML=rooms.map((r,i)=>`<button data-room="${i}"><b>${r.n}</b><span><strong>${r.name}</strong><small>${r.sub}</small></span><span style="margin-left:auto">↗</span></button>`).join('')+'<button data-game-room><b>G</b><span><strong>The Game Room</strong><small>PLAY THE SEEN QUIZ</small></span><span style="margin-left:auto">↗</span></button>';document.querySelector('#room-list').onclick=e=>{if(!e.target.closest('[data-game-room],[data-room]'))return;if(isSceneOpen('screening'))closeScene('screening');if(isSceneOpen('arcade-room'))leaveArcade();if(filmDialog.open)filmDialog.close();if(e.target.closest('[data-game-room]')){closeIndex();walkToGame();return}const b=e.target.closest('[data-room]');if(!b)return;const r=rooms[Number(b.dataset.room)];closeIndex();walkToScreen(r)};addEventListener('keydown',e=>{if(e.key==='Escape'&&!directory.hidden)closeIndex()});
 const touchMap={up:'ArrowUp',down:'ArrowDown',left:'ArrowLeft',right:'ArrowRight'};document.querySelectorAll('[data-dir]').forEach(b=>{b.addEventListener('pointerdown',e=>{e.preventDefault();b.setPointerCapture(e.pointerId);keys.add(touchMap[b.dataset.dir])});for(const event of ['pointerup','pointercancel','lostpointercapture'])b.addEventListener(event,()=>keys.delete(touchMap[b.dataset.dir]))});
 

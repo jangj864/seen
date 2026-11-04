@@ -6,9 +6,21 @@
  const mobile=matchMedia('(any-pointer:coarse)').matches;document.querySelector('#welcome-controls').textContent=mobile?'Use the left stick to walk and the round button to jump. You can also tap the floor.':'Use arrow keys or WASD to walk, Space to jump, or click the floor.';
  document.querySelectorAll('.welcome-steps li')[1].lastChild.textContent=mobile?' Walk up to a screening door to preview its story. Tap the door to enter.':' Hover over a screening door to preview its story. Click to enter.';
  const artwork=[...new Set([...Object.values(images),...[...document.images].filter(im=>im.getAttribute('src'))])];let done=0,failed=0;
- function update(){bar.value=Math.round(done/Math.max(artwork.length,1)*100);status.textContent=`Preparing the cinema · ${bar.value}%`;}
- const tasks=artwork.map(im=>new Promise(resolve=>{let settled=false;const finish=ok=>{if(settled)return;settled=true;clearTimeout(timer);if(!ok)failed++;done++;update();resolve()};const timer=setTimeout(()=>finish(false),8000);if(im.complete){finish(im.naturalWidth>0);return}im.addEventListener('load',()=>finish(true),{once:true});im.addEventListener('error',()=>finish(false),{once:true})}));
- Promise.allSettled(tasks).then(()=>{ready=true;bar.value=100;status.textContent=failed?'Ready to enter. Some artwork may finish loading inside.':'The lights are on. Your seat is waiting.';screen.dataset.ready='true';enter.disabled=false;enter.textContent='ENTER THE CINEMA ↗';if(!mobile)input.focus({preventScroll:true})});
+ function update(){
+  bar.value=artwork.length?Math.round(done/artwork.length*100):100;
+  status.textContent=ready?(done===artwork.length&&!failed?'The lights are on. Your seat is waiting.':'Ready to enter. Some artwork may finish loading inside.'):`Preparing the cinema · ${bar.value}%`;
+ }
+ // Track actual artwork completion in the background. A slow poster must not
+ // block a visitor from entering the already available canvas and controls.
+ artwork.forEach(im=>{
+  let settled=false;
+  const loaded=()=>finish(true),errored=()=>finish(false);
+  const finish=ok=>{if(settled)return;settled=true;im.removeEventListener('load',loaded);im.removeEventListener('error',errored);if(!ok)failed++;done++;update()};
+  if(im.complete){finish(im.naturalWidth>0);return}
+  im.addEventListener('load',loaded,{once:true});im.addEventListener('error',errored,{once:true});
+ });
+ update();
+ requestAnimationFrame(()=>{ready=true;update();screen.dataset.ready='true';enter.disabled=false;enter.textContent='ENTER THE CINEMA ↗';if(!mobile)input.focus({preventScroll:true})});
  form.onsubmit=e=>{e.preventDefault();const nickname=input.value.replace(/\s+/g,' ').trim();if(!ready)return;if([...nickname].length<2||[...nickname].length>20||/[\u0000-\u001f\u007f<>]/.test(nickname)){input.setCustomValidity(SeenI18n.t('Please use 2–20 characters without < or >.'));input.reportValidity();return}input.setCustomValidity('');SeenHub.join(nickname);document.querySelectorAll('body>.site-header,body>main,body>.site-footer').forEach(e=>e.inert=false);document.body.classList.remove('is-entering');screen.hidden=true;canvas.focus({preventScroll:true});document.dispatchEvent(new Event('seen-welcome-complete'))};
  input.addEventListener('input',()=>input.setCustomValidity(''));screen.addEventListener('keydown',e=>{if(e.key!=='Tab')return;const focusable=[...screen.querySelectorAll('input,button')].filter(e=>!e.disabled);if(e.shiftKey&&document.activeElement===focusable[0]){e.preventDefault();focusable.at(-1).focus()}else if(!e.shiftKey&&document.activeElement===focusable.at(-1)){e.preventDefault();focusable[0].focus()}});screen.focus({preventScroll:true});
 })();

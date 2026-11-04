@@ -5,13 +5,16 @@ const held=new Set(),chairs=[];let width=0,height=0,unit=1,cx=0,cy=0,visitor={x:
 for(let row=0;row<5;row++)for(let col=0;col<10;col++){const id='ABCDE'[row]+String(col+1).padStart(2,'0'),seat={id,x:col<5?1.35+col*.78:6.85+(col-5)*.78,y:4.1+row*1.3};chairs.push(seat);const option=document.createElement('option');option.value=id;option.textContent=`Seat ${id}`;picker.append(option)}
 const articleDialog=document.querySelector('#screen-article'),screenStill=document.querySelector('#screen-still');
 let roomRevision=0,roomPaintKey='';
+let viewport;
+const camera=createSeenWorldCamera({scene:dialog,onChange:()=>{size();roomRevision++;render()},zoom:1.6,home:{x:6.5,y:5.5},deadZone:{x:4,y:5}});
+function updateCamera(dt){if(!viewport)return;const view=camera.view({...viewport,x:visitor.x,y:visitor.y,dt});unit=view.unit;cx=view.ox;cy=view.oy;if(view.changed)roomRevision++}
 screenStill.addEventListener('load',()=>roomRevision++);
 const chairDrawOrder=[...chairs].sort((a,b)=>(a.x+a.y)-(b.x+b.y)),chairHitOrder=[...chairDrawOrder].reverse();
 const chairById=new Map(chairs.map(seat=>[seat.id,seat]));
 const navigation=createSeenCrowdNavigation(createSeenRoomNavigation(chairs),()=>SeenHub.people('screen-'+currentRoom.n)),roomJump=createSeenJump();
 function jump(){if(!active()||seated||motion)return;roomJump.start();world.focus({preventScroll:true})}
 const active=()=>SeenHub.entered&&!document.querySelector('dialog[open]')&&!document.hidden&&isSceneOpen('screening')&&!room.hidden&&!articleDialog.open;
-function size(){roomRevision++;width=world.clientWidth;height=world.clientHeight;if(!width||!height)return;const ratio=Math.min(devicePixelRatio||1,2);world.width=width*ratio;world.height=height*ratio;g.setTransform(ratio,0,0,ratio,0,0);unit=Math.min(width/22.5,height/18.3);cx=width/2;cy=Math.max(unit*5.3+12,height*.29)+(width<700&&height>650?height*.05:0);}
+function size(){roomRevision++;width=world.clientWidth;height=world.clientHeight;if(!width||!height)return;const ratio=Math.min(devicePixelRatio||1,2);world.width=width*ratio;world.height=height*ratio;g.setTransform(ratio,0,0,ratio,0,0);unit=Math.min(width/22.5,height/18.3);cx=width/2;cy=Math.max(unit*5.3+12,height*.29)+(width<700&&height>650?height*.05:0);viewport={width,height,unit,ox:cx,oy:cy};updateCamera(1);}
 new ResizeObserver(size).observe(world);
 function point(x,y,z=0){return{x:cx+(x-y)*unit*.86,y:cy+(x+y)*unit*.43-z*unit}}
 function polygon(vertices,color){g.beginPath();vertices.forEach((v,i)=>{const p=point(...v);i?g.lineTo(p.x,p.y):g.moveTo(p.x,p.y)});g.closePath();g.fillStyle=color;g.fill()}
@@ -66,19 +69,19 @@ function requestOccupiedSeat(seat,person=occupant(seat)){if(!person)return;if(!S
 document.addEventListener('seen-seat-request',e=>{const req=e.detail;if(!isSceneOpen('screening')||req.scene!=='screen-'+currentRoom.n||seated?.id!==req.seatId){SeenHub.replySeat(req,false);return}const next=freeSeat(req.seatId);if(!next){SeenHub.replySeat(req,false);return}held.clear();SeenTalk.incoming(req,()=>planSeat(next.id))});
 function nearest(){return chairs.find(s=>!hostSeat(s)&&Math.hypot(visitor.x-(s.x+.33),visitor.y-(s.y-.33))<.44)||null}
 function sitHere(){if(motion)return;roomJump.reset();if(seated){stand();return}if(!closeSeat)return;if(hostSeat(closeSeat)){requestOccupiedSeat(closeSeat);return}seated=closeSeat;seatChoices.set(currentRoom.n,seated.id);updateSeat();picker.value=seated.id;path=[];velocity={x:0,y:0};motion={kind:'sit',elapsed:0,duration:reduced ? .01 : .65,from:{...visitor},to:{x:seated.x+.33,y:seated.y+.22}};seenSetText(status,`Taking seat ${seated.id}…`);sit.disabled=true;}
-function planSeat(id){const seat=chairById.get(id);if(!seat)return;if(hostSeat(seat)){requestOccupiedSeat(seat);return}
+function planSeat(id,focus=true){const seat=chairById.get(id);if(!seat)return;if(hostSeat(seat)){requestOccupiedSeat(seat);return}
 // Staying in the same seat needs no animation; neighbours share one short aisle transfer.
-if(seated?.id===seat.id&&!motion){world.focus({preventScroll:true});return}
+if(seated?.id===seat.id&&!motion){if(focus)world.focus({preventScroll:true});return}
 if(seated&&!motion&&seat.y===seated.y&&Math.abs(seat.x-seated.x)<1.6){
  const fromAisle={x:seated.x+.33,y:seated.y-.33},toAisle={x:seat.x+.33,y:seat.y-.33};
  if(navigation.clear(fromAisle,toAisle)){
   motion={kind:'transfer',elapsed:0,duration:reduced ? .01 : .75+Math.abs(seat.x-seated.x)*.24,from:{...visitor},fromAisle,toAisle,to:{x:seat.x+.33,y:seat.y+.22},seat};
   afterStand=null;pendingSeat=null;path=[];velocity={x:0,y:0};sit.disabled=true;
-  seenSetText(status,`Moving to seat ${seat.id}…`);world.focus({preventScroll:true});return;
+  seenSetText(status,`Moving to seat ${seat.id}…`);if(focus)world.focus({preventScroll:true});return;
  }
 }
-requestAction(()=>{const y=seat.y-.33;autoSpeed=0;path=navigation.route(visitor,{x:seat.x+.33,y});pendingSeat=seat;});world.focus({preventScroll:true})}
-picker.addEventListener('change',()=>planSeat(picker.value));sit.onclick=()=>{sitHere();world.focus({preventScroll:true})};
+requestAction(()=>{const y=seat.y-.33;autoSpeed=0;path=navigation.route(visitor,{x:seat.x+.33,y});pendingSeat=seat;});if(focus)world.focus({preventScroll:true})}
+picker.addEventListener('change',()=>planSeat(picker.value,false));sit.onclick=()=>{sitHere();world.focus({preventScroll:true})};
 function loop(now){const dt=Math.min((now-previous)/1000,.04);previous=now;if(active()){
 const wasAirborne=roomJump.height>0;roomJump.step(dt);
 if(wasAirborne&&roomJump.height===0&&occupied(visitor.x,visitor.y)){
@@ -125,7 +128,7 @@ else{gait=0;isWalking=false;turnToward(-Math.PI/2,dt)}
 closeSeat=seated||nearest();sit.hidden=!closeSeat&&!motion;if(!motion&&!seated&&closeSeat)seenSetText(status,`Seat ${closeSeat.id} nearby. Enter to sit.`);else if(!motion&&!seated&&!pendingSeat)seenSetText(status,'Walk the aisles or choose a seat.');
 if(!seated&&!motion&&!exiting&&visitor.x>5.3&&visitor.x<6.7&&visitor.y>11.34){leaveThroughExit();requestAnimationFrame(loop);return}
 seenSetData(world,'jumpPhase',roomJump.active?'active':'idle');seenSetData(world,'jumpCrouch',roomJump.crouch.toFixed(3));seenSetData(world,'jumpTuck',roomJump.tuck.toFixed(3));seenSetData(world,'jump',roomJump.height.toFixed(3));seenSetData(world,'motion',motion?.kind||(seated?'seated':isWalking?'walking':'idle'));seenSetData(world,'position',`${visitor.x.toFixed(3)},${visitor.y.toFixed(3)}`);
-SeenTalk.nearby({scene:'screen-'+currentRoom.n,x:visitor.x,y:visitor.y,project:point,canvas:world});SeenHub.publish({scene:'screen-'+currentRoom.n,x:visitor.x,y:visitor.y,heading,posture,jump:roomJump.height,moving:isWalking});
+updateCamera(dt);SeenTalk.nearby({scene:'screen-'+currentRoom.n,x:visitor.x,y:visitor.y,project:point,canvas:world});SeenHub.publish({scene:'screen-'+currentRoom.n,x:visitor.x,y:visitor.y,heading,posture,jump:roomJump.height,moving:isWalking});
 const paintKey=[SeenHub.revision,roomRevision,seenFontRevision,roomJump.height.toFixed(3),roomJump.crouch.toFixed(3),roomJump.tuck.toFixed(3),currentRoom?.n,seatChoices.get(currentRoom?.n),world.dataset.position,heading.toFixed(3),gait.toFixed(3),posture.toFixed(3),tick.toFixed(3),path.at(-1)?.x,path.at(-1)?.y].join('|');
 if(paintKey!==roomPaintKey){render();roomPaintKey=paintKey}}
 requestAnimationFrame(loop)}requestAnimationFrame(loop);
@@ -140,7 +143,7 @@ function chairHit(seat,px,py){
 }
 world.addEventListener('pointerdown',e=>{
  if(!active())return;const r=world.getBoundingClientRect(),px=e.clientX-r.left,py=e.clientY-r.top;
- const person=SeenHub.hitPerson({scene:'screen-'+currentRoom.n,project:point,unit,px,py});if(person){const seat=person.posture>.5?chairs.find(s=>Math.hypot(person.x-(s.x+.33),person.y-(s.y+.22))<.3):null;if(seat)requestOccupiedSeat(seat,person);else if(SeenTalk.staff(person)===false){const next=navigation.destination(visitor,person);path=next?navigation.route(visitor,next):[]}return}
+ const person=SeenHub.hitPerson({scene:'screen-'+currentRoom.n,project:point,unit,px,py,touch:e.pointerType==='touch'});if(person){const seat=person.posture>.5?chairs.find(s=>Math.hypot(person.x-(s.x+.33),person.y-(s.y+.22))<.3):null;if(seat)requestOccupiedSeat(seat,person);else if(SeenTalk.staff(person)===false){const next=navigation.destination(visitor,person);path=next?navigation.route(visitor,next):[]}return}
  const occupiedHit=chairHitOrder.find(seat=>hostSeat(seat)&&chairHit(seat,px,py));if(occupiedHit){requestOccupiedSeat(occupiedHit);return}
  const sx=(px-cx)/unit/.86,sy=(py-cy)/unit/.43;
  const floor={x:Math.max(.5,Math.min(11.5,(sx+sy)/2)),y:Math.max(1.5,Math.min(11.5,(sy-sx)/2))};
@@ -155,7 +158,7 @@ world.addEventListener('pointerdown',e=>{
  requestAction(()=>{pendingSeat=null;const target=navigation.destination(visitor,floor);autoSpeed=0;path=target?navigation.route(visitor,target):[];velocity={x:0,y:0}});world.focus({preventScroll:true});
 });
 document.addEventListener('seen-conversation-open',()=>{held.clear();path=[];pendingSeat=null;velocity={x:0,y:0};autoSpeed=0});
-addEventListener('keydown',e=>{if(!active()||seenTypingTarget(e.target))return;const key=seenNavigationKey(e);if(e.code==='Space'||e.key===' '){e.preventDefault();if(!e.repeat)jump();return}if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','w','a','s','d'].includes(key)){e.preventDefault();held.add(key);world.focus({preventScroll:true})}if(key==='Enter'&&document.activeElement===world){e.preventDefault();sitHere()}});addEventListener('keyup',e=>held.delete(seenNavigationKey(e)));addEventListener('blur',()=>held.clear());dialog.addEventListener('close',()=>held.clear());document.querySelector('#start-program').addEventListener('click',()=>{held.clear();velocity={x:0,y:0}});
+addEventListener('keydown',e=>{if(!active()||seenControlTarget(e.target))return;const key=seenNavigationKey(e);if(e.code==='Space'||e.key===' '){e.preventDefault();if(!e.repeat)jump();return}if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','w','a','s','d'].includes(key)){e.preventDefault();held.add(key);world.focus({preventScroll:true})}if(key==='Enter'&&document.activeElement===world){e.preventDefault();sitHere()}});addEventListener('keyup',e=>held.delete(seenNavigationKey(e)));addEventListener('blur',()=>held.clear());dialog.addEventListener('close',()=>held.clear());document.querySelector('#start-program').addEventListener('click',()=>{held.clear();velocity={x:0,y:0}});
 const controls={up:'ArrowUp',left:'ArrowLeft',down:'ArrowDown',right:'ArrowRight'};document.querySelectorAll('[data-room-dir]').forEach(button=>{button.addEventListener('pointerdown',e=>{e.preventDefault();button.setPointerCapture(e.pointerId);held.add(controls[button.dataset.roomDir])});for(const name of ['pointerup','pointercancel','lostpointercapture'])button.addEventListener(name,()=>held.delete(controls[button.dataset.roomDir]))});
 document.addEventListener('seen-room-enter',()=>{held.clear();roomJump.reset();autoSpeed=0;exiting=false;visitor={x:6,y:10.65};path=[];seated=null;pendingSeat=null;closeSeat=null;motion=null;afterStand=null;posture=0;heading=-Math.PI/2;velocity={x:0,y:0};gait=0;sit.disabled=false;sit.textContent='TAKE A SEAT';picker.value=seatChoices.get(currentRoom.n)||'';size();world.focus({preventScroll:true});render()});
 createSeenTouchGamepad({scene:dialog,keys:held,active,jump});

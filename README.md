@@ -8,7 +8,7 @@ The entry page is an interactive isometric cinema lobby drawn with Canvas 2D. Wa
 
 ## Game Room
 
-A green doorway on the left of the lobby opens on approach and automatically launches SEEN Quiz when crossed. Click the door or choose The Game Room in The Program to walk there. The arcade-style dialog uses eight quiz questions, including two actor eye-detail questions, with answer explanations, score, result, replay, and return to the lobby. Progress is preserved during the current visit.
+A green doorway on the left of the lobby opens on approach and automatically launches SEEN Quiz when crossed. Click the door or choose The Game Room in The Program to walk there. Three arcade cabinets offer five-question director, actor-eye and film-trivia rounds, with answer explanations, shared Top 10 results, replay, and return to the lobby. Progress is preserved during the current visit.
 
 ## Preview
 
@@ -71,6 +71,16 @@ NPC identities appear within interaction range. Approach and click/tap a charact
 
 ## Korean and English
 
-The language buttons in the welcome ticket, header, and reading/game dialogs switch between English and Korean. `seen-language` stores the preference locally and carries it between the cinema and magazine. English remains the default. `i18n-data.js` contains the translations, including the four full screening articles; `i18n.js` translates static and newly rendered UI without restarting a quiz, moving an avatar, or rebuilding comment forms. Visitor names, submitted reader comments, and form values remain as written. Original film artwork and brand names are retained. Canvas labels use the same translator and redraw on a language change. Korean typography uses system font fallbacks.
+The language buttons in the welcome ticket, header, and reading/game dialogs switch between English and Korean. `seen-language` stores the preference locally and carries it between the cinema and magazine. English remains the default. `i18n-data.js` contains the translations, including the four full screening articles; `i18n.js` translates static and newly rendered UI without restarting a quiz, moving an avatar, or rebuilding comment forms. Visitor names, submitted reader comments, and form values remain as written. Original film artwork and brand names are retained. Canvas labels use the same translator and redraw on a language change. Korean typography uses locally hosted Pretendard, Noto Serif KR accents, and a Korean pixel font in the arcade.
 
 Validation covered switching an answered quiz in both directions without changing its score, switching article languages while retaining an unsubmitted comment, preference continuity into the magazine, and Korean quiz/layout checks at phone, tablet, desktop, and landscape sizes. Run `node --test tests/*.test.cjs` for localization and navigation/jump checks.
+
+## Mobile navigation and reading continuity (November 2026)
+
+A shared mobile camera enlarges the walking scenes and offers an Overview / Follow toggle. Projection, nameplates and pointer hits use the same camera; touch doors and people have expanded targets. Visible screening controls provide article reading, seat selection and return to the lobby, while the arcade offers three keyboard-accessible cabinet buttons. Native buttons and selects retain their standard Space/Enter/arrow behavior.
+
+Cinema articles support `#read/table`, `#read/ladybird`, `#read/yang` and `#read/minari` links. Browser Back/Forward closes and restores the article. Reading position and exact unposted comment drafts are kept per article in this tab, including reloads when session storage is available. Successful posting clears only the matching draft; failures and newer replacement drafts are retained. Background poster loading no longer blocks admission. Reading type is 16px on narrow screens and 18px on larger screens.
+
+`film-catalog.js` supplies the five upcoming films to both editions, and `articles.js` supplies their shared essays. Recommendation PNGs wrap long Korean and Latin strings without clipping. Conversation sessions reject stale async seat replies after a conversation closes or changes.
+
+Validation: `node --test tests/*.test.cjs`. Browser regressions: `PLAYWRIGHT_MODULE=/absolute/path/to/playwright node --test --test-concurrency=1 tests/*.browser.cjs` (Chrome). Browser fixtures replace backend services and never publish public comments or scores.

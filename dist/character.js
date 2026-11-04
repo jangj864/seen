@@ -2,6 +2,14 @@
 const seenCloseIcon='<svg class="close-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m6 6 12 12M18 6 6 18"/></svg>';
 function seenNavigationKey(event){return ({KeyW:'w',KeyA:'a',KeyS:'s',KeyD:'d'})[event.code]||(/^[wasd]$/i.test(event.key)?event.key.toLowerCase():event.key)}
 function seenTypingTarget(target){return target instanceof Element&&!!target.closest('input,textarea,select,[contenteditable="true"]')}
+function seenControlTarget(target){return target instanceof Element&&!!target.closest('input,textarea,select,button,a[href],[role="button"],[contenteditable="true"]')}
+function seenPanelHit(px,py,a,b,c,minimum=0){
+ const u=(px-a.x)/(b.x-a.x),v=(py-a.y-u*(b.y-a.y))/(c.y-a.y);
+ if(u>=0&&u<=1&&v>=0&&v<=1)return true;
+ if(!minimum)return false;
+ const d={x:b.x+c.x-a.x,y:b.y+c.y-a.y},left=Math.min(a.x,b.x,c.x,d.x),right=Math.max(a.x,b.x,c.x,d.x),top=Math.min(a.y,b.y,c.y,d.y),bottom=Math.max(a.y,b.y,c.y,d.y),padX=Math.max(0,(minimum-right+left)/2),padY=Math.max(0,(minimum-bottom+top)/2);
+ return px>=left-padX&&px<=right+padX&&py>=top-padY&&py<=bottom+padY;
+}
 
 // Avoid replacing text nodes or attributes when the visible state has not changed.
 function seenSetText(node,value){SeenI18n.text(node,value)}
