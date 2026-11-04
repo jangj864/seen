@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="ko">
+<head>
+ <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#ede8d9">
+ <title>SEEN — 3D Cinema Study</title><meta name="description" content="부드러운 빛과 둥근 캐릭터로 둘러보는 SEEN의 3D 영화관.">
+ <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23485f4d'/%3E%3Ctext x='16' y='24' fill='%23fff5df' font-size='25' font-family='Arial' font-weight='bold' text-anchor='middle'%3ES%3C/text%3E%3C/svg%3E">
+ <link rel="stylesheet" href="three-preview/style.css?v=1">
+ <script src="room-navigation.js?v=experience1"></script>
+ <script type="importmap">{"imports":{"three":"./vendor/three-0.187.0/three.module.js"}}</script>
+ <script type="module" src="three-preview/main.js?v=1"></script>
+</head>
+<body>
+ <header class="topbar"><a class="brand" href="./" aria-label="SEEN 영화관으로">SEEN<span>시선이 머무는 영화관</span></a><div class="edition"><i></i> CINEMA STUDY / 01</div><a class="back" href="./">영화관으로 ↗</a></header>
+ <main id="stage" aria-label="SEEN 3D 영화관 로비">
+  <canvas id="scene" tabindex="0" aria-label="3D 로비. 방향키나 WASD로 걷고, Space로 점프합니다. 문이나 인물 근처에서 Enter를 눌러 상호작용합니다. 바닥을 눌러 이동하거나 화면을 드래그해 둘러보세요."></canvas>
+  <div class="intro"><span class="eyebrow">A LITTLE MORE DIMENSION.</span><h1>영화관을<br>산책해보세요.</h1><p>부드러운 빛, 작은 표정,<br>그리고 함께 머무는 공간.</p></div>
+  <nav class="views" aria-label="카메라 보기"><button type="button" data-view="lobby" aria-pressed="true">로비 전체</button><button type="button" data-view="avatar" aria-pressed="false">캐릭터 보기</button><button type="button" id="reset-camera" aria-label="카메라를 처음 위치로">↺</button></nav>
+  <div id="loading" role="status"><span class="loading-dot"></span>영화관에 불을 켜고 있어요.</div>
+  <div id="hover-label" hidden></div>
+  <div class="visitor-tag" id="visitor-tag" hidden>나</div>
+  <aside class="character-card"><span>오늘의 나</span><div class="swatches" aria-label="캐릭터 선택"><button type="button" data-avatar="0" class="selected" style="--swatch:#c77b5d" aria-label="테라코타 니트 캐릭터" aria-pressed="true"></button><button type="button" data-avatar="1" style="--swatch:#6a846d" aria-label="올리브 니트 캐릭터" aria-pressed="false"></button><button type="button" data-avatar="2" style="--swatch:#a19ab6" aria-label="라벤더 니트 캐릭터" aria-pressed="false"></button></div></aside>
+  <div class="help"><span>바닥을 눌러 걷기</span><i></i><span>드래그로 둘러보기</span><i></i><span class="keyboard-help">방향키 · WASD 이동 / Space 점프 / Enter 대화·입장</span></div>
+  <div class="mobile-controls"><div class="walk-pad" role="group" aria-label="이동"><button type="button" data-move="up" aria-label="앞으로">↑</button><button type="button" data-move="left" aria-label="왼쪽으로">←</button><button type="button" data-move="down" aria-label="뒤로">↓</button><button type="button" data-move="right" aria-label="오른쪽으로">→</button></div><button type="button" id="jump" aria-label="점프">점프 ↑</button></div>
+  <dialog id="place-dialog" aria-labelledby="place-title"><button class="close" type="button" aria-label="닫기">×</button><span id="place-kicker">SEEN CINEMA</span><h2 id="place-title"></h2><p id="place-description"></p><a id="place-link" href="./">둘러보기 ↗</a></dialog>
+ </main>
+ <footer><span>좋은 영화, 함께하는 즐거움.</span><span>SEEN / 입체 공간 시안</span></footer>
+</body>
+</html>

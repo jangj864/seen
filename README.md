@@ -84,3 +84,11 @@ Cinema articles support `#read/table`, `#read/ladybird`, `#read/yang` and `#read
 `film-catalog.js` supplies the five upcoming films to both editions, and `articles.js` supplies their shared essays. Recommendation PNGs wrap long Korean and Latin strings without clipping. Conversation sessions reject stale async seat replies after a conversation closes or changes.
 
 Validation: `node --test tests/*.test.cjs`. Browser regressions: `PLAYWRIGHT_MODULE=/absolute/path/to/playwright node --test --test-concurrency=1 tests/*.browser.cjs` (Chrome). Browser fixtures replace backend services and never publish public comments or scores.
+
+## 3D cinema study
+
+`3d.html` is a separate, interactive WebGL study of the cinema lobby and original rounded characters. Drag to orbit, use arrows/WASD or tap the floor to walk, and press Space to jump. Enter interacts with a nearby door, prop or host. The camera controls switch between a full lobby view and a character close-up; three appearance presets are available. Mobile visitors start with the character view and have directional and jump controls. Furniture and people have collision footprints, and clicking a door, prop or host approaches it before opening its information dialog.
+
+This study links into the existing articles and cinema. It does not migrate the auditoriums, arcade, live presence or scores into 3D. Its shared geometry/material helpers, character builder and cinema builder live in `dist/three-preview/`; walking routes reuse `room-navigation.js`. Three.js **0.187.0** and its required addons are pinned and served locally from `dist/vendor/three-0.187.0/`, with the MIT license and source provenance. No build step is needed.
+
+Validation: `PLAYWRIGHT_MODULE=/absolute/path/to/playwright node --test tests/three-preview.browser.cjs` covers real WebGL rendering, walking/jumping, appearance and camera controls, door raycasting/approach, narrow-screen layout and finite character geometry. Tests serve local assets and do not connect to public services.
