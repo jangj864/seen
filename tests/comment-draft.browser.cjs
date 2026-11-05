@@ -13,8 +13,8 @@ const mockSdk=`
  const mockChannel={
   on(){return this},presenceState(){return {}},
   subscribe(callback){queueMicrotask(()=>callback('SUBSCRIBED'));return this},
-  track(){return Promise.resolve()},
-  send(message){if(message.event==='comment')commentMock.broadcasts.push(message);return Promise.resolve()}
+  track(){return commentMock.rejectSignals?Promise.reject(Error('Socket unavailable')):Promise.resolve()},
+  send(message){if(message.event==='comment')commentMock.broadcasts.push(message);return commentMock.rejectSignals?Promise.reject(Error('Socket unavailable')):Promise.resolve()}
  };
  window.supabase={createClient(){return {
   channel(){return mockChannel},
@@ -71,7 +71,7 @@ test('actual comment submits preserve failed and newer drafts and notify reading
   assert.equal(await page.evaluate(()=>commentMock.broadcasts.length),0);
 
   const matching='  등록할 감상\n확인  ';
-  await submit(matching,2);await settle({error:null},1);
+  await submit(matching,2);await page.evaluate(()=>commentMock.rejectSignals=true);await settle({error:null},1);
   assert.equal(await field.inputValue(),'');assert.equal(await savedBody(),'');
   assert.deepEqual(await page.evaluate(()=>commentMock.events[0]),{detail:{articleId:'table',body:matching.trim(),author:'Comment QA'},targetIsDocument:true});
   await close();await reopen();assert.equal(await field.inputValue(),'');

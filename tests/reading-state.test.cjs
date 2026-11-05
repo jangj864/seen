@@ -58,3 +58,9 @@ test('a pasted deep link gets a seats entry so close stays on site, including af
  assert.equal(browser.api.location.search,'?issue=2');assert.equal(browser.api.location.hash,'');assert.equal(current.article,null);
  browser.api.history.forward();assert.equal(current.article,'ladybird');
 });
+
+test('one damaged entry cannot discard other saved article drafts on reload',()=>{
+ const raw=JSON.stringify([null,{},'old format',['broken',[]],['ladybird',{scroll:540,body:'  남겨 둔 초안  ',author:'지수'}]]);
+ const store=load().createStore({getItem:()=>raw});
+ assert.equal(store.read('ladybird').body,'  남겨 둔 초안  ');assert.equal(store.read('ladybird').scroll,540);assert.equal(store.read('broken').body,'');
+});

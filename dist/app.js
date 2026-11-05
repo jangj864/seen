@@ -25,7 +25,7 @@ function wrapCardText(ctx,text,maxWidth){
 let toastTimer;
 function toast(text){$('#toast').textContent=text;$('#toast').classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('#toast').classList.remove('show'),3200)}
 const films = SeenFilmCatalog.magazine;
-let saved=storage.get('watchlist',[]);if(!Array.isArray(saved))saved=[];
+let saved=storage.get('watchlist',[]);if(!Array.isArray(saved))saved=[];saved=[...new Set(saved.filter(id=>films.some(film=>film.id===id)))];
 function renderFilms(filter='all'){$('#films').innerHTML=films.filter(f=>filter==='all'||f.type===filter).map((f,i)=>`<article class="film-card" data-type="${f.type}"><div class="film-top"><span>${String(i+1).padStart(2,'0')} / ${f.type==='new'?'COMING THIS MONTH':'FROM THE SHELF'}</span><span class="film-date">${f.date}</span></div><div class="film-art"><img src="assets/${f.image}.${f.ext||'jpg'}" alt="${escapeHTML(f.title)} — official publicity artwork" loading="lazy"><button class="save-film ${saved.includes(f.id)?'saved':''}" data-save="${f.id}" aria-pressed="${saved.includes(f.id)}">${saved.includes(f.id)?'✓ Saved':'+ My watchlist'}</button></div><h3>${f.title}</h3><div class="director">${f.director}</div><p>${f.note}</p><div class="film-prompt"><b>AFTER THE CREDITS</b><br>${f.prompt}</div><a class="film-link" href="${f.link}" target="_blank" rel="noopener">${f.source} ↗</a></article>`).join('')}
 renderFilms();
 $$('[data-filter]').forEach(b=>b.addEventListener('click',()=>{$$('[data-filter]').forEach(x=>{x.classList.toggle('active',x===b);x.setAttribute('aria-pressed',x===b?'true':'false')});renderFilms(b.dataset.filter)}));
@@ -48,10 +48,25 @@ window.addEventListener('popstate',()=>{if(location.hash.startsWith('#read/'))op
 if(location.hash.startsWith('#read/'))openArticle(location.hash.slice(6),false);
 $('.menu-button').addEventListener('click',()=>{const yes=$('#issue-menu').hidden;$('#issue-menu').hidden=!yes;$('.menu-button').setAttribute('aria-expanded',String(yes))});$$('#issue-menu a').forEach(a=>a.addEventListener('click',()=>{$('#issue-menu').hidden=true;$('.menu-button').setAttribute('aria-expanded','false')}));document.addEventListener('click',e=>{if(!e.target.closest('#issue-menu,.menu-button')){$('#issue-menu').hidden=true;$('.menu-button').setAttribute('aria-expanded','false')}});
 // Keep ballot options aligned with the same upcoming records as both film views.
-function renderBallotChoices(){const fieldset=$('#vote-form fieldset');fieldset.innerHTML=`<legend class="field-label">What are we watching?</legend>`+films.filter(f=>f.type==='new').map(f=>`<label><input type="radio" name="film" value="${escapeHTML(f.title)}" required><span>${escapeHTML(f.title)}</span><small>${f.date}</small></label>`).join('')}
+const ballotFilms=films.filter(film=>film.type==='new');
+function restoreVotes(raw){
+ const valid=new Map();
+ if(Array.isArray(raw))for(const vote of raw){
+  if(!vote||typeof vote.name!=='string'||!vote.name.trim()||!ballotFilms.some(film=>film.title===vote.film))continue;
+  const name=vote.name.trim().slice(0,35);valid.set(name.toLowerCase(),{name,film:vote.film});
+ }
+ return [...valid.values()];
+}
+function renderBallotChoices(){const fieldset=$('#vote-form fieldset');fieldset.innerHTML=`<legend class="field-label">What are we watching?</legend>`+ballotFilms.map(f=>`<label><input type="radio" name="film" value="${escapeHTML(f.title)}" required><span>${escapeHTML(f.title)}</span><small>${f.date}</small></label>`).join('')}
 renderBallotChoices();
-let votes=storage.get('votes',[]);if(!Array.isArray(votes))votes=[];
-function renderVotes(){if(!votes.length){$('#vote-results').innerHTML='';return}const counts=Object.fromEntries(films.filter(f=>f.type==='new').map(f=>[f.id,votes.filter(v=>v.film===f.title).length]));const max=Math.max(...Object.values(counts));const leaders=films.filter(f=>counts[f.id]===max).map(f=>f.title);$('#vote-results').innerHTML=`<p><strong>${votes.length} vote${votes.length===1?'':'s'} on this screen.</strong> ${leaders.length===1?'Leading: '+escapeHTML(leaders[0]):'A tie. Let someone who hasn’t chosen recently decide.'}</p>`+films.filter(f=>f.type==='new').map(f=>`<div class="result-row"><span>${f.title}</span><b>${counts[f.id]}</b><i style="width:${counts[f.id]/votes.length*100}%"></i></div>`).join('')}
+let votes=restoreVotes(storage.get('votes',[]));
+function renderVotes(){
+ if(!votes.length){$('#vote-results').innerHTML='';return}
+ const counts=new Map(ballotFilms.map(film=>[film.title,0]));
+ for(const vote of votes)counts.set(vote.film,counts.get(vote.film)+1);
+ const max=Math.max(...counts.values()),leaders=ballotFilms.filter(film=>counts.get(film.title)===max);
+ $('#vote-results').innerHTML=`<p><strong>${votes.length} vote${votes.length===1?'':'s'} on this screen.</strong> ${leaders.length===1?'Leading: '+escapeHTML(leaders[0].title):'A tie. Let someone who hasn’t chosen recently decide.'}</p>`+ballotFilms.map(film=>`<div class="result-row"><span>${film.title}</span><b>${counts.get(film.title)}</b><i style="width:${counts.get(film.title)/votes.length*100}%"></i></div>`).join('');
+}
 renderVotes();
 $('#vote-form').addEventListener('submit',e=>{e.preventDefault();const name=$('#voter').value.trim();if(!name){$('#voter').setCustomValidity(SeenI18n.t('Enter a name before voting.'));$('#voter').reportValidity();return}$('#voter').setCustomValidity('');const film=new FormData(e.target).get('film');const previous=votes.findIndex(v=>v.name.toLowerCase()===name.toLowerCase());if(previous>=0)votes[previous]={name,film};else votes.push({name,film});const persisted=storage.set('votes',votes);renderVotes();e.target.reset();toast(persisted?`${name}’s vote ${previous>=0?'updated':'counted'}. Pass the screen on.`:'Vote counted for this visit; browser storage is unavailable.')});$('#voter').addEventListener('input',()=>$('#voter').setCustomValidity(''));
 let confirmReset=false;$('#reset-votes').addEventListener('click',()=>{if(!votes.length){toast('The ballot is already empty.');return}if(!confirmReset){confirmReset=true;$('#reset-votes').textContent='Confirm reset?';setTimeout(()=>{confirmReset=false;$('#reset-votes').textContent='Reset ballot'},4000);return}votes=[];storage.set('votes',votes);renderVotes();confirmReset=false;$('#reset-votes').textContent='Reset ballot';toast('A fresh ballot. Choose the next film together.')});
@@ -65,7 +80,7 @@ const questions=[
 ];let qi=0,score=0,answered=false;
 function renderQuiz(){answered=false;$('#quiz-progress').textContent=qi<questions.length?`QUESTION ${String(qi+1).padStart(2,'0')} / 06`:'THE CREDITS / YOUR RESULT';$('#quiz-score').textContent=`SCORE ${score}`;$('.quiz-track span').style.width=`${Math.min(qi+1,6)/6*100}%`;if(qi===questions.length){$('#quiz-content').innerHTML=`<h3>${score} / 6.<br>${score===6?'You’ve been paying attention.':score>=3?'Good company for a film night.':'A reason to watch again.'}</h3><p class="quiz-feedback">${score===6?'Perfect score. Pick the next film, then pass the quiz to a friend.':'Every answer is another invitation to look again. Choose a film from this issue and keep the conversation going.'}</p><button class="quiz-next" id="quiz-restart">Play again ↻</button>`;$('#quiz-restart').addEventListener('click',()=>{qi=0;score=0;renderQuiz()});return}const q=questions[qi];$('#quiz-content').innerHTML=`<h3>${q.q}</h3><div class="quiz-options">${q.options.map((x,i)=>`<button data-answer="${i}"><span>${'ABCD'[i]}</span>${x}</button>`).join('')}</div><div id="quiz-answer" aria-live="polite"></div>`;$$('[data-answer]').forEach(b=>b.addEventListener('click',()=>{if(answered)return;answered=true;const chosen=Number(b.dataset.answer);const right=chosen===q.answer;if(right)score++;$('#quiz-score').textContent=`SCORE ${score}`;$$('[data-answer]').forEach(x=>{x.disabled=true;const i=Number(x.dataset.answer);if(i===q.answer)x.classList.add('correct');if(i===chosen&&!right)x.classList.add('wrong')});$('#quiz-answer').innerHTML=`<p class="quiz-feedback"><strong>${right?'That’s it.':'Not quite.'}</strong> ${q.note}</p><button class="quiz-next" id="quiz-next">${qi===5?'See your result':'Next question'} →</button>`;$('#quiz-next').addEventListener('click',()=>{qi++;renderQuiz()});$('#quiz-next').focus({preventScroll:true})}))}
 renderQuiz();
-const draftKeys=['recipient','recommend-film','reason'];let draft=storage.get('card',{});if(!draft||typeof draft!=='object')draft={};
+const draftKeys=['recipient','recommend-film','reason'];let draft=storage.get('card',{});if(!draft||typeof draft!=='object'||Array.isArray(draft))draft={};
 try{const shared=new URLSearchParams(location.hash.startsWith('#card?')?location.hash.slice(6):'');if(shared.has('to')){draft={recipient:shared.get('to')?.slice(0,65),'recommend-film':shared.get('film')?.slice(0,90),reason:shared.get('why')?.slice(0,500)};setTimeout(()=>$('#pass-it-on').scrollIntoView(),300)}}catch{}
 draftKeys.forEach(k=>{if(typeof draft[k]==='string')$('#'+k).value=draft[k];$('#'+k).addEventListener('input',()=>{draftKeys.forEach(x=>draft[x]=$('#'+x).value);storage.set('card',draft);$('#download-card').hidden=true;$('#share-status').textContent=''})});
 function getCard(){return Object.fromEntries(draftKeys.map(k=>[k,$('#'+k).value.trim()]))}

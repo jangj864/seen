@@ -10,10 +10,13 @@ const SeenReading=(()=>{
  }
  function createStore(storage){
   const entries=new Map();
-  try{for(const [id,value]of JSON.parse(storage?.getItem(storageKey)||'[]')){
-   if(typeof id!=='string'||!/^[a-z0-9-]{1,64}$/i.test(id)||!value||typeof value!=='object')continue;
+  let restored;try{restored=JSON.parse(storage?.getItem(storageKey)||'[]')}catch{}
+  if(Array.isArray(restored))for(const entry of restored){
+   if(!Array.isArray(entry)||entry.length!==2)continue;
+   const [id,value]=entry;
+   if(typeof id!=='string'||!/^[a-z0-9-]{1,64}$/i.test(id)||!value||typeof value!=='object'||Array.isArray(value))continue;
    entries.set(id,{scroll:Number.isFinite(value.scroll)?Math.max(0,value.scroll):0,body:typeof value.body==='string'?value.body.slice(0,800):'',author:typeof value.author==='string'?value.author.slice(0,32):''});
-  }}catch{}
+  }
   function read(id){return{scroll:0,body:'',author:'',...entries.get(id)}}
   function save(id,patch){const value=read(id);if(Number.isFinite(patch.scroll))value.scroll=Math.max(0,patch.scroll);if(typeof patch.body==='string')value.body=patch.body;if(typeof patch.author==='string')value.author=patch.author;entries.set(id,value);try{storage?.setItem(storageKey,JSON.stringify([...entries]))}catch{}return{...value}}
   function posted(id,body){const value=read(id);if(value.body.trim()===body.trim())save(id,{body:''})}

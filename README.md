@@ -90,3 +90,13 @@ Validation: `node --test tests/*.test.cjs`. Browser regressions: `PLAYWRIGHT_MOD
 The cinema uses the original isometric canvas style throughout the lobby, screening rooms and arcade. Language buttons use **KR / EN**. Sound uses a speaker icon with an accessible on/off state. On small screens the introduction wraps inside the viewport. Arcade leaves open inward, and nameplates use a foreground layer anchored to each character’s head.
 
 `quiz-player.js` provides the existing questions, answers, replay and Top 10 scoreboard. Completed rounds retain the visitor’s nickname across score retries.
+
+## Refresh recovery
+
+The cinema and magazine validate saved ballot, watchlist, card and article data before restoring it. A malformed entry cannot stop startup or discard another article’s valid draft. With blocked browser storage, reading progress and drafts remain available for the current visit.
+
+Presence and quiz results reuse the same Supabase client. Movement updates serialize at most once per 120 ms, and unchanged positions are not broadcast again. Optional presence notifications and AudioContext resume failures are handled without interrupting comments or navigation.
+
+`tests/refresh-recovery.browser.cjs` covers repeated refreshes at mobile and desktop widths, all four article routes, malformed links and stored data, missing artwork, blocked storage, shared connections and audio failures. It uses local backend fixtures and never writes public comments or scores. Run browser checks with `PLAYWRIGHT_MODULE=/path/to/playwright node --test --test-concurrency=1 tests/*.browser.cjs` and unit checks with `node --test tests/*.test.cjs`.
+
+The Publish SEEN workflow runs unit, shipped-script syntax and local-resource checks before uploading the site, so these failures stop deployment.

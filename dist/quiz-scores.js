@@ -4,6 +4,7 @@ const SeenScores=(()=>{
  let client;
  const pending=new Map();
  function connection(){
+  const shared=typeof SeenHub!=='undefined'&&SeenHub?.client;if(shared)return shared;
   const config=window.SEEN_COMMUNITY;
   if(!config?.url||!config.key||!window.supabase)throw Error('Score service unavailable');
   return client||(client=supabase.createClient(config.url,config.key,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}}));
