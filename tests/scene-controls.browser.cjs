@@ -53,15 +53,17 @@ for(const viewport of [{width:320,height:568},{width:393,height:852},{width:844,
    assert.deepEqual(await page.evaluate(()=>({position:document.querySelector('#world').dataset.position,jump:document.querySelector('#world').dataset.jumpPhase})),{position:before.position,jump:'idle'});
   }
   await page.evaluate(()=>{near=rooms[0];enter()});await frame(page);
-  for(const selector of ['#read-story','#seat-picker','#return-lobby'])await visibleControl(page,selector);
+  for(const selector of ['#seat-picker','#return-lobby'])await visibleControl(page,selector);
   await noOverflow(page);
-  await page.locator('#read-story').focus();await page.keyboard.press('Space');
+  assert.equal(await page.locator('#read-story').count(),0);
+  const screen=await page.evaluate(()=>{const detail={frame:null};document.dispatchEvent(new CustomEvent('seen-capture-screen',{detail}));const m=detail.frame.matrix;return{x:m[4]+m[0]*400,y:m[5]+m[1]*400+m[3]*225}});
+  await page.mouse.click(screen.x,screen.y);
   await page.waitForFunction(()=>document.querySelector('#screen-article').open&&document.querySelector('#screen-article').dataset.readingReady==='true');
   assert.ok(await page.locator('.screen-article-body').evaluate(element=>parseFloat(getComputedStyle(element).fontSize))>=16,'article text is at least 16px');
   await noOverflow(page);
   await page.keyboard.press('Escape');
   await page.waitForFunction(()=>!document.querySelector('#screen-article').open&&!location.hash);await frame(page);
-  assert.equal(await page.locator('#room-world').getAttribute('data-jump-phase'),'idle','Space reads without triggering a world jump');
+  assert.equal(await page.locator('#room-world').getAttribute('data-jump-phase'),'idle','clicking the screen reads without triggering a world jump');
   await page.locator('#return-lobby').click();
   assert.equal(await page.evaluate(()=>document.body.dataset.scene),'lobby-scene');
   await page.evaluate(()=>enterGame());await frame(page);

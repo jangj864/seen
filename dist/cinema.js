@@ -220,7 +220,7 @@ const articleHistory=SeenReading.createHistory({host:window,ids:rooms.map(room=>
 }});
 articleHistory.start();
 document.addEventListener('seen-welcome-complete',()=>articleHistory.sync());
-for(const id of ['projection','start-program','read-story']){const control=document.getElementById(id);if(control)control.onclick=openProgram}
+for(const id of ['projection','start-program']){const control=document.getElementById(id);if(control)control.onclick=openProgram}
 document.querySelector('#back-to-seats').onclick=()=>closeProgram();
 screenArticle.addEventListener('cancel',event=>{event.preventDefault();closeProgram()});
 screenArticle.addEventListener('close',()=>{keys.clear();if(!screenArticle.open)document.querySelector('#room-world').focus({preventScroll:true})});
