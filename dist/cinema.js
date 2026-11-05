@@ -179,20 +179,24 @@ function openProgram(fromHistory=false){
  document.querySelector('#screen-article-room').textContent=`SCREEN ${currentRoom.n} / SEEN · ISSUE 02`;
  const selectedSeat=document.querySelector('#room-world').dataset.motion==='seated'?seatChoices.get(currentRoom.n):null;seenSetText(document.querySelector('#screen-article-seat'),selectedSeat?`Seat ${selectedSeat}`:'FROM THE AUDIENCE');
  const content=document.querySelector('#screen-article-content');content.replaceChildren();
+ const hero=document.createElement('div');hero.className='screen-article-hero';content.append(hero);
  const header=document.createElement('header');header.className='screen-article-header';
  const tag=document.createElement('span');tag.className='screen-article-tag';tag.textContent=article.tag;
  const title=document.createElement('h2');title.id='screen-article-title';title.innerHTML=article.title;
- const deck=document.createElement('p');deck.textContent=article.deck;header.append(tag,title,deck);content.append(header);
+ header.append(tag,title);hero.append(header);
+ const cue=document.createElement('span');cue.className='screen-reading-cue';cue.textContent='SCROLL TO READ ↓';hero.append(cue);
  let artworkReady=Promise.resolve();
  if(article.image){
   const figure=document.createElement('figure'),image=document.createElement('img'),caption=document.createElement('figcaption');
   image.alt=article.credit;caption.textContent=article.credit;
   artworkReady=new Promise(resolve=>{image.addEventListener('load',resolve,{once:true});image.addEventListener('error',resolve,{once:true})});
   image.src=`assets/${article.image}.jpg`;if(image.complete)artworkReady=Promise.resolve();
-  figure.append(image,caption);content.append(figure);
+  figure.append(image,caption);hero.prepend(figure);
  }
- const body=document.createElement('div');body.className='screen-article-body';body.innerHTML=article.body;content.append(body);
- const commentsReady=SeenHub.mountComments(content,id);
+ const copy=document.createElement('div');copy.className='screen-article-copy';content.append(copy);
+ const deck=document.createElement('p');deck.className='screen-article-lead';deck.textContent=article.deck;copy.append(deck);
+ const body=document.createElement('div');body.className='screen-article-body';body.innerHTML=article.body;copy.append(body);
+ const commentsReady=SeenHub.mountComments(copy,id);
  const form=content.querySelector('.comment-form');
  if(form){form.elements.body.value=saved.body;if(saved.author)form.elements.author.value=saved.author}
  screenArticle.showModal();const transitionReady=readingTransition.open(transitionFrame);restoringArticleScroll=true;screenArticle.dataset.readingReady='false';

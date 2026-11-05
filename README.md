@@ -106,3 +106,9 @@ The Publish SEEN workflow runs unit, shipped-script syntax and local-resource ch
 All three quizzes use the same front-facing cabinet, inset CRT playfield, answer cards and Top 10 result screen. Each game retains its own accent color and pixel icon; question text and answer names use readable Korean/Latin typography. Choose with the cards, A–D, 1–4, or the cabinet’s physical-style answer buttons on desktop. Those buttons and keyboard shortcuts call the same answer action and cannot submit twice.
 
 `arcade-experience.css` owns the cabinet, confirmation and scoreboard styling. `tests/arcade-cabinet.browser.cjs` completes every mode in Korean and English at four viewport sizes, checking card text bounds, feedback, a fixed screen frame, nickname preservation and one score submission per round. Its backend is local test data.
+
+## Cinema projection interface
+
+The wall projection and reading view use the same film still and article title with black masking, a matte screen texture, restrained lighting and dark velvet curtains. `cinema-experience.css` owns the reading frame and transition styling; shared scene controls remain in `experience.css`. The 16:9 title card fills one screen, and the introduction, article and comments scroll inside that fixed surface. Image credits remain visible on the title card.
+
+The wall’s tiny perforation texture is cached per drawing context, including the transition snapshot. Curtain opening never scales the wall screen. Browser checks cover both languages, title/credit bounds, internal scrolling, draft restoration and motion cancellation.
