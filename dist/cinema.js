@@ -59,68 +59,18 @@ box(x+.16,y+.26,.012,1.28,.09,.018,'#d8c29b','#ad9873','#968367');
 function leaf(hinge,sign,color){const hx=x+hinge,hy=y+.27,tx=hx+sign*.56*Math.cos(angle),ty=hy+.56*Math.sin(angle);poly([[hx,hy,0],[tx,ty,0],[tx,ty,2.28],[hx,hy,2.28]],color);poly([[hx,hy,2.28],[tx,ty,2.28],[tx,ty+.035,2.28],[hx,hy+.035,2.28]],'#c46b4d');poly([[tx,ty,0],[tx,ty+.035,0],[tx,ty+.035,2.28],[tx,ty,2.28]],'#682d26');const handleX=hx+(tx-hx)*.87,handleY=hy+(ty-hy)*.87;const a=p(handleX,handleY+.04,.98),b=p(handleX,handleY+.04,1.27);ctx.strokeStyle='#eccb87';ctx.lineWidth=scale*.035;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();}
 leaf(.20,1,'#a84432');leaf(1.36,-1,'#913a2d');box(x+.14,y+.25,2.45,1.32,.05,.35,'#f0d2a8','#f4deaa','#d5b584');text('SCREEN '+r.n,x+.8,y+.32,2.53,.2,'#652b24','wall');ctx.save();ctx.globalAlpha=1-r.open;text(r.n,x+.8,y+.34,1.45,.6,'#f5d49f','wall');ctx.restore();}
 function gameEntrance(){const angle=gameOpen*Math.PI*.45;poly([[.35,5.26,.01],[1.72,5.26,.01],[1.72,6.74,.01],[.35,6.74,.01]],'#727d56');box(.12,5.1,0,.25,1.8,2.2,'#d8c89e','#344c3b','#263d31');poly([[.39,5.24,0],[.39,6.76,0],[.39,6.76,1.84],[.39,5.24,1.84]],'#182b23');
-for(const [y,sign]of [[5.30,1],[6.70,-1]]){const tx=.42+.70*Math.sin(angle),ty=y+sign*.70*Math.cos(angle);poly([[.42,y,0],[tx,ty,0],[tx,ty,1.8],[.42,y,1.8]],sign===1?'#3e6a50':'#335c46');}
+for(const [y,sign]of [[5.30,1],[6.70,-1]]){const tx=.42-.70*Math.sin(angle),ty=y+sign*.70*Math.cos(angle);poly([[.42,y,0],[tx,ty,0],[tx,ty,1.8],[.42,y,1.8]],sign===1?'#3e6a50':'#335c46');}
 function sign(value,y,z,size,color){value=SeenI18n.t(value);const q=p(.44,y,z);ctx.save();ctx.transform(.86,-.43,0,1,q.x,q.y);ctx.fillStyle=color;ctx.font=`700 ${size*scale}px "Barlow Condensed","Pretendard",sans-serif`;ctx.textAlign='center';ctx.fillText(value,0,0);ctx.restore()}
+for(const y of [5.1,6.76])box(.12,y,0,.28,.14,1.85,'#cbbf99','#344c3b','#263d31');
 box(.12,5.1,1.85,.28,1.8,.35,'#ddcda3','#516a46','#364e37');sign('GAME ROOM',6,1.95,.19,'#f3dfaa');ctx.save();ctx.globalAlpha=1-gameOpen;sign('?',6,1.03,.58,'#e2c78d');sign('SEEN QUIZ',6,.54,.14,'#e2c78d');ctx.restore();}
 function walkToGame(){keys.clear();walkLobbyTo({x:.56,y:6});canvas.focus({preventScroll:true})}
-const quizThemes={
- all:{title:'SEEN QUIZ',accent:'#b74239',light:'#f0b39d',onAccent:'#fff3dc',description:'Five questions about film directors.'},
- eyes:{title:'EYES ONLY',accent:'#428b7e',light:'#a4d4b2',onAccent:'#fff3dc',description:'Guess five actors from their eyes.'},
- films:{title:'FILM CLUB',accent:'#b1893e',light:'#efcf82',onAccent:'#172a20',description:'Five questions about film stories and settings.'}
-};
-let requestedQuiz=null;
-function applyQuizTheme(element,mode){const theme=quizThemes[mode];element.dataset.mode=mode;for(const [key,value]of Object.entries({accent:theme.accent,light:theme.light,'on-accent':theme.onAccent}))element.style.setProperty(`--game-${key}`,value)}
-function requestQuiz(mode){
- if(!isSceneOpen('arcade-room')||gameRoom.open||quizConfirm.open||!quizThemes[mode])return;
- requestedQuiz=mode;applyQuizTheme(quizConfirm,mode);document.querySelector('.game-confirm-mark').innerHTML=SeenIcons.svg(mode);document.querySelector('#game-confirm-title').textContent=`Would you like to play ${quizThemes[mode].title}?`;document.querySelector('#game-confirm-description').textContent=quizThemes[mode].description;
- quizConfirm.showModal();document.querySelector('#confirm-game-start').focus({preventScroll:true});document.dispatchEvent(new Event('seen-quiz-open'));
-}
-function cancelQuizRequest(){requestedQuiz=null;quizConfirm.close();document.querySelector('#arcade-world').focus({preventScroll:true})}
-document.querySelector('#cancel-game-start').onclick=cancelQuizRequest;
-quizConfirm.addEventListener('cancel',event=>{event.preventDefault();cancelQuizRequest()});
-document.querySelector('#confirm-game-start').onclick=()=>{const mode=requestedQuiz;requestedQuiz=null;quizConfirm.close();if(mode)openQuiz(mode)};
-function updateQuizIndicators(total,complete){
- const dots=document.querySelector('#game-indicators');dots.replaceChildren();
- for(let i=0;i<total;i++){const dot=document.createElement('li'),current=!complete&&i===gameIndex,answered=complete||i<gameIndex||(current&&gameAnswered!==null);dot.className='quiz-dot';dot.classList.toggle('is-current',current);dot.classList.toggle('is-answered',answered);dot.setAttribute('aria-label',`Question ${i+1}: ${current?'current question':answered?'completed':'not answered yet'}`);if(current)dot.setAttribute('aria-current','step');dots.append(dot)}
-}
-let gameIndex=0,gameScore=0,gameAnswered=null,gameMode='all',gameQuestions=seenQuizQuestions.filter(q=>q.mode==='all'),gameRound=SeenScoreboard.createRound('all');
-function replayQuiz(){gameIndex=0;gameScore=0;gameAnswered=null;gameRound=SeenScoreboard.createRound(gameMode);renderGame();document.querySelector('#game-quiz button')?.focus({preventScroll:true})}
-function renderGame(){
- const total=gameQuestions.length,complete=gameIndex===total,q=gameQuestions[gameIndex],root=document.querySelector('#game-quiz');
- updateQuizIndicators(total,complete);
- document.querySelector('#game-progress').textContent=complete?'YOUR RESULT':`QUESTION ${String(gameIndex+1).padStart(2,'0')} / ${String(total).padStart(2,'0')}`;
- document.querySelector('#game-score').textContent=`SCORE ${gameScore}`;
- document.querySelector('#game-progress-bar').style.width=`${Math.min(gameIndex+1,total)/total*100}%`;
- root.dataset.state=complete?'complete':gameAnswered===null?'question':gameAnswered===q.answer?'correct':'wrong';
- if(complete){SeenScoreboard.show(root,{round:gameRound,score:gameScore,total,onReplay:replayQuiz});return}
- root.replaceChildren();const question=document.createElement('div');question.className='game-question';
- const heading=document.createElement('h3');heading.textContent=q.q;question.append(heading);
- if(!complete&&q.kind==='eyes'){
-  const ns='http://www.w3.org/2000/svg',visual=document.createElementNS(ns,'svg'),image=document.createElementNS(ns,'image');
-  visual.classList.add('game-eyes');visual.setAttribute('viewBox',q.crop.join(' '));visual.setAttribute('role','img');visual.setAttribute('aria-label',gameAnswered===null?'Eye detail from a film publicity still. Choose the actor below.':`Eye detail: ${q.options[q.answer]}`);
-  image.setAttribute('href',`assets/${q.image}.jpg`);image.setAttribute('width',String(q.imageSize?.[0]||2000));image.setAttribute('height',String(q.imageSize?.[1]||1125));visual.append(image);question.append(visual);
- }
- if(!complete){const options=document.createElement('div');options.className='game-options';q.options.forEach((value,i)=>{
-  const button=document.createElement('button');button.dataset.gameAnswer=String(i);const letter=document.createElement('span');letter.textContent='ABCD'[i];const label=document.createElement('strong');label.textContent=value;button.append(letter,label);button.setAttribute('aria-pressed',String(gameAnswered===i));
-  if(gameAnswered!==null){button.disabled=true;if(i===q.answer)button.classList.add('correct');if(i===gameAnswered&&i!==q.answer)button.classList.add('wrong');if(i!==q.answer&&i!==gameAnswered)button.classList.add('is-muted');if(i===q.answer||i===gameAnswered){const mark=document.createElement('b');mark.className='answer-mark';mark.textContent=i===q.answer?'✓':'×';mark.setAttribute('aria-label',i===q.answer?'Correct answer':'Incorrect answer');button.append(mark)}}
-  button.onclick=()=>{if(gameAnswered!==null)return;gameAnswered=i;gameRound.answers[gameIndex]=i;if(i===q.answer)gameScore++;SeenHub.fx(i===q.answer?'correct':'wrong');renderGame();root.querySelector('.game-next').focus({preventScroll:true})};options.append(button)
- });question.append(options)}root.append(question);
- const slot=document.createElement('div');slot.className='game-answer-slot';root.append(slot);
- if(gameAnswered!==null){const feedback=document.createElement('p');feedback.className='game-feedback';feedback.setAttribute('role','status');feedback.textContent=`${gameAnswered===q.answer?'CORRECT! +1 POINT':'ANSWER: '+q.options[q.answer]} — ${q.note}`;
- const next=document.createElement('button');next.className='game-next';next.textContent=gameIndex===total-1?'SEE YOUR RESULT →':'NEXT QUESTION →';next.onclick=()=>{gameIndex++;gameAnswered=null;renderGame();root.querySelector('button').focus({preventScroll:true})};slot.append(feedback,next)}
-}
+const quizPlayer=createSeenQuizPlayer({canRequest:()=>isSceneOpen('arcade-room'),onOpen:()=>document.dispatchEvent(new Event('seen-quiz-open')),onClose:()=>document.querySelector('#arcade-world').focus({preventScroll:true}),fx:value=>SeenHub.fx(value),nickname:()=>SeenHub.name});
+function requestQuiz(mode){quizPlayer.request(mode)}
+function openQuiz(mode='all'){quizPlayer.open(mode)}
+function leaveGame(){quizPlayer.close()}
 function enterGame(){if(isSceneOpen('arcade-room'))return;keys.clear();target=null;lobbyWaypoints=[];lobbyVelocity={x:0,y:0};lobbyJump.reset();showScene('arcade-room');document.dispatchEvent(new Event('seen-arcade-enter'))}
-function openQuiz(mode='all'){
- if(gameRoom.open||!quizThemes[mode])return;
- applyQuizTheme(gameRoom,mode);document.querySelector('#game-room .game-toolbar>span').textContent=quizThemes[mode].title;
- if(mode!==gameMode){gameMode=mode;gameQuestions=seenQuizQuestions.filter(q=>q.mode===mode);gameIndex=0;gameScore=0;gameAnswered=null;gameRound=SeenScoreboard.createRound(mode)}
- const titles={all:'SEEN<span>QUIZ</span>',eyes:'EYES<span>ONLY</span>',films:'FILM<span>CLUB</span>'};
- document.querySelector('#game-title').innerHTML=titles[mode];document.querySelector('.game-marquee p').textContent=`${gameQuestions.length} questions. ${gameQuestions.length} points. How closely were you watching?`;
- renderGame();gameRoom.showModal();document.querySelector('#leave-game').focus({preventScroll:true});document.dispatchEvent(new Event('seen-quiz-open'));
-}
-function leaveGame(){if(!gameRoom.open)return;gameRoom.close();document.querySelector('#arcade-world').focus({preventScroll:true})}
-function leaveArcade(){if(quizConfirm.open){quizConfirm.close();requestedQuiz=null}if(gameRoom.open)gameRoom.close();closeScene('arcade-room');keys.clear();lobbyVelocity={x:0,y:0};target=null;lobbyWaypoints=[];player={x:1.8,y:6};setNear();canvas.focus({preventScroll:true})}
- document.querySelector('#leave-game').onclick=leaveGame;gameRoom.addEventListener('cancel',e=>{e.preventDefault();leaveGame()});arcadeRoom.addEventListener('cancel',e=>{e.preventDefault();leaveArcade()});
+function leaveArcade(){if(quizConfirm.open)quizPlayer.cancel();if(gameRoom.open)gameRoom.close();closeScene('arcade-room');keys.clear();lobbyVelocity={x:0,y:0};target=null;lobbyWaypoints=[];player={x:1.8,y:6};setNear();canvas.focus({preventScroll:true})}
+ arcadeRoom.addEventListener('cancel',e=>{e.preventDefault();leaveArcade()});
 
 function roomApproach(r){return{x:r.x+.8,y:r.y+1.5}}
 function person(){drawSeenCharacter({ctx,unit:scale,project:p,x:player.x,y:player.y,heading:lobbyHeading,nameTag:SeenHub.name,gait:reduced?0:lobbyGait,phase,jump:lobbyJump.height,jumpCrouch:lobbyJump.crouch,jumpTuck:lobbyJump.tuck,jumping:lobbyJump.active,tagColor:'#a44731',shadowColor:'#493e2826'})}
@@ -151,12 +101,11 @@ upcomingFilms.forEach((film,i)=>poster(posterPositions[i],film));rooms.forEach(d
 
 // Draw movable and freestanding pieces back-to-front on the shared floor plane.
 const benchDepth=propDepth(8.8,11.6,6.7,8.0);
-const signCorners=[];for(const x of [-.05,.08])for(const y of [-1.2,1.2])for(const z of [.85,1.6])signCorners.push(p(...upcomingSignPosition(x,y,z)));
-p.nameTagObstacles=[{left:Math.min(...signCorners.map(q=>q.x))-4,right:Math.max(...signCorners.map(q=>q.x))+4,top:Math.min(...signCorners.map(q=>q.y))-4,bottom:Math.max(...signCorners.map(q=>q.y))+4}];
+seenPrepareNameTags(p,canvas);
 const signBounds=upcomingSignBounds;
 const props=[{depth:propDepth(signBounds.left,signBounds.right,signBounds.top,signBounds.bottom),paint:upcomingSign},...SeenHub.drawPeople({ctx,unit:scale,project:p,scene:'lobby'}).map(item=>item.id==='lobby:npc:2'?{...item,depth:benchDepth+.01}:item),{depth:propDepth(13.5,16,7.2,8.4),paint:popcornShop},{depth:propDepth(3.6,6.6,6.5,7.58),paint:()=>offsetProp(counter,3,1)},{depth:propDepth(7.5,8.7,7.98,8.02),paint:()=>offsetProp(queuePosts,3,1)},{depth:benchDepth,paint:bench},{depth:20,paint:()=>planter(12,7.4)},{depth:player.x+player.y,paint:person}];
 if(target){ellipse(target.x,target.y,.025,.24,.10,'#d74a3538');ellipse(target.x,target.y,.027,.07,.03,'#d74a35')}
-props.sort((a,b)=>a.depth-b.depth).forEach(item=>item.paint());positionDoorPreview();
+props.sort((a,b)=>a.depth-b.depth).forEach(item=>item.paint());seenFlushNameTags(p);positionDoorPreview();
 
 }
 function setNear(){const next=rooms.find(r=>{const a=roomApproach(r);return Math.hypot(player.x-a.x,player.y-a.y)<1.1})||null;{near=next;if(near)showDoorPreview(near);else if(!hoveredDoor)preview.hidden=true;seenSetText(lobbyLocation,Math.hypot(player.x-1.4,player.y-6)<1.4?'OUTSIDE THE GAME ROOM':near?`OUTSIDE SCREEN ${near.n}`:'YOU ARE IN THE LOBBY')}}

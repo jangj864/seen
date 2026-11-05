@@ -54,8 +54,8 @@
   polygon([[10.9,6.1,.02],[12,6.1,.02],[12,7.7,.02],[10.9,7.7,.02]],'#c5b47e');
   if(path.length){const t=path.at(-1),q=p(t.x,t.y,.02);ctx.fillStyle='#f6df9b88';ctx.beginPath();ctx.ellipse(q.x,q.y,.2*unit,.08*unit,0,0,Math.PI*2);ctx.fill()}
   for(const x of [1.2,4.9,8.6])polygon([[x,3,.014],[x+2,3,.014],[x+2,3.06,.014],[x,3.06,.014]],'#88d9d4');
-  const objects=machines.map(m=>({depth:m.x+m.y+1,draw:()=>cabinet(m)}));objects.push(...SeenHub.drawPeople({ctx,unit,project:p,scene:'arcade'}).map(o=>({depth:o.depth,draw:o.paint})));objects.push({depth:visitor.x+visitor.y,draw:()=>drawSeenCharacter({ctx,unit,project:p,x:visitor.x,y:visitor.y,heading,nameTag:SeenHub.name,gait:reduced?0:gait,phase,jump:jump.height,jumpCrouch:jump.crouch,jumpTuck:jump.tuck,jumping:jump.active})});objects.sort((a,b)=>a.depth-b.depth).forEach(o=>o.draw());
-  for(const y of [6.1,7.58])box(11.72,y,0,.12,.12,1.6,'#d4c49b','#aa9d75','#8c8668');box(11.72,6.1,1.6,.12,1.60,.32,'#d5bc89','#3c593b','#2d4230');label('EXIT',11.87,6.9,1.69,.23,'#f3dfac',true);
+  seenPrepareNameTags(p,canvas);const objects=machines.map(m=>({depth:m.x+m.y+1,draw:()=>cabinet(m)}));objects.push(...SeenHub.drawPeople({ctx,unit,project:p,scene:'arcade'}).map(o=>({depth:o.depth,draw:o.paint})));objects.push({depth:visitor.x+visitor.y,draw:()=>drawSeenCharacter({ctx,unit,project:p,x:visitor.x,y:visitor.y,heading,nameTag:SeenHub.name,gait:reduced?0:gait,phase,jump:jump.height,jumpCrouch:jump.crouch,jumpTuck:jump.tuck,jumping:jump.active})});objects.sort((a,b)=>a.depth-b.depth).forEach(o=>o.draw());
+  for(const y of [6.1,7.58])box(11.72,y,0,.12,.12,1.6,'#d4c49b','#aa9d75','#8c8668');box(11.72,6.1,1.6,.12,1.60,.32,'#d5bc89','#3c593b','#2d4230');label('EXIT',11.87,6.9,1.69,.23,'#f3dfac',true);seenFlushNameTags(p);
  }
  function approach(m){return{x:m.x+.8,y:m.y+1.95}}
  function offerMachine(machine){held.clear();path=[];pending=null;offeredMachine=machine;requestQuiz(machine.mode)}

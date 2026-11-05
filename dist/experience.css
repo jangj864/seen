@@ -40,3 +40,10 @@
  #screening .auditorium-bottom{bottom:54px}
  .arcade-actions{left:130px;right:130px;justify-content:center}
 }
+
+/* Keep the lobby introduction readable over a zoomed map on compact screens. */
+@media(max-width:950px){#lobby-scene .intro{left:5%;right:100px;max-width:330px;z-index:3;top:18px}#lobby-scene .intro .eyebrow{display:inline-block;max-width:100%;white-space:normal;overflow-wrap:break-word;word-break:keep-all;font-size:clamp(11px,2vw,14px);line-height:1.5;letter-spacing:.02em;padding:7px 10px;border-radius:8px;background:#f3ecdfed;box-shadow:0 1px 0 #a99a7c22}}
+@media(max-height:500px) and (max-width:950px){#lobby-scene .intro{display:none!important}}
+.cinema-page .site-header .sound-toggle{display:grid;place-items:center;width:44px;height:44px;min-width:44px;padding:9px!important;border-radius:50%;font-size:0!important}.sound-toggle svg{display:block;width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.seen-name-layer{position:absolute;pointer-events:none;z-index:4;display:block}
+#directory{overflow-y:auto}.three-cinema-link{display:flex;align-items:center;gap:16px;margin-top:16px;padding:15px;border:1px solid #aebd9a66;border-radius:10px;color:#f3eedb;text-decoration:none;background:#4d674a;font-size:12px;font-weight:700}.three-cinema-link b{font-size:22px;letter-spacing:-1px}

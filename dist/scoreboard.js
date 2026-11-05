@@ -4,7 +4,7 @@
 const SeenScoreboard=(()=>{
  const activeViews=new Set();
  const translate=(node,source)=>typeof SeenI18n!=='undefined'?SeenI18n.text(node,source):node.textContent=source;
- function createRound(mode){return{mode,runId:crypto.randomUUID(),answers:[],status:'idle',data:null,promise:null}}
+ function createRound(mode,nickname){return{mode,nickname,runId:crypto.randomUUID(),answers:[],status:'idle',data:null,promise:null}}
  function submit(round,retry=false){
   if(round.promise)return round.promise;
   if(round.status==='ready')return Promise.resolve(round.data);
@@ -12,7 +12,7 @@ const SeenScoreboard=(()=>{
   round.status='loading';
   round.promise=Promise.resolve().then(()=>{
    if(typeof SeenScores==='undefined')throw new Error('Score service unavailable');
-   return SeenScores.submit({mode:round.mode,answers:round.answers.slice(),runId:round.runId});
+   return SeenScores.submit({mode:round.mode,nickname:round.nickname,answers:round.answers.slice(),runId:round.runId});
   }).then(data=>{round.data=data;round.status='ready';return data},error=>{round.status='error';throw error}).finally(()=>{round.promise=null});
   return round.promise;
  }

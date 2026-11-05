@@ -8,9 +8,11 @@ const SeenScores=(()=>{
   if(!config?.url||!config.key||!window.supabase)throw Error('Score service unavailable');
   return client||(client=supabase.createClient(config.url,config.key,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}}));
  }
- async function save({mode,answers,runId}){
+ async function save({mode,answers,runId,nickname:submittedName}){
   if(!['all','eyes','films'].includes(mode)||!Array.isArray(answers)||answers.length!==5||answers.some(a=>!Number.isInteger(a)||a<0||a>3)||typeof runId!=='string')throw Error('Incomplete quiz run');
-  const nickname=SeenHub.name.trim().replace(/\s+/g,' '),api=connection();
+  const nickname=String(submittedName??(typeof SeenHub!=='undefined'?SeenHub.name:'')).trim().replace(/\s+/g,' ');
+  if([...nickname].length<2||[...nickname].length>32||/[\u0000-\u001f\u007f<>]/.test(nickname))throw Error('Invalid nickname');
+  const api=connection();
   const {error}=await api.from('seen_quiz_scores').insert({id:runId,nickname,quiz_mode:mode,answers});
   if(error&&error.code!=='23505')throw error;
   const {data,error:readError}=await api.rpc('seen_quiz_leaderboard',{p_mode:mode,p_run_id:runId});

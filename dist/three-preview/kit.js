@@ -14,7 +14,12 @@ export function label(text,{width=2,height=.5,color='#f4e9ce',background='transp
  ctx.fillStyle=color;ctx.textAlign='center';ctx.textBaseline='middle';ctx.font=`${weight} ${fontSize}px ${fontFamily}`;
  const lines=String(text).split('\n'),lineHeight=fontSize*1.35;lines.forEach((line,i)=>ctx.fillText(line,canvas.width/2,canvas.height/2+(i-(lines.length-1)/2)*lineHeight,canvas.width*.92));
  const texture=new THREE.CanvasTexture(canvas);texture.colorSpace=THREE.SRGBColorSpace;texture.anisotropy=4;
- const mesh=new THREE.Mesh(new THREE.PlaneGeometry(width,height),new THREE.MeshBasicMaterial({map:texture,transparent:background==='transparent',depthWrite:false,side:THREE.DoubleSide,toneMapped:false}));return mesh;
+ const mesh=new THREE.Mesh(new THREE.PlaneGeometry(width,height),new THREE.MeshBasicMaterial({map:texture,transparent:background==='transparent',depthWrite:false,side:THREE.DoubleSide,toneMapped:false}));mesh.userData.label={color,background,fontSize,fontFamily,weight};return mesh;
+}
+export function updateLabel(mesh,text){
+ const {color,background,fontSize,fontFamily,weight}=mesh.userData.label,canvas=mesh.material.map.image,ctx=canvas.getContext('2d');ctx.clearRect(0,0,canvas.width,canvas.height);
+ if(background!=='transparent'){ctx.fillStyle=background;ctx.fillRect(0,0,canvas.width,canvas.height)}ctx.fillStyle=color;ctx.textAlign='center';ctx.textBaseline='middle';ctx.font=`${weight} ${fontSize}px ${fontFamily}`;
+ const lines=String(text).split('\n');lines.forEach((line,i)=>ctx.fillText(line,canvas.width/2,canvas.height/2+(i-(lines.length-1)/2)*fontSize*1.35,canvas.width*.92));mesh.material.map.needsUpdate=true;
 }
 let shadowTexture;
 export function contactShadow(rx,rz,opacity=.25){

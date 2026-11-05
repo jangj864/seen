@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { material, roundedBox, box, sphere, label, contactShadow } from './kit.js';
+import { material, roundedBox, box, sphere, label, contactShadow } from './kit.js?v=rooms1';
 
 const C = {
   paper: '#f2e8ce', cream: '#fff5da', plaster: '#e7dbc0', trim: '#bead88',

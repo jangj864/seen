@@ -257,12 +257,15 @@ export function createAvatar({shirt = '#cb7052', skin = '#e8b48d', hair = '#4938
   let previousTime;
   let currentHeading = 0;
   let movement = 0;
+  let posture = 0;
   let gait = idleOffset;
 
-  function update(time, {walking = false, speed = 1, heading = 0, jump = 0, talking = false} = {}) {
+  function update(time, {walking = false, speed = 1, heading = 0, jump = 0, talking = false, sitting = 0} = {}) {
     const dt = previousTime === undefined ? 1 / 60 : THREE.MathUtils.clamp(time - previousTime, 0, .1);
     previousTime = time;
     const easing = 1 - Math.exp(-dt * 11);
+    posture += (sitting - posture) * easing;
+    walking = walking && sitting < .1;
     movement += ((walking ? 1 : 0) - movement) * easing;
     const turn = Math.atan2(Math.sin(heading - currentHeading), Math.cos(heading - currentHeading));
     currentHeading += turn * (1 - Math.exp(-dt * 12));
@@ -270,7 +273,7 @@ export function createAvatar({shirt = '#cb7052', skin = '#e8b48d', hair = '#4938
     gait += dt * Math.max(.25, speed) * 9.5 * movement;
     const stride = Math.sin(gait) * movement;
     const breathe = Math.sin(time * 2.1 + idleOffset);
-    rig.position.y = jump + Math.abs(Math.cos(gait)) * .035 * movement;
+    rig.position.y = jump + Math.abs(Math.cos(gait)) * .035 * movement - .20 * posture;
     torso.position.y = breathe * .006 * (1 - movement);
     torso.rotation.z = Math.sin(gait) * .025 * movement;
     torso.rotation.x = .025 * movement;
@@ -280,9 +283,9 @@ export function createAvatar({shirt = '#cb7052', skin = '#e8b48d', hair = '#4938
     for (let i = 0; i < 2; i++) {
       const side = i === 0 ? -1 : 1;
       const swing = stride * side;
-      legs[i].rotation.x = swing * .40;
-      knees[i].rotation.x = Math.max(0, -swing) * .48;
-      arms[i].rotation.x = -swing * .34 - .035;
+      legs[i].rotation.x = THREE.MathUtils.lerp(swing * .40,-1.35,posture);
+      knees[i].rotation.x = THREE.MathUtils.lerp(Math.max(0, -swing) * .48,1.4,posture);
+      arms[i].rotation.x = THREE.MathUtils.lerp(-swing * .34 - .035,-.5,posture);
       arms[i].rotation.z = side * (.055 + (talking ? .035 + Math.sin(time * 3.2) * .02 : 0));
       elbows[i].rotation.x = -.10 - Math.max(0, swing) * .12;
     }
@@ -293,5 +296,5 @@ export function createAvatar({shirt = '#cb7052', skin = '#e8b48d', hair = '#4938
   }
 
   update(0);
-  return {group, update};
+  return {group, update, headAnchor(target=new THREE.Vector3()){return head.localToWorld(target.set(0,.63,0))}};
 }

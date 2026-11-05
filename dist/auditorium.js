@@ -53,9 +53,9 @@ function drawExit(){for(const x of [5.23,6.65])cube(x,11.72,0,.12,.12,1.85,'#d4c
 function walkToExit(){requestAction(()=>{pendingSeat=null;autoSpeed=0;path=navigation.route(visitor,exitZone);status.textContent='Walking to the exit…'});world.focus({preventScroll:true})}
 function leaveThroughExit(){if(exiting)return;exiting=true;held.clear();path=[];velocity={x:0,y:0};leaveScreening()}
 function render(){if(!width||!height)return;g.clearRect(0,0,width,height);const gradient=g.createRadialGradient(width*.5,height*.4,0,width*.5,height*.4,width*.8);gradient.addColorStop(0,'#353d33');gradient.addColorStop(1,'#171d1b');g.fillStyle=gradient;g.fillRect(0,0,width,height);cube(0,0,-.14,12,12,.14,'#3c3731','#272c28','#212723');for(let y=0;y<12;y++)polygon([[0,y,.005],[12,y,.005],[12,y+.025,.005],[0,y+.025,.005]],'#d6b78209');cube(0,-.12,0,12,.24,5.1,'#51403a','#292326','#201e21');cube(-.12,0,0,.18,11.6,1.05,'#655b49','#374333','#29372d');drawScreen();drawCurtains();for(const x of [.8,5.65,6.4,11.1])for(let y=3;y<11.7;y+=.6)cube(x,y,.015,.035,.18,.02,'#bd9c5d','#bd9c5d','#bd9c5d');if(path.length){const dest=path[path.length-1];oval(dest.x,dest.y,.02,.22,.09,'#e8c28b55')}
-drawExitMat();// Depth-sort seated hosts, live visitors, chairs, and the exit together.
+seenPrepareNameTags(point,world);drawExitMat();// Depth-sort seated hosts, live visitors, chairs, and the exit together.
 const visitorDepth=seated&&posture>.45&&motion?.kind!=='transfer'?seated.x+seated.y+.45:visitor.x+visitor.y;
-const figures=[...SeenHub.drawPeople({ctx:g,unit,project:point,scene:'screen-'+currentRoom.n}),{depth:visitorDepth,paint:character},{depth:17.9,paint:drawExit},...chairDrawOrder.map(seat=>({depth:seat.x+seat.y+.5,paint:()=>chair(seat)}))];figures.sort((a,b)=>a.depth-b.depth).forEach(o=>o.paint());}
+const figures=[...SeenHub.drawPeople({ctx:g,unit,project:point,scene:'screen-'+currentRoom.n}),{depth:visitorDepth,paint:character},{depth:17.9,paint:drawExit},...chairDrawOrder.map(seat=>({depth:seat.x+seat.y+.5,paint:()=>chair(seat)}))];figures.sort((a,b)=>a.depth-b.depth).forEach(o=>o.paint());seenFlushNameTags(point);}
 
 function occupied(x,y){return navigation.blocked(x,y)}
 function ease(t){return t*t*(3-2*t)}
