@@ -152,15 +152,15 @@ seatRows.innerHTML=['A','B','C','D','E'].map((row,ri)=>`<div class="seat-row" st
 function updateSeat(){const selected=seatChoices.get(currentRoom.n);seatRows.querySelectorAll('[data-seat]').forEach(b=>{const yes=b.dataset.seat===selected;b.classList.toggle('selected',yes);b.setAttribute('aria-pressed',String(yes))});document.querySelector('#seat-label').textContent=selected?`SCREEN ${currentRoom.n} / ${selected}`:'CHOOSE A SEAT';}
 seatRows.addEventListener('click',e=>{const seat=e.target.closest('[data-seat]');if(!seat||!currentRoom)return;seatChoices.set(currentRoom.n,seat.dataset.seat);updateSeat()});
 function enter(){if(!near)return;hideDoorPreview();lobbyJump.reset();keys.clear();target=null;currentRoom=near;document.querySelector('#screening-title').textContent=`SCREEN ${near.n} / ${near.name.toUpperCase()}`;document.querySelector('#screen-name').textContent=near.name;document.querySelector('#screen-category').textContent=`SCREEN ${near.n} / ${near.sub}`;document.querySelector('#screen-still').src=`assets/${near.img}.jpg`;document.querySelector('#auditorium').hidden=false;updateSeat();showScene('screening');document.dispatchEvent(new Event('seen-room-enter'));}
-const screenArticle=document.querySelector('#screen-article');
-const readingTransition=createSeenScreenTransition({dialog:screenArticle,content:document.querySelector('#screen-article-content')});let pendingReadingFrame=null;
+const screenArticle=document.querySelector('#screen-article'),articleScroller=document.querySelector('#screen-article-content');
+const readingTransition=createSeenScreenTransition({dialog:screenArticle,content:articleScroller});let pendingReadingFrame=null;
 let readingStorage;try{readingStorage=sessionStorage}catch{}
 const readingState=SeenReading.createStore(readingStorage);
 let activeArticle=null,articleRestoreToken=0,articleScrollTimer=0,restoringArticleScroll=false;
 function saveReading(){
  if(!activeArticle)return;
  const form=screenArticle.querySelector('.comment-form');
- readingState.save(activeArticle,{scroll:screenArticle.scrollTop,...(form?{body:form.elements.body.value,author:form.elements.author.value}:{})});
+ readingState.save(activeArticle,{scroll:articleScroller.scrollTop,...(form?{body:form.elements.body.value,author:form.elements.author.value}:{})});
 }
 function stopArticleRestore(){restoringArticleScroll=false;screenArticle.dataset.readingReady=readingTransition.active?'false':'true'}
 function closeProgram(updateHistory=true){
@@ -197,7 +197,7 @@ function openProgram(fromHistory=false){
  if(form){form.elements.body.value=saved.body;if(saved.author)form.elements.author.value=saved.author}
  screenArticle.showModal();const transitionReady=readingTransition.open(transitionFrame);restoringArticleScroll=true;screenArticle.dataset.readingReady='false';
  document.querySelector('#back-to-seats').focus({preventScroll:true});
- const restore=()=>{if(restoreToken===articleRestoreToken&&screenArticle.open&&restoringArticleScroll)screenArticle.scrollTop=saved.scroll};
+ const restore=()=>{if(restoreToken===articleRestoreToken&&screenArticle.open&&restoringArticleScroll)articleScroller.scrollTop=saved.scroll};
  requestAnimationFrame(restore);
  Promise.allSettled([artworkReady,commentsReady,document.fonts?.ready,transitionReady]).then(()=>requestAnimationFrame(()=>{
   restore();requestAnimationFrame(()=>{restore();if(restoreToken===articleRestoreToken)stopArticleRestore()});
@@ -222,9 +222,17 @@ screenArticle.addEventListener('cancel',event=>{event.preventDefault();closeProg
 screenArticle.addEventListener('close',()=>{keys.clear();if(!screenArticle.open)document.querySelector('#room-world').focus({preventScroll:true})});
 screenArticle.addEventListener('click',event=>{if(event.target===screenArticle){const rect=screenArticle.getBoundingClientRect();if(event.clientX<rect.left||event.clientX>rect.right||event.clientY<rect.top||event.clientY>rect.bottom)closeProgram()}});
 screenArticle.addEventListener('input',event=>{if(event.target.closest('.comment-form'))saveReading()});
-screenArticle.addEventListener('scroll',()=>{if(restoringArticleScroll)return;clearTimeout(articleScrollTimer);articleScrollTimer=setTimeout(saveReading,180)},{passive:true});
+articleScroller.addEventListener('scroll',()=>{if(restoringArticleScroll)return;clearTimeout(articleScrollTimer);articleScrollTimer=setTimeout(saveReading,180)},{passive:true});
 for(const event of ['wheel','touchmove','pointerdown'])screenArticle.addEventListener(event,stopArticleRestore,{passive:true});
-screenArticle.addEventListener('keydown',event=>{if(['ArrowUp','ArrowDown','PageUp','PageDown','Home','End',' '].includes(event.key))stopArticleRestore()});
+screenArticle.addEventListener('keydown',event=>{
+ if(event.defaultPrevented||event.altKey||event.ctrlKey||event.metaKey||!['ArrowUp','ArrowDown','PageUp','PageDown','Home','End',' '].includes(event.key))return;
+ if(event.target.closest('input,textarea,select,[contenteditable]')||event.key===' '&&event.target.closest('button,a'))return;
+ stopArticleRestore();event.preventDefault();
+ const page=articleScroller.clientHeight*.9,step={ArrowUp:-40,ArrowDown:40,PageUp:-page,PageDown:page,' ':event.shiftKey?-page:page}[event.key];
+ if(event.key==='Home')articleScroller.scrollTop=0;
+ else if(event.key==='End')articleScroller.scrollTop=articleScroller.scrollHeight;
+ else articleScroller.scrollBy(0,step);
+});
 addEventListener('pagehide',saveReading);
 document.addEventListener('seen-comment-posted',event=>{
  const {articleId,body}=event.detail||{};if(typeof articleId!=='string'||typeof body!=='string')return;

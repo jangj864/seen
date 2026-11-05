@@ -11,8 +11,7 @@ function createSeenScreenTransition({dialog,content}){
  }
  function open(frame){
   cancel();if(!frame||matchMedia('(prefers-reduced-motion: reduce)').matches)return Promise.resolve();
-  const paper=content.getBoundingClientRect(),bar=dialog.querySelector('.screen-article-toolbar').getBoundingClientRect(),seats=dialog.querySelector('.reading-seats').getBoundingClientRect();
-  const top=Math.max(bar.bottom+18,Math.min(paper.top,innerHeight-120)),target={left:paper.left,top,width:paper.width,height:Math.max(80,Math.min(paper.height,innerHeight-top-Math.max(24,seats.height-12)))};
+  const target=content.getBoundingClientRect();
   if(target.width<1)return Promise.resolve();
   const image=document.createElement('img');image.className='reading-screen-flight';image.alt='';image.setAttribute('aria-hidden','true');image.src=frame.image;
   Object.assign(image.style,{width:'800px',height:'450px',transform:`matrix(${frame.matrix.join(',')})`});
