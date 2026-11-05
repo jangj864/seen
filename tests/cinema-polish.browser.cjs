@@ -1,7 +1,7 @@
 const{test}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');
 const{chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright'),root=path.resolve(__dirname,'../dist');
-async function fixture(browser,width,height){
- const page=await browser.newPage({viewport:{width,height},reducedMotion:'reduce'}),errors=[];page.on('pageerror',error=>errors.push(error.message));
+async function fixture(browser,width,height,motion='reduce'){
+ const page=await browser.newPage({viewport:{width,height},reducedMotion:motion}),errors=[];page.on('pageerror',error=>errors.push(error.message));
  await page.route('**/*',route=>{const u=new URL(route.request().url());if(u.hostname!=='cinema-polish.test')return route.abort();const name=u.pathname==='/'?'index.html':decodeURIComponent(u.pathname.slice(1));if(name==='community-config.js')return route.fulfill({contentType:'text/javascript',body:'window.SEEN_COMMUNITY={};'});const file=path.resolve(root,name);if(!file.startsWith(root+path.sep)||!fs.existsSync(file))return route.fulfill({status:404,body:''});return route.fulfill({contentType:({'.js':'text/javascript','.css':'text/css','.html':'text/html','.jpg':'image/jpeg','.png':'image/png','.woff2':'font/woff2'})[path.extname(file)]||'application/octet-stream',body:fs.readFileSync(file)})});
  await page.goto('https://cinema-polish.test/');await page.waitForFunction(()=>!document.querySelector('#welcome-enter').disabled);await page.locator('#welcome-name').fill('Head Anchor QA');await page.locator('#welcome-enter').click();return{page,errors};
 }
@@ -32,5 +32,25 @@ test('screen descriptions appear only while hovering a doorway, including after 
   await page.evaluate(()=>{near=rooms[0];enter();leaveScreening()});assert(await note.isHidden(),'returning to the lobby does not reopen the description');
   const pos=await page.evaluate(()=>{const room=rooms[0],q=p(room.x+.8,room.y+.3,1.7),rect=canvas.getBoundingClientRect();return{x:q.x+rect.left,y:q.y+rect.top}});await page.mouse.move(pos.x,pos.y);assert(await note.isVisible());
   await page.mouse.move(30,800);assert(await note.isHidden(),'moving onto the floor removes the description');assert.deepEqual(errors,[]);
+ }finally{await browser.close()}
+});
+
+test('screen entry opens curtains and enlarges the screen without moving controls or restarting on image load',async()=>{
+ const browser=await chromium.launch({channel:'chrome'});try{const{page,errors}=await fixture(browser,1440,1000,'no-preference');
+  await page.evaluate(()=>{near=rooms[0];enter()});
+  const initial=await page.locator('#room-world').evaluate(e=>({progress:+e.dataset.curtainProgress,scale:+e.dataset.screenScale,position:e.dataset.position,rect:e.getBoundingClientRect().toJSON()}));assert(initial.progress<.1);assert(initial.scale<.95);
+  await page.waitForFunction(()=>+document.querySelector('#room-world').dataset.curtainProgress>.2);
+  const middle=await page.locator('#room-world').evaluate(e=>({progress:+e.dataset.curtainProgress,scale:+e.dataset.screenScale}));assert(middle.progress<1);assert(middle.scale>initial.scale);
+  await page.evaluate(()=>document.querySelector('#screen-still').dispatchEvent(new Event('load')));assert((await page.locator('#room-world').evaluate(e=>+e.dataset.curtainProgress))>=middle.progress);
+  await page.waitForFunction(()=>document.querySelector('#room-world').dataset.curtainState==='open');
+  const final=await page.locator('#room-world').evaluate(e=>({progress:+e.dataset.curtainProgress,scale:+e.dataset.screenScale,position:e.dataset.position,rect:e.getBoundingClientRect().toJSON()}));assert.equal(final.progress,1);assert.equal(final.scale,1);assert.equal(final.position,initial.position);assert.deepEqual(final.rect,initial.rect);
+  for(let i=1;i<4;i++){await page.evaluate(i=>{leaveScreening();near=rooms[i];enter()},i);assert.equal(await page.locator('#room-world').getAttribute('data-curtain-state'),'opening');assert((await page.locator('#room-world').evaluate(e=>+e.dataset.screenScale))<.95)}
+  await page.locator('#read-story').click();const paused=await page.locator('#room-world').getAttribute('data-curtain-progress');await page.waitForTimeout(350);assert.equal(await page.locator('#room-world').getAttribute('data-curtain-progress'),paused);await page.locator('#back-to-seats').click();await page.waitForFunction(()=>document.querySelector('#room-world').dataset.curtainState==='open');assert.deepEqual(errors,[]);
+ }finally{await browser.close()}
+});
+
+test('reduced motion shows the fully opened stage immediately',async()=>{
+ const browser=await chromium.launch({channel:'chrome'});try{const{page,errors}=await fixture(browser,393,852);
+  await page.evaluate(()=>{near=rooms[0];enter()});assert.equal(await page.locator('#room-world').getAttribute('data-curtain-state'),'open');assert.equal(await page.locator('#room-world').getAttribute('data-curtain-progress'),'1.0000');assert.equal(await page.locator('#room-world').getAttribute('data-screen-scale'),'1.0000');assert.deepEqual(errors,[]);
  }finally{await browser.close()}
 });
