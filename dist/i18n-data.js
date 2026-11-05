@@ -678,3 +678,5 @@ window.SEEN_KO_CREDIT_LISTS={
   ]
  ]
 };
+
+Object.assign(window.SEEN_KO,{'FROM THE AUDIENCE':'객석에서 바라보기'});

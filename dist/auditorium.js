@@ -6,13 +6,12 @@ for(let row=0;row<5;row++)for(let col=0;col<10;col++){const id='ABCDE'[row]+Stri
 const articleDialog=document.querySelector('#screen-article'),screenStill=document.querySelector('#screen-still');
 let roomRevision=0,roomPaintKey='';
 // One entrance cue per visit; camera, seats and controls keep their positions.
-const stageReveal={elapsed:2.1,curtain:1,scale:1};
+const stageReveal={elapsed:2.1,curtain:1};
 function revealEase(value){const t=Math.max(0,Math.min(1,value));return t*t*t*(t*(t*6-15)+10)}
 function updateStageReveal(dt){
  stageReveal.elapsed=reduced?2.1:Math.min(2.1,stageReveal.elapsed+dt);
  stageReveal.curtain=revealEase((stageReveal.elapsed-.18)/1.82);
- stageReveal.scale=.93+.07*revealEase((stageReveal.elapsed-.30)/1.8);
- seenSetData(world,'curtainProgress',stageReveal.curtain.toFixed(4));seenSetData(world,'screenScale',stageReveal.scale.toFixed(4));seenSetData(world,'curtainState',stageReveal.elapsed<2.1?'opening':'open');
+ seenSetData(world,'curtainProgress',stageReveal.curtain.toFixed(4));seenSetData(world,'curtainState',stageReveal.elapsed<2.1?'opening':'open');
 }
 let viewport;
 const camera=createSeenWorldCamera({scene:dialog,onChange:()=>{size();roomRevision++;render()},zoom:1.6,home:{x:6.5,y:5.5},deadZone:{x:4,y:5}});
@@ -36,10 +35,9 @@ function fabric(x,z,w,h,mirror=false,valance=false){const a=point(x,.30,z+h),b=p
 cube(.18,.10,0,11.65,.65,.20,'#44302b','#292322','#201e1e');const curtainWidth=2.4+1.55*(1-stageReveal.curtain);fabric(.22,.34,curtainWidth,4.43);fabric(11.78-curtainWidth,.34,curtainWidth,4.43,true);fabric(.22,4.66,11.56,.35,false,true);}
 // Local wall dimensions and image pixels share the same 16:9 aspect ratio.
 const screenGeometry={left:2.8,right:9.2,top:4.5,bottom:.9,width:800,height:450};
-function screenBounds(){const s=screenGeometry,halfWidth=(s.right-s.left)*stageReveal.scale/2,halfHeight=(s.top-s.bottom)*stageReveal.scale/2,x=(s.left+s.right)/2,z=(s.top+s.bottom)/2;return{...s,left:x-halfWidth,right:x+halfWidth,top:z+halfHeight,bottom:z-halfHeight}}
-function screenPoints(){const s=screenBounds();return{a:point(s.left,.32,s.top),b:point(s.right,.32,s.top),c:point(s.left,.32,s.bottom)}}
+function screenPoints(){const s=screenGeometry;return{a:point(s.left,.32,s.top),b:point(s.right,.32,s.top),c:point(s.left,.32,s.bottom)}}
 function drawScreen(){
- const s=screenBounds(),{a,b,c}=screenPoints(),W=s.width,H=s.height;
+ const s=screenGeometry,{a,b,c}=screenPoints(),W=s.width,H=s.height;
  g.save();g.transform((b.x-a.x)/W,(b.y-a.y)/W,(c.x-a.x)/H,(c.y-a.y)/H,a.x,a.y);
  g.fillStyle='#090c0d';g.fillRect(-13,-13,W+26,H+26);
  const im=screenStill;if(im.complete&&im.naturalWidth){const ratio=16/9,ir=im.naturalWidth/im.naturalHeight;let sx=0,sy=0,sw=im.naturalWidth,sh=im.naturalHeight;if(ir>ratio){sw=sh*ratio;sx=(im.naturalWidth-sw)/2}else{sh=sw/ratio;sy=(im.naturalHeight-sh)/2}g.drawImage(im,sx,sy,sw,sh,0,0,W,H)}
@@ -140,7 +138,7 @@ closeSeat=seated||nearest();sit.hidden=!closeSeat&&!motion;if(!motion&&!seated&&
 if(!seated&&!motion&&!exiting&&visitor.x>5.3&&visitor.x<6.7&&visitor.y>11.34){leaveThroughExit();requestAnimationFrame(loop);return}
 seenSetData(world,'jumpPhase',roomJump.active?'active':'idle');seenSetData(world,'jumpCrouch',roomJump.crouch.toFixed(3));seenSetData(world,'jumpTuck',roomJump.tuck.toFixed(3));seenSetData(world,'jump',roomJump.height.toFixed(3));seenSetData(world,'motion',motion?.kind||(seated?'seated':isWalking?'walking':'idle'));seenSetData(world,'position',`${visitor.x.toFixed(3)},${visitor.y.toFixed(3)}`);
 updateCamera(dt);SeenTalk.nearby({scene:'screen-'+currentRoom.n,x:visitor.x,y:visitor.y,project:point,canvas:world});SeenHub.publish({scene:'screen-'+currentRoom.n,x:visitor.x,y:visitor.y,heading,posture,jump:roomJump.height,moving:isWalking});
-const paintKey=[SeenHub.revision,roomRevision,seenFontRevision,world.dataset.curtainProgress,world.dataset.screenScale,roomJump.height.toFixed(3),roomJump.crouch.toFixed(3),roomJump.tuck.toFixed(3),currentRoom?.n,seatChoices.get(currentRoom?.n),world.dataset.position,heading.toFixed(3),gait.toFixed(3),posture.toFixed(3),tick.toFixed(3),path.at(-1)?.x,path.at(-1)?.y].join('|');
+const paintKey=[SeenHub.revision,roomRevision,seenFontRevision,world.dataset.curtainProgress,roomJump.height.toFixed(3),roomJump.crouch.toFixed(3),roomJump.tuck.toFixed(3),currentRoom?.n,seatChoices.get(currentRoom?.n),world.dataset.position,heading.toFixed(3),gait.toFixed(3),posture.toFixed(3),tick.toFixed(3),path.at(-1)?.x,path.at(-1)?.y].join('|');
 if(paintKey!==roomPaintKey){render();roomPaintKey=paintKey}}
 requestAnimationFrame(loop)}requestAnimationFrame(loop);
 // Test actual projected chair faces instead of a large rectangle covering nearby aisles.

@@ -175,6 +175,7 @@ function openProgram(fromHistory=false){
  if(screenArticle.open)closeProgram(false);
  activeArticle=id;const saved=readingState.read(id),restoreToken=++articleRestoreToken;
  document.querySelector('#screen-article-room').textContent=`SCREEN ${currentRoom.n} / SEEN · ISSUE 02`;
+ const selectedSeat=document.querySelector('#room-world').dataset.motion==='seated'?seatChoices.get(currentRoom.n):null;seenSetText(document.querySelector('#screen-article-seat'),selectedSeat?`Seat ${selectedSeat}`:'FROM THE AUDIENCE');
  const content=document.querySelector('#screen-article-content');content.replaceChildren();
  const header=document.createElement('header');header.className='screen-article-header';
  const tag=document.createElement('span');tag.className='screen-article-tag';tag.textContent=article.tag;

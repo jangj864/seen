@@ -35,22 +35,32 @@ test('screen descriptions appear only while hovering a doorway, including after 
  }finally{await browser.close()}
 });
 
-test('screen entry opens curtains and enlarges the screen without moving controls or restarting on image load',async()=>{
+test('screen entry opens curtains while keeping the projection at a fixed size',async()=>{
  const browser=await chromium.launch({channel:'chrome'});try{const{page,errors}=await fixture(browser,1440,1000,'no-preference');
-  await page.evaluate(()=>{near=rooms[0];enter()});
-  const initial=await page.locator('#room-world').evaluate(e=>({progress:+e.dataset.curtainProgress,scale:+e.dataset.screenScale,position:e.dataset.position,rect:e.getBoundingClientRect().toJSON()}));assert(initial.progress<.1);assert(initial.scale<.95);
+  await page.evaluate(()=>{const ctx=document.querySelector('#room-world').getContext('2d'),draw=ctx.drawImage;window.__stageTransforms=[];ctx.drawImage=function(image,...args){if(image===document.querySelector('#screen-still'))window.__stageTransforms.push([...Object.values(this.getTransform().toJSON())]);return draw.call(this,image,...args)};near=rooms[0];enter()});
+  await page.waitForFunction(()=>window.__stageTransforms.length>0);
+  const initial=await page.locator('#room-world').evaluate(e=>({progress:+e.dataset.curtainProgress,position:e.dataset.position,rect:e.getBoundingClientRect().toJSON()}));assert(initial.progress<.1);
   await page.waitForFunction(()=>+document.querySelector('#room-world').dataset.curtainProgress>.2);
-  const middle=await page.locator('#room-world').evaluate(e=>({progress:+e.dataset.curtainProgress,scale:+e.dataset.screenScale}));assert(middle.progress<1);assert(middle.scale>initial.scale);
+  const middle=await page.locator('#room-world').evaluate(e=>({progress:+e.dataset.curtainProgress}));assert(middle.progress<1);
   await page.evaluate(()=>document.querySelector('#screen-still').dispatchEvent(new Event('load')));assert((await page.locator('#room-world').evaluate(e=>+e.dataset.curtainProgress))>=middle.progress);
   await page.waitForFunction(()=>document.querySelector('#room-world').dataset.curtainState==='open');
-  const final=await page.locator('#room-world').evaluate(e=>({progress:+e.dataset.curtainProgress,scale:+e.dataset.screenScale,position:e.dataset.position,rect:e.getBoundingClientRect().toJSON()}));assert.equal(final.progress,1);assert.equal(final.scale,1);assert.equal(final.position,initial.position);assert.deepEqual(final.rect,initial.rect);
-  for(let i=1;i<4;i++){await page.evaluate(i=>{leaveScreening();near=rooms[i];enter()},i);assert.equal(await page.locator('#room-world').getAttribute('data-curtain-state'),'opening');assert((await page.locator('#room-world').evaluate(e=>+e.dataset.screenScale))<.95)}
+  const final=await page.locator('#room-world').evaluate(e=>({progress:+e.dataset.curtainProgress,position:e.dataset.position,rect:e.getBoundingClientRect().toJSON()}));assert.equal(final.progress,1);assert.equal(final.position,initial.position);assert.deepEqual(final.rect,initial.rect);const matrices=await page.evaluate(()=>window.__stageTransforms);for(const matrix of matrices)assert.deepEqual(matrix,matrices[0],'the actual canvas projection matrix stays fixed while the curtains open');
+  for(let i=1;i<4;i++){await page.evaluate(i=>{leaveScreening();near=rooms[i];enter()},i);assert.equal(await page.locator('#room-world').getAttribute('data-curtain-state'),'opening');assert.equal(await page.locator('#room-world').getAttribute('data-screen-scale'),null)}
   await page.locator('#read-story').click();const paused=await page.locator('#room-world').getAttribute('data-curtain-progress');await page.waitForTimeout(350);assert.equal(await page.locator('#room-world').getAttribute('data-curtain-progress'),paused);await page.locator('#back-to-seats').click();await page.waitForFunction(()=>document.querySelector('#room-world').dataset.curtainState==='open');assert.deepEqual(errors,[]);
  }finally{await browser.close()}
 });
 
 test('reduced motion shows the fully opened stage immediately',async()=>{
  const browser=await chromium.launch({channel:'chrome'});try{const{page,errors}=await fixture(browser,393,852);
-  await page.evaluate(()=>{near=rooms[0];enter()});assert.equal(await page.locator('#room-world').getAttribute('data-curtain-state'),'open');assert.equal(await page.locator('#room-world').getAttribute('data-curtain-progress'),'1.0000');assert.equal(await page.locator('#room-world').getAttribute('data-screen-scale'),'1.0000');assert.deepEqual(errors,[]);
+  await page.evaluate(()=>{near=rooms[0];enter()});assert.equal(await page.locator('#room-world').getAttribute('data-curtain-state'),'open');assert.equal(await page.locator('#room-world').getAttribute('data-curtain-progress'),'1.0000');assert.deepEqual(errors,[]);
  }finally{await browser.close()}
+});
+
+test('the audience reading view fills the theater and keeps text and close controls usable on small screens',async()=>{
+ const browser=await chromium.launch({channel:'chrome'});try{for(const[index,[width,height]]of [[320,568],[393,852],[844,390],[1440,1000]].entries()){
+  const{page,errors}=await fixture(browser,width,height);await page.evaluate(index=>{near=rooms[index];enter();openProgram()},index);await page.waitForFunction(()=>document.querySelector('#screen-article').dataset.readingReady==='true');
+  const layout=await page.evaluate(()=>{const dialog=document.querySelector('#screen-article'),paper=document.querySelector('#screen-article-content'),close=document.querySelector('#back-to-seats'),seat=document.querySelector('.reading-seats');return{dialog:dialog.getBoundingClientRect().toJSON(),paper:paper.getBoundingClientRect().toJSON(),close:close.getBoundingClientRect().toJSON(),seat:seat.getBoundingClientRect().toJSON(),overflow:dialog.scrollWidth>dialog.clientWidth+1,radius:parseFloat(getComputedStyle(dialog).borderRadius),text:parseFloat(getComputedStyle(document.querySelector('.screen-article-body')).fontSize),decor:getComputedStyle(document.querySelector('.reading-room')).pointerEvents}});
+  assert.equal(layout.dialog.width,width);assert.equal(layout.dialog.height,height);assert.equal(layout.radius,0);assert.equal(layout.overflow,false);assert(layout.paper.left>=12&&layout.paper.right<=width-12);assert(layout.close.width>=40&&layout.close.height>=40);assert(layout.close.right<=width&&layout.close.top>=0);assert(layout.text>=16);assert.equal(layout.decor,'none');assert(layout.seat.top<height);
+  assert.equal(new URL(page.url()).hash,['#read/table','#read/ladybird','#read/yang','#read/minari'][index]);await page.keyboard.press('Escape');await page.waitForFunction(()=>!document.querySelector('#screen-article').open);assert(await page.locator('#room-world').evaluate(e=>e===document.activeElement));assert.deepEqual(errors,[]);await page.close();
+ }}finally{await browser.close()}
 });
