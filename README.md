@@ -85,16 +85,8 @@ Cinema articles support `#read/table`, `#read/ladybird`, `#read/yang` and `#read
 
 Validation: `node --test tests/*.test.cjs`. Browser regressions: `PLAYWRIGHT_MODULE=/absolute/path/to/playwright node --test --test-concurrency=1 tests/*.browser.cjs` (Chrome). Browser fixtures replace backend services and never publish public comments or scores.
 
-## 3D cinema
+## Cinema controls
 
-`3d.html` contains a connected WebGL cinema: the lobby, four screening rooms and an arcade. The original edition links to it from The Program. Drag to orbit, use arrows/WASD or tap the floor to walk, press Space to jump and Enter to interact nearby. Three character appearances are available. Names stay attached to the actual animated head, including sitting and jumping.
+The cinema uses the original isometric canvas style throughout the lobby, screening rooms and arcade. Language buttons use **KR / EN**. Sound uses a speaker icon with an accessible on/off state. On small screens the introduction wraps inside the viewport. Arcade leaves open inward, and nameplates use a foreground layer anchored to each character’s head.
 
-Lobby doors and destination controls walk the visitor to the entrance before a short room transition. Each screening has its own article and palette, 50 upholstered chairs, curtains, screen artwork and aisle lighting. Chairs use shared instanced geometry and collision footprints; selecting a free seat approaches it from the aisle before sitting. Standing reverses that movement. Article dialogs remain within the 3D room, preserve the seat and reading position, and support the same `#read/table`, `#read/ladybird`, `#read/yang` and `#read/minari` links and Back/Forward behavior. Exits walk back to the lobby doorway.
-
-The arcade has three 3D cabinets. Both cinema editions use `quiz-player.js` for the existing questions, answers, replay and scoreboard, with the same server-validated Top 10. Visitors use their existing nickname or enter a 2–20 character nickname before playing; completed rounds carry that name across retries. The 3D edition does not publish multiplayer presence or comments. Existing shared services and tables are unchanged.
-
-`three-preview/interiors.js` builds the rooms; `activities.js` adapts the shared reading/quiz components. Geometry and materials are cached by `kit.js` and the character builder. Rooms are created on first entry and reused. Three.js **0.187.0** and required addons are pinned and served from `dist/vendor/three-0.187.0/` with the MIT license and source provenance; no build step is needed.
-
-Language buttons use **KR / EN**. The original cinema has a speaker icon with an accessible sound state, compact-screen introduction wrapping, inward-opening arcade leaves, and a transparent nameplate layer so the upcoming-film panel cannot cover a name or push it away from the head.
-
-Validation: `node --test tests/*.test.cjs`; browser regressions: `PLAYWRIGHT_MODULE=/absolute/path/to/playwright node --test --test-concurrency=1 tests/*.browser.cjs`. The 3D browser tests exercise real WebGL, walking/jumping, all four article routes, seating/collision, mobile controls and all three quizzes. Ranking fixtures replace the backend and never write public scores or comments.
+`quiz-player.js` provides the existing questions, answers, replay and Top 10 scoreboard. Completed rounds retain the visitor’s nickname across score retries.

@@ -678,4 +678,3 @@ window.SEEN_KO_CREDIT_LISTS={
   ]
  ]
 };
-Object.assign(window.SEEN_KO,{'EXPLORE IN 3D ↗':'3D 영화관 둘러보기 ↗'});

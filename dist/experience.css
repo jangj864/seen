@@ -46,4 +46,4 @@
 @media(max-height:500px) and (max-width:950px){#lobby-scene .intro{display:none!important}}
 .cinema-page .site-header .sound-toggle{display:grid;place-items:center;width:44px;height:44px;min-width:44px;padding:9px!important;border-radius:50%;font-size:0!important}.sound-toggle svg{display:block;width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .seen-name-layer{position:absolute;pointer-events:none;z-index:4;display:block}
-#directory{overflow-y:auto}.three-cinema-link{display:flex;align-items:center;gap:16px;margin-top:16px;padding:15px;border:1px solid #aebd9a66;border-radius:10px;color:#f3eedb;text-decoration:none;background:#4d674a;font-size:12px;font-weight:700}.three-cinema-link b{font-size:22px;letter-spacing:-1px}
+#directory{overflow-y:auto}
