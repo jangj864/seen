@@ -19,3 +19,18 @@ test('open arcade leaves swing inside the doorway and head labels use a foregrou
   await page.screenshot({path:'/tmp/seen-door-and-labels-fixed.png'});assert.deepEqual(errors,[]);
  }finally{await browser.close()}
 });
+
+test('screen descriptions appear only while hovering a doorway, including after returning nearby',async()=>{
+ const browser=await chromium.launch({channel:'chrome'});try{const{page,errors}=await fixture(browser,1440,1000),note=page.locator('#lobby-scene .corner-note');
+  assert(await note.isHidden(),'no default description is shown on admission');
+  await page.evaluate(()=>{player=roomApproach(rooms[0]);setNear();draw()});assert(await note.isHidden(),'standing near a room does not count as hovering');
+  for(let index=0;index<4;index++){
+   const pos=await page.evaluate(index=>{const room=rooms[index],q=p(room.x+.8,room.y+.3,1.7),rect=canvas.getBoundingClientRect();return{x:q.x+rect.left,y:q.y+rect.top,title:room.name}},index);
+   await page.mouse.move(pos.x,pos.y);assert(await note.isVisible());assert.equal(await note.locator('strong').textContent(),pos.title);
+   await page.mouse.move(10,10);assert(await note.isHidden(),'leaving the canvas removes the description even near a door');
+  }
+  await page.evaluate(()=>{near=rooms[0];enter();leaveScreening()});assert(await note.isHidden(),'returning to the lobby does not reopen the description');
+  const pos=await page.evaluate(()=>{const room=rooms[0],q=p(room.x+.8,room.y+.3,1.7),rect=canvas.getBoundingClientRect();return{x:q.x+rect.left,y:q.y+rect.top}});await page.mouse.move(pos.x,pos.y);assert(await note.isVisible());
+  await page.mouse.move(30,800);assert(await note.isHidden(),'moving onto the floor removes the description');assert.deepEqual(errors,[]);
+ }finally{await browser.close()}
+});
