@@ -680,3 +680,7 @@ window.SEEN_KO_CREDIT_LISTS={
 };
 
 Object.assign(window.SEEN_KO,{'FROM THE AUDIENCE':'객석에서 바라보기'});
+
+Object.assign(window.SEEN_KO,{'NOW PLAYING':'플레이 중','CHOOSE YOUR ANSWER':'정답을 골라주세요','or tap a card':'또는 카드를 눌러주세요','Pick one. Make it count.':'정답 하나를 골라주세요.'});
+
+Object.assign(window.SEEN_KO,{"Answer controls":"답변 조작 버튼","Choose answer A":"A 답변 선택","Choose answer B":"B 답변 선택","Choose answer C":"C 답변 선택","Choose answer D":"D 답변 선택"});

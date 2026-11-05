@@ -1,5 +1,5 @@
 'use strict';
-// Both walking editions share one question/answer/result renderer.
+// Every cabinet shares one question, answer and result renderer.
 const SeenQuizThemes=Object.freeze({
  all:{title:'SEEN QUIZ',accent:'#b74239',light:'#f0b39d',onAccent:'#fff3dc',description:'Five questions about film directors.'},
  eyes:{title:'EYES ONLY',accent:'#428b7e',light:'#a4d4b2',onAccent:'#fff3dc',description:'Guess five actors from their eyes.'},
@@ -26,6 +26,7 @@ let gameIndex=0,gameScore=0,gameAnswered=null,gameMode='all',gameQuestions=seenQ
 function replayQuiz(){gameIndex=0;gameScore=0;gameAnswered=null;gameRound=SeenScoreboard.createRound(gameMode,nickname());renderGame();document.querySelector('#game-quiz button')?.focus({preventScroll:true})}
 function renderGame(){
  const total=gameQuestions.length,complete=gameIndex===total,q=gameQuestions[gameIndex],root=document.querySelector('#game-quiz');
+ document.querySelectorAll('[data-cabinet-answer]').forEach(button=>button.disabled=complete||gameAnswered!==null);
  updateQuizIndicators(total,complete);
  document.querySelector('#game-progress').textContent=complete?'YOUR RESULT':`QUESTION ${String(gameIndex+1).padStart(2,'0')} / ${String(total).padStart(2,'0')}`;
  document.querySelector('#game-score').textContent=`SCORE ${gameScore}`;
@@ -36,29 +37,34 @@ function renderGame(){
  const heading=document.createElement('h3');heading.textContent=q.q;question.append(heading);
  if(!complete&&q.kind==='eyes'){
   const ns='http://www.w3.org/2000/svg',visual=document.createElementNS(ns,'svg'),image=document.createElementNS(ns,'image');
-  visual.classList.add('game-eyes');visual.setAttribute('viewBox',q.crop.join(' '));visual.setAttribute('role','img');visual.setAttribute('aria-label',gameAnswered===null?'Eye detail from a film publicity still. Choose the actor below.':`Eye detail: ${q.options[q.answer]}`);
+  visual.classList.add('game-eyes');visual.setAttribute('viewBox',q.crop.join(' '));visual.setAttribute('preserveAspectRatio','xMidYMid slice');visual.setAttribute('role','img');visual.setAttribute('aria-label',gameAnswered===null?'Eye detail from a film publicity still. Choose the actor below.':`Eye detail: ${q.options[q.answer]}`);
   image.setAttribute('href',`assets/${q.image}.jpg`);image.setAttribute('width',String(q.imageSize?.[0]||2000));image.setAttribute('height',String(q.imageSize?.[1]||1125));visual.append(image);question.append(visual);
  }
  if(!complete){const options=document.createElement('div');options.className='game-options';q.options.forEach((value,i)=>{
-  const button=document.createElement('button');button.dataset.gameAnswer=String(i);const letter=document.createElement('span');letter.textContent='ABCD'[i];const label=document.createElement('strong');label.textContent=value;button.append(letter,label);button.setAttribute('aria-pressed',String(gameAnswered===i));
+  const button=document.createElement('button');button.dataset.gameAnswer=String(i);button.setAttribute('aria-keyshortcuts',`${'ABCD'[i]} ${i+1}`);const letter=document.createElement('span');letter.textContent='ABCD'[i];const label=document.createElement('strong');label.textContent=value;button.append(letter,label);button.setAttribute('aria-pressed',String(gameAnswered===i));
   if(gameAnswered!==null){button.disabled=true;if(i===q.answer)button.classList.add('correct');if(i===gameAnswered&&i!==q.answer)button.classList.add('wrong');if(i!==q.answer&&i!==gameAnswered)button.classList.add('is-muted');if(i===q.answer||i===gameAnswered){const mark=document.createElement('b');mark.className='answer-mark';mark.textContent=i===q.answer?'✓':'×';mark.setAttribute('aria-label',i===q.answer?'Correct answer':'Incorrect answer');button.append(mark)}}
   button.onclick=()=>{if(gameAnswered!==null)return;gameAnswered=i;gameRound.answers[gameIndex]=i;if(i===q.answer)gameScore++;fx(i===q.answer?'correct':'wrong');renderGame();root.querySelector('.game-next').focus({preventScroll:true})};options.append(button)
  });question.append(options)}root.append(question);
  const slot=document.createElement('div');slot.className='game-answer-slot';root.append(slot);
  if(gameAnswered!==null){const feedback=document.createElement('p');feedback.className='game-feedback';feedback.setAttribute('role','status');feedback.textContent=`${gameAnswered===q.answer?'CORRECT! +1 POINT':'ANSWER: '+q.options[q.answer]} — ${q.note}`;
- const next=document.createElement('button');next.className='game-next';next.textContent=gameIndex===total-1?'SEE YOUR RESULT →':'NEXT QUESTION →';next.onclick=()=>{gameIndex++;gameAnswered=null;renderGame();root.querySelector('button').focus({preventScroll:true})};slot.append(feedback,next)}
+ const next=document.createElement('button');next.className='game-next';next.textContent=gameIndex===total-1?'SEE YOUR RESULT →':'NEXT QUESTION →';next.onclick=()=>{gameIndex++;gameAnswered=null;renderGame();root.querySelector('button')?.focus({preventScroll:true})};slot.append(feedback,next)}else{const hint=document.createElement('p');hint.className='game-idle-hint';hint.textContent='Pick one. Make it count.';slot.append(hint)}
 }
 function openQuiz(mode='all'){
  if(gameRoom.open||!quizThemes[mode])return;
- applyQuizTheme(gameRoom,mode);document.querySelector('#game-room .game-toolbar>span').textContent=quizThemes[mode].title;
+ applyQuizTheme(gameRoom,mode);document.querySelector('#game-title').textContent=quizThemes[mode].title;document.querySelector('.cabinet-mode-icon').innerHTML=SeenIcons.svg(mode);
  if(mode!==gameMode){gameMode=mode;gameQuestions=seenQuizQuestions.filter(q=>q.mode===mode);gameIndex=0;gameScore=0;gameAnswered=null;gameRound=SeenScoreboard.createRound(mode,nickname())}
  if(gameIndex===0&&gameAnswered===null)gameRound.nickname=nickname();
- const titles={all:'SEEN<span>QUIZ</span>',eyes:'EYES<span>ONLY</span>',films:'FILM<span>CLUB</span>'};
- document.querySelector('#game-title').innerHTML=titles[mode];document.querySelector('.game-marquee p').textContent=`${gameQuestions.length} questions. ${gameQuestions.length} points. How closely were you watching?`;
  renderGame();gameRoom.showModal();document.querySelector('#leave-game').focus({preventScroll:true});onOpen();
 }
 function leaveGame(){if(!gameRoom.open)return;gameRoom.close();onClose()}
 document.querySelector('#leave-game').onclick=leaveGame;
 gameRoom.addEventListener('cancel',event=>{event.preventDefault();leaveGame()});
+function chooseAnswer(index){const option=gameRoom.querySelector(`[data-game-answer="${index}"]`);if(!option||option.disabled)return false;option.click();return true}
+gameRoom.querySelector('.cabinet-buttons').addEventListener('click',event=>{const button=event.target.closest('[data-cabinet-answer]');if(button)chooseAnswer(Number(button.dataset.cabinetAnswer))});
+gameRoom.addEventListener('keydown',event=>{
+ if(!gameRoom.open||event.repeat||event.altKey||event.ctrlKey||event.metaKey||seenTypingTarget(event.target))return;
+ const key=event.key.toLowerCase(),index=/^[1-4]$/.test(key)?Number(key)-1:'abcd'.indexOf(key);
+ if(index<0||!chooseAnswer(index))return;event.preventDefault();event.stopPropagation();
+});
 return{request:requestQuiz,open:openQuiz,close:leaveGame,cancel:cancelQuizRequest,render:renderGame};
 }

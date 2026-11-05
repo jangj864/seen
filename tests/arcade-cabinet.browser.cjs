@@ -1,0 +1,55 @@
+const{test,before,after}=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');
+const{chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright'),root=path.resolve(__dirname,'../dist');let browser;
+before(async()=>{browser=await chromium.launch({channel:process.env.PLAYWRIGHT_CHANNEL||'chrome'})});after(async()=>{await browser?.close()});
+// Local test data only: never insert scores or comments into the live service.
+const sdk=`window.arcadeQA={writes:[]};const channel={on(){return this},presenceState(){return{}},subscribe(cb){queueMicrotask(()=>cb('SUBSCRIBED'));return this},track(){return Promise.resolve()},send(){return Promise.resolve()}};
+window.supabase={
+ createClient(){return{
+  channel(){return channel},
+  from(){return{async insert(row){arcadeQA.writes.push(row);return{error:null}}}},
+  async rpc(){return{error:null,data:{entries:Array.from({length:10},(_,i)=>({rank:i+1,nickname:i?'Player '+(i+1):'Arcade QA',score:i?3:4,total:5,is_current:!i})),current:{rank:1,nickname:'Arcade QA',score:4,total:5}}}}
+ }}
+};`;
+async function fixture(t,width,height){
+ const page=await browser.newPage({viewport:{width,height},reducedMotion:'reduce'}),errors=[];page.setDefaultTimeout(5000);page.on('pageerror',e=>errors.push(e.message));t.after(async()=>{await page.close();assert.deepEqual(errors,[])});
+ await page.route('**/*',route=>{const url=new URL(route.request().url());if(url.hostname!=='cabinet.test')return route.fulfill({status:204,body:''});const name=decodeURIComponent(url.pathname.slice(1))||'index.html';
+  if(name==='community-config.js')return route.fulfill({contentType:'text/javascript',body:'window.SEEN_COMMUNITY={url:"https://mock.invalid",key:"test-only"};'});
+  if(name.startsWith('vendor/supabase-'))return route.fulfill({contentType:'text/javascript',body:sdk});
+  const file=path.resolve(root,name);if(!file.startsWith(root+path.sep)||!fs.existsSync(file))return route.fulfill({status:404,body:''});
+  return route.fulfill({contentType:({'.html':'text/html','.js':'text/javascript','.css':'text/css','.jpg':'image/jpeg','.png':'image/png','.woff2':'font/woff2'})[path.extname(file)]||'application/octet-stream',body:fs.readFileSync(file)});
+ });await page.goto('https://cabinet.test/');assert.equal(await page.evaluate(()=>typeof arcadeQA),'object','local score service is loaded');await page.waitForFunction(()=>!document.querySelector('#welcome-enter').disabled);await page.locator('#welcome-name').fill('Arcade QA');await page.locator('#welcome-enter').click();await page.evaluate(()=>enterGame());await page.mouse.move(0,0);return page;
+}
+async function cardsFit(page){
+ const layout=await page.evaluate(()=>{
+  const room=document.querySelector('#game-room'),screen=room.querySelector('.arcade-machine'),heading=room.querySelector('.game-question h3'),cards=[...room.querySelectorAll('[data-game-answer]')];
+  return{room:room.getBoundingClientRect().toJSON(),screen:screen.getBoundingClientRect().toJSON(),heading:heading.getBoundingClientRect().toJSON(),cards:cards.map(e=>({rect:e.getBoundingClientRect().toJSON(),label:e.querySelector('strong').getBoundingClientRect().toJSON(),font:parseFloat(getComputedStyle(e.querySelector('strong')).fontSize)})),overflow:room.scrollWidth>room.clientWidth+1};
+ });assert.equal(layout.overflow,false);assert(layout.room.top>=0&&layout.room.bottom<=page.viewportSize().height);assert.equal(layout.cards.length,4);
+ assert(layout.heading.bottom<=layout.cards[0].rect.top-5,'question and answer cards never overlap');
+ for(const {rect,label,font}of layout.cards){assert(rect.width>=90&&rect.height>=44,'cards keep usable touch targets');assert(font>=12);assert(label.top>=rect.top&&label.bottom<=rect.bottom+1,'answer text stays inside its card');assert(rect.left>=layout.screen.left&&rect.right<=layout.screen.right)}
+ return layout.screen;
+}
+for(const[width,height]of[[320,568],[393,852],[844,390],[1440,1000]])test(`all cabinets keep questions, feedback and rankings usable at ${width}×${height}`,async t=>{
+ const page=await fixture(t,width,height);
+ for(const language of ['en','ko'])for(const mode of ['all','eyes','films']){
+  await page.evaluate(({language,mode})=>{SeenI18n.setLanguage(language);openQuiz(mode)},{language,mode});
+  // Replaying creates a fresh round when returning to the same game mode.
+  if(await page.locator('#game-quiz').getAttribute('data-state')==='complete')await page.locator('.scoreboard-actions .game-next').click();
+  if(mode==='eyes')assert.equal(await page.locator('.game-eyes').getAttribute('preserveAspectRatio'),'xMidYMid slice','the eye crop fills its frame without revealing the rest of the face');
+  const screen=await cardsFit(page);assert.equal(await page.locator('.cabinet-mode-icon svg').count(),1);
+  for(let index=0;index<5;index++){
+   await cardsFit(page);
+   const answer=await page.evaluate(({mode,index})=>seenQuizQuestions.filter(q=>q.mode===mode)[index].answer,{mode,index}),chosen=index===0?(answer+1)%4:answer;
+   if(index===0&&width>700)await page.locator(`[data-cabinet-answer="${chosen}"]`).click();else await page.keyboard.press(index%2?'ABCD'[chosen]:String(chosen+1));
+   assert.equal(await page.locator('#game-quiz').getAttribute('data-state'),index?'correct':'wrong');assert.equal(await page.locator('.game-options .correct').count(),1);assert.equal(await page.locator('.game-options .wrong').count(),index?0:1);
+   assert.equal(await page.locator('.game-options button:disabled').count(),4);assert.equal(await page.locator('.game-options [aria-pressed="true"]').count(),1);
+   const next=await page.locator('.game-answer-slot .game-next').boundingBox();assert(next.y>=screen.y&&next.y+next.height<=screen.y+screen.height,'next action stays on the screen');
+   assert.deepEqual(await page.locator('.arcade-machine').boundingBox(),{x:screen.x,y:screen.y,width:screen.width,height:screen.height},'answering keeps the CRT frame fixed');
+   await page.locator('.game-answer-slot .game-next').click();
+  }
+  await page.waitForFunction(()=>document.querySelector('.scoreboard-table tr.is-current'));
+  assert.equal(await page.locator('.scoreboard-table tbody tr').count(),10);assert.equal(await page.locator('.scoreboard-table .is-current .scoreboard-player').innerText(),'Arcade QA'+(language==='ko'?'나':'YOU'));
+  const table=page.locator('.scoreboard-table-scroll');await table.evaluate(e=>e.scrollTop=e.scrollHeight);assert(await page.locator('.scoreboard-table tbody tr:last-child').isVisible());
+  assert.equal(await page.locator('.scoreboard-actions .game-next').isVisible(),true);await page.keyboard.press('Escape');assert.equal(await page.locator('#game-room').isVisible(),false);
+ }
+ assert.equal(await page.evaluate(()=>arcadeQA.writes.length),6,'one score per completed round');assert((await page.evaluate(()=>arcadeQA.writes)).every(row=>row.nickname==='Arcade QA'));
+});

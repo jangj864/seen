@@ -59,7 +59,7 @@ Validation included two independent browser contexts for live presence/movement,
 
 Each of the three five-question quizzes shows a shared Top 10 after completion, using the nickname entered on the admission ticket. The best score per nickname and quiz is ranked first; equal scores use the time that record was achieved. Replaying starts a new run; reopening a result or changing language keeps the same run id and does not submit again. Empty positions remain empty.
 
-`quiz-scores.js` submits the five answer choices to `public.seen_quiz_scores`; the database derives the score and supplies its own timestamp. Public clients can insert only run id, nickname, mode and choices, and can read public ranking fields. They cannot change scores, timestamps or existing records. The invoker RPC `seen_quiz_leaderboard` returns the Top 10 and the current nickname's best rank, including ranks below 10. Schema reference: `backend/seen-quiz-scores.sql`. The SQL verification fixtures roll back all test records. `scoreboard.js` and `scoreboard.css` supply the shared retro result view, including loading, retry and narrow-screen scrolling.
+`quiz-scores.js` submits the five answer choices to `public.seen_quiz_scores`; the database derives the score and supplies its own timestamp. Public clients can insert only run id, nickname, mode and choices, and can read public ranking fields. They cannot change scores, timestamps or existing records. The invoker RPC `seen_quiz_leaderboard` returns the Top 10 and the current nickname's best rank, including ranks below 10. Schema reference: `backend/seen-quiz-scores.sql`. The SQL verification fixtures roll back all test records. `scoreboard.js` and `arcade-experience.css` supply the shared retro result view, including loading, retry and narrow-screen scrolling.
 
 ## Entry, NPC conversations, and pixel arcade
 
@@ -100,3 +100,9 @@ Presence and quiz results reuse the same Supabase client. Movement updates seria
 `tests/refresh-recovery.browser.cjs` covers repeated refreshes at mobile and desktop widths, all four article routes, malformed links and stored data, missing artwork, blocked storage, shared connections and audio failures. It uses local backend fixtures and never writes public comments or scores. Run browser checks with `PLAYWRIGHT_MODULE=/path/to/playwright node --test --test-concurrency=1 tests/*.browser.cjs` and unit checks with `node --test tests/*.test.cjs`.
 
 The Publish SEEN workflow runs unit, shipped-script syntax and local-resource checks before uploading the site, so these failures stop deployment.
+
+## Arcade cabinet interface
+
+All three quizzes use the same front-facing cabinet, inset CRT playfield, answer cards and Top 10 result screen. Each game retains its own accent color and pixel icon; question text and answer names use readable Korean/Latin typography. Choose with the cards, A–D, 1–4, or the cabinet’s physical-style answer buttons on desktop. Those buttons and keyboard shortcuts call the same answer action and cannot submit twice.
+
+`arcade-experience.css` owns the cabinet, confirmation and scoreboard styling. `tests/arcade-cabinet.browser.cjs` completes every mode in Korean and English at four viewport sizes, checking card text bounds, feedback, a fixed screen frame, nickname preservation and one score submission per round. Its backend is local test data.
