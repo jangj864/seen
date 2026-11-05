@@ -36,14 +36,24 @@ cube(.18,.10,0,11.65,.65,.20,'#44302b','#292322','#201e1e');const curtainWidth=2
 // Local wall dimensions and image pixels share the same 16:9 aspect ratio.
 const screenGeometry={left:2.8,right:9.2,top:4.5,bottom:.9,width:800,height:450};
 function screenPoints(){const s=screenGeometry;return{a:point(s.left,.32,s.top),b:point(s.right,.32,s.top),c:point(s.left,.32,s.bottom)}}
-function drawScreen(){
- const s=screenGeometry,{a,b,c}=screenPoints(),W=s.width,H=s.height;
- g.save();g.transform((b.x-a.x)/W,(b.y-a.y)/W,(c.x-a.x)/H,(c.y-a.y)/H,a.x,a.y);
+// Snapshot the rendered projection in its own wall coordinates, including its current curtain coverage.
+document.addEventListener('seen-capture-screen',event=>{
+ if(!isSceneOpen('screening')||!width||!height)return;
+ const {a,b,c}=screenPoints(),rect=world.getBoundingClientRect(),matrix=new DOMMatrix([(b.x-a.x)/800,(b.y-a.y)/800,0,(c.y-a.y)/450,a.x,a.y]);
+ const corners=[a,b,c,{x:b.x+c.x-a.x,y:b.y+c.y-a.y}];
+ if(Math.max(...corners.map(p=>p.x))<0||Math.min(...corners.map(p=>p.x))>width||Math.max(...corners.map(p=>p.y))<0||Math.min(...corners.map(p=>p.y))>height)return;
+ try{const snapshot=document.createElement('canvas');snapshot.width=800;snapshot.height=450;const ctx=snapshot.getContext('2d');ctx.setTransform(matrix.inverse());ctx.drawImage(world,0,0,width,height);if(stageReveal.curtain>.995){ctx.resetTransform();paintScreenSurface(ctx)}event.detail.frame={image:snapshot.toDataURL(),matrix:[matrix.a,matrix.b,matrix.c,matrix.d,rect.left+matrix.e,rect.top+matrix.f]}}catch{/* Keep reading available if the canvas cannot be captured. */}
+});
+function paintScreenSurface(g){const W=screenGeometry.width,H=screenGeometry.height;
  g.fillStyle='#090c0d';g.fillRect(-13,-13,W+26,H+26);
  const im=screenStill;if(im.complete&&im.naturalWidth){const ratio=16/9,ir=im.naturalWidth/im.naturalHeight;let sx=0,sy=0,sw=im.naturalWidth,sh=im.naturalHeight;if(ir>ratio){sw=sh*ratio;sx=(im.naturalWidth-sw)/2}else{sh=sw/ratio;sy=(im.naturalHeight-sh)/2}g.drawImage(im,sx,sy,sw,sh,0,0,W,H)}
  g.fillStyle='#101611a6';g.fillRect(0,0,W,H);g.fillStyle='#e3c18b';g.font='500 15px "DM Sans","Pretendard",sans-serif';g.fillText(`SEEN / SCREEN ${currentRoom?.n||'01'}`,40,65);
  g.fillStyle='#fff0d2';g.font='600 46px "Barlow Condensed","Pretendard",sans-serif';g.fillText(SeenI18n.t(currentRoom?.name||'SEEN CINEMA'),40,215,W-80);
- g.fillStyle='#ebc58e';g.font='500 14px "DM Sans","Pretendard",sans-serif';g.fillText(SeenI18n.t('READ THE STORY  ↗'),40,380);g.restore();
+ g.fillStyle='#ebc58e';g.font='500 14px "DM Sans","Pretendard",sans-serif';g.fillText(SeenI18n.t('READ THE STORY  ↗'),40,380);}
+function drawScreen(){
+ const s=screenGeometry,{a,b,c}=screenPoints(),W=s.width,H=s.height;
+ g.save();g.transform((b.x-a.x)/W,(b.y-a.y)/W,(c.x-a.x)/H,(c.y-a.y)/H,a.x,a.y);
+ paintScreenSurface(g);g.restore();
  polygon([[s.left,.38,s.bottom-.07],[s.right,.38,s.bottom-.07],[s.right,.47,s.bottom-.07],[s.left,.47,s.bottom-.07]],'#c9b085');
 }
 function chair(seat){const selected=seatChoices.get(currentRoom?.n)===seat.id,x=seat.x,y=seat.y;

@@ -64,3 +64,12 @@
 @media(max-width:700px){#screen-article{--reading-gutter:16px;--reading-bar:56px;scroll-padding-top:0}#screen-article>.screen-article-toolbar{padding:6px 10px;gap:8px;font-size:8px;letter-spacing:.4px}#screen-article-seat{display:none}#screen-article .screen-article-toolbar>.language-toggle{margin-left:auto}#screen-article-content{margin-top:22px;margin-bottom:76px;padding:26px 20px 34px;border-width:3px;min-height:calc(100dvh - 150px)}#screen-article-content .screen-article-header h2{font-size:36px}#screen-article-content .screen-article-header>p{font-size:16px}#screen-article-content figure{margin:25px -8px}#screen-article-content .screen-article-body{font-size:16px}.reading-curtain{width:22px;bottom:20px;--curtain-from:9px}.reading-curtain-left{left:-10px}.reading-curtain-right{right:-10px;--curtain-from:-9px}.reading-valance{height:10px}.reading-seats{height:45px;gap:9px;bottom:-8px}.reading-seats>i{flex-basis:76px;height:32px;border-radius:15px 15px 3px 3px}.reading-seats>i:nth-child(even){height:37px}}
 @media(max-height:500px){#screen-article{--reading-bar:50px}#screen-article>.screen-article-toolbar{min-height:50px;padding-block:3px}#screen-article-content{margin-top:18px;margin-bottom:65px}.reading-valance{height:10px}.reading-seats{height:40px;bottom:-15px}}
 @media(prefers-reduced-motion:reduce){#screen-article[open] .reading-curtain{animation:none}}
+
+/* The wall's rendered image unfolds into the front-facing reading screen. */
+.reading-screen-flight{position:fixed;left:0;top:0;z-index:12;display:block;max-width:none;max-height:none;object-fit:contain;background:#090f0b;transform-origin:0 0;pointer-events:none;box-shadow:0 0 0 10px #090f0b;will-change:transform,width,height,opacity}
+#screen-article[data-screen-transition="opening"]{background:transparent;overflow:hidden}
+#screen-article[data-screen-transition="opening"]::backdrop{animation:reading-room-dim .78s cubic-bezier(.22,.7,.24,1) both}
+#screen-article[data-screen-transition="handoff"] :is(.reading-room,.screen-article-toolbar,#screen-article-content){transition:opacity .22s ease}
+#screen-article[data-screen-transition="opening"] :is(.reading-room,.screen-article-toolbar,#screen-article-content){opacity:0;transition:none}
+@keyframes reading-room-dim{from{background:#0b100e00}to{background:#0b100e}}
+@media(prefers-reduced-motion:reduce){.reading-screen-flight{display:none}}

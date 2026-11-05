@@ -153,6 +153,7 @@ function updateSeat(){const selected=seatChoices.get(currentRoom.n);seatRows.que
 seatRows.addEventListener('click',e=>{const seat=e.target.closest('[data-seat]');if(!seat||!currentRoom)return;seatChoices.set(currentRoom.n,seat.dataset.seat);updateSeat()});
 function enter(){if(!near)return;hideDoorPreview();lobbyJump.reset();keys.clear();target=null;currentRoom=near;document.querySelector('#screening-title').textContent=`SCREEN ${near.n} / ${near.name.toUpperCase()}`;document.querySelector('#screen-name').textContent=near.name;document.querySelector('#screen-category').textContent=`SCREEN ${near.n} / ${near.sub}`;document.querySelector('#screen-still').src=`assets/${near.img}.jpg`;document.querySelector('#auditorium').hidden=false;updateSeat();showScene('screening');document.dispatchEvent(new Event('seen-room-enter'));}
 const screenArticle=document.querySelector('#screen-article');
+const readingTransition=createSeenScreenTransition({dialog:screenArticle,content:document.querySelector('#screen-article-content')});let pendingReadingFrame=null;
 let readingStorage;try{readingStorage=sessionStorage}catch{}
 const readingState=SeenReading.createStore(readingStorage);
 let activeArticle=null,articleRestoreToken=0,articleScrollTimer=0,restoringArticleScroll=false;
@@ -161,18 +162,19 @@ function saveReading(){
  const form=screenArticle.querySelector('.comment-form');
  readingState.save(activeArticle,{scroll:screenArticle.scrollTop,...(form?{body:form.elements.body.value,author:form.elements.author.value}:{})});
 }
-function stopArticleRestore(){restoringArticleScroll=false;screenArticle.dataset.readingReady='true'}
+function stopArticleRestore(){restoringArticleScroll=false;screenArticle.dataset.readingReady=readingTransition.active?'false':'true'}
 function closeProgram(updateHistory=true){
  if(!screenArticle.open)return;
- clearTimeout(articleScrollTimer);saveReading();articleRestoreToken++;activeArticle=null;stopArticleRestore();screenArticle.close();
+ readingTransition.cancel();pendingReadingFrame=null;clearTimeout(articleScrollTimer);saveReading();articleRestoreToken++;activeArticle=null;stopArticleRestore();screenArticle.close();
  if(updateHistory)articleHistory.close();
 }
 function openProgram(fromHistory=false){
  if(!currentRoom)return;
  const id=currentRoom.article,article=screeningArticles[id];if(!article)return;
- if(fromHistory!==true){articleHistory.open(id);return}
+ if(fromHistory!==true){pendingReadingFrame=readingTransition.capture();articleHistory.open(id);return}
  if(screenArticle.open&&activeArticle===id)return;
  if(screenArticle.open)closeProgram(false);
+ const transitionFrame=pendingReadingFrame;pendingReadingFrame=null;
  activeArticle=id;const saved=readingState.read(id),restoreToken=++articleRestoreToken;
  document.querySelector('#screen-article-room').textContent=`SCREEN ${currentRoom.n} / SEEN · ISSUE 02`;
  const selectedSeat=document.querySelector('#room-world').dataset.motion==='seated'?seatChoices.get(currentRoom.n):null;seenSetText(document.querySelector('#screen-article-seat'),selectedSeat?`Seat ${selectedSeat}`:'FROM THE AUDIENCE');
@@ -193,11 +195,11 @@ function openProgram(fromHistory=false){
  const commentsReady=SeenHub.mountComments(content,id);
  const form=content.querySelector('.comment-form');
  if(form){form.elements.body.value=saved.body;if(saved.author)form.elements.author.value=saved.author}
- screenArticle.showModal();restoringArticleScroll=true;screenArticle.dataset.readingReady='false';
+ screenArticle.showModal();const transitionReady=readingTransition.open(transitionFrame);restoringArticleScroll=true;screenArticle.dataset.readingReady='false';
  document.querySelector('#back-to-seats').focus({preventScroll:true});
  const restore=()=>{if(restoreToken===articleRestoreToken&&screenArticle.open&&restoringArticleScroll)screenArticle.scrollTop=saved.scroll};
  requestAnimationFrame(restore);
- Promise.allSettled([artworkReady,commentsReady,document.fonts?.ready]).then(()=>requestAnimationFrame(()=>{
+ Promise.allSettled([artworkReady,commentsReady,document.fonts?.ready,transitionReady]).then(()=>requestAnimationFrame(()=>{
   restore();requestAnimationFrame(()=>{restore();if(restoreToken===articleRestoreToken)stopArticleRestore()});
  }));
 }
