@@ -53,3 +53,19 @@ for(const[width,height]of[[320,568],[393,852],[844,390],[1440,1000]])test(`all c
  }
  assert.equal(await page.evaluate(()=>arcadeQA.writes.length),6,'one score per completed round');assert((await page.evaluate(()=>arcadeQA.writes)).every(row=>row.nickname==='Arcade QA'));
 });
+
+// Regression: feedback used to shrink the question pane and clip the bottom cards.
+test('eye answers keep complete card borders above the explanation after a wrong answer',async t=>{
+ for(const [width,height]of [[1440,1000],[1280,800],[960,740],[960,680],[960,510],[393,700],[320,568]]){
+  for(const language of ['en','ko']){
+   const page=await fixture(t,width,height);
+   await page.evaluate(language=>{SeenI18n.setLanguage(language);openQuiz('eyes')},language);
+   const before=await page.locator('.game-question').boundingBox();
+   await page.keyboard.press('4');await page.locator('.game-next').click();await page.keyboard.press('4');
+   const layout=await page.evaluate(()=>{const rect=e=>e.getBoundingClientRect().toJSON(),question=document.querySelector('.game-question');return{question:rect(question),cards:[...document.querySelectorAll('[data-game-answer]')].map(rect),feedback:rect(document.querySelector('.game-answer-slot')),next:rect(document.querySelector('.game-next'))}});
+   assert.equal(layout.question.height,before.height,'answering reserves the same space for the cards');
+   for(const card of layout.cards){assert(card.top>=layout.question.top&&card.bottom+3<=layout.question.bottom,'all four card borders and shadows remain visible');assert(card.bottom+3<=layout.feedback.top||card.right+3<=layout.feedback.left,'feedback never covers the answer grid')}
+   assert(layout.next.bottom<=height);await page.keyboard.press('Escape');
+  }
+ }
+});

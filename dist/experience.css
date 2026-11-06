@@ -45,7 +45,7 @@
 /* Keep the lobby introduction readable over a zoomed map on compact screens. */
 @media(max-width:950px){#lobby-scene .intro{left:5%;right:100px;max-width:330px;z-index:3;top:18px}#lobby-scene .intro .eyebrow{display:inline-block;max-width:100%;white-space:normal;overflow-wrap:break-word;word-break:keep-all;font-size:clamp(11px,2vw,14px);line-height:1.5;letter-spacing:.02em;padding:7px 10px;border-radius:8px;background:#f3ecdfed;box-shadow:0 1px 0 #a99a7c22}}
 @media(max-height:500px) and (max-width:950px){#lobby-scene .intro{display:none!important}}
-.cinema-page .site-header .sound-toggle{display:grid;place-items:center;width:44px;height:44px;min-width:44px;padding:9px!important;border-radius:0;font-size:0!important}.sound-toggle svg{display:block;width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.cinema-page .site-header .sound-toggle{display:grid;place-items:center;width:44px;height:44px;min-width:44px;padding:9px!important;appearance:none;border:0!important;border-radius:0!important;background:none!important;box-shadow:none!important;font-size:0!important}.sound-toggle svg{display:block;width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .seen-name-layer{position:absolute;pointer-events:none;z-index:4;display:block}
 #directory{overflow-y:auto}
 
