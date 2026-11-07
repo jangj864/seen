@@ -14,30 +14,6 @@ const seenQuizQuestions=[
   },
   {
     "mode": "all",
-    "q": "Who directed After Yang?",
-    "options": [
-      "Kogonada",
-      "Bong Joon Ho",
-      "Park Chan-wook",
-      "Hirokazu Kore-eda"
-    ],
-    "answer": 0,
-    "note": "Kogonada directed After Yang (2022)."
-  },
-  {
-    "mode": "all",
-    "q": "Who directed Minari?",
-    "options": [
-      "Justin Chon",
-      "Lulu Wang",
-      "Lee Isaac Chung",
-      "Celine Song"
-    ],
-    "answer": 2,
-    "note": "Lee Isaac Chung wrote and directed Minari (2020)."
-  },
-  {
-    "mode": "all",
     "q": "Who directed Spirited Away?",
     "options": [
       "Satoshi Kon",
@@ -59,6 +35,97 @@ const seenQuizQuestions=[
     ],
     "answer": 0,
     "note": "Bong Joon Ho directed Parasite (2019)."
+  },
+  {
+    "mode": "all",
+    "q": "Who directed Inception?",
+    "options": [
+      "Ridley Scott",
+      "Denis Villeneuve",
+      "Christopher Nolan",
+      "David Fincher"
+    ],
+    "answer": 2,
+    "note": "Christopher Nolan directed Inception (2010).",
+    "source": "https://www.legendary.com/film/inception/"
+  },
+  {
+    "mode": "all",
+    "q": "Who directed Titanic?",
+    "options": [
+      "James Cameron",
+      "Steven Spielberg",
+      "Robert Zemeckis",
+      "Ron Howard"
+    ],
+    "answer": 0,
+    "note": "James Cameron wrote and directed Titanic (1997).",
+    "source": "https://www.paramount.com/movies/titanic"
+  },
+  {
+    "mode": "all",
+    "q": "Who directed Jaws?",
+    "options": [
+      "George Lucas",
+      "Martin Scorsese",
+      "Francis Ford Coppola",
+      "Steven Spielberg"
+    ],
+    "answer": 3,
+    "note": "Steven Spielberg directed Jaws (1975).",
+    "source": "https://www.universalpicturesathome.com/movies/jaws"
+  },
+  {
+    "mode": "all",
+    "q": "Who directed Pulp Fiction?",
+    "options": [
+      "Guy Ritchie",
+      "Quentin Tarantino",
+      "David Lynch",
+      "Paul Thomas Anderson"
+    ],
+    "answer": 1,
+    "note": "Quentin Tarantino directed Pulp Fiction (1994).",
+    "source": "https://www.miramax.com/movie/pulp-fiction/"
+  },
+  {
+    "mode": "all",
+    "q": "Who directed The Lord of the Rings: The Return of the King?",
+    "options": [
+      "Guillermo del Toro",
+      "Sam Raimi",
+      "Peter Jackson",
+      "Tim Burton"
+    ],
+    "answer": 2,
+    "note": "Peter Jackson directed The Return of the King (2003).",
+    "source": "https://www.oscars.org/oscars/ceremonies/2004"
+  },
+  {
+    "mode": "all",
+    "q": "Who directed the original Star Wars (1977)?",
+    "options": [
+      "George Lucas",
+      "J. J. Abrams",
+      "Irvin Kershner",
+      "Rian Johnson"
+    ],
+    "answer": 0,
+    "note": "George Lucas wrote and directed Star Wars: A New Hope (1977).",
+    "source": "https://www.lucasfilm.com/productions/episode-iv/"
+  },
+  {
+    "mode": "all",
+    "q": "Who directed The Grand Budapest Hotel?",
+    "options": [
+      "Noah Baumbach",
+      "Sofia Coppola",
+      "Taika Waititi",
+      "Wes Anderson"
+    ],
+    "answer": 3,
+    "note": "Wes Anderson directed The Grand Budapest Hotel (2014).",
+    "source": "https://www.searchlightpictures.com/thegrandbudapesthotel/"
   },
   {
     "kind": "eyes",
@@ -165,16 +232,129 @@ const seenQuizQuestions=[
     ]
   },
   {
-    "q": "In After Yang, what starts Jake’s search?",
+    "mode": "eyes",
+    "q": "Whose eyes are these?",
     "options": [
-      "A missing photograph",
-      "A letter from his father",
-      "An A.I. companion malfunctions",
-      "A move to another city"
+      "Brad Pitt",
+      "Tom Cruise",
+      "Matt Damon",
+      "Christian Bale"
+    ],
+    "answer": 1,
+    "note": "Tom Cruise plays Ethan Hunt in Mission: Impossible.",
+    "source": "https://www.paramount.com/movies/mission-impossible",
+    "kind": "eyes",
+    "image": "quiz-tom-cruise",
+    "imageSize": [
+      960,
+      1210
+    ],
+    "crop": [
+      400,
+      365,
+      330,
+      100
+    ]
+  },
+  {
+    "mode": "eyes",
+    "q": "Whose eyes are these?",
+    "options": [
+      "Leonardo DiCaprio",
+      "Bradley Cooper",
+      "Ryan Gosling",
+      "Jude Law"
+    ],
+    "answer": 0,
+    "note": "Leonardo DiCaprio plays Jack Dawson in Titanic (1997).",
+    "source": "https://www.paramount.com/movies/titanic",
+    "kind": "eyes",
+    "image": "quiz-leonardo-dicaprio",
+    "imageSize": [
+      960,
+      1141
+    ],
+    "crop": [
+      135,
+      338,
+      270,
+      90
+    ]
+  },
+  {
+    "mode": "eyes",
+    "q": "Whose eyes are these?",
+    "options": [
+      "Johnny Depp",
+      "Nicolas Cage",
+      "Hugh Jackman",
+      "Keanu Reeves"
+    ],
+    "answer": 3,
+    "note": "Keanu Reeves plays Neo in The Matrix (1999).",
+    "source": "https://www.warnerbros.com/movies/matrix",
+    "kind": "eyes",
+    "image": "quiz-keanu-reeves",
+    "imageSize": [
+      960,
+      1354
+    ],
+    "crop": [
+      355,
+      329,
+      320,
+      80
+    ]
+  },
+  {
+    "mode": "eyes",
+    "q": "Whose eyes are these?",
+    "options": [
+      "Jennifer Lawrence",
+      "Margot Robbie",
+      "Emma Stone",
+      "Anne Hathaway"
     ],
     "answer": 2,
-    "note": "Yang’s malfunction leads Jake to discover a life he did not know about.",
-    "mode": "films"
+    "note": "Emma Stone plays Mia in La La Land (2016).",
+    "source": "https://www.lionsgate.com/movies/la-la-land",
+    "kind": "eyes",
+    "image": "quiz-emma-stone",
+    "imageSize": [
+      960,
+      1064
+    ],
+    "crop": [
+      240,
+      315,
+      350,
+      100
+    ]
+  },
+  {
+    "mode": "eyes",
+    "q": "Whose eyes are these?",
+    "options": [
+      "Chris Evans",
+      "Robert Downey Jr.",
+      "Mark Ruffalo",
+      "Jeremy Renner"
+    ],
+    "answer": 1,
+    "note": "Robert Downey Jr. plays Tony Stark in Iron Man (2008).",
+    "source": "https://www.marvel.com/movies/iron-man",
+    "kind": "eyes",
+    "image": "quiz-robert-downey",
+    "imageSize": [
+      960,
+      1360
+    ],
+    "crop": [
+      480,
+      515,
+      340,
+      110
+    ]
   },
   {
     "q": "Which film follows a Korean American family making a home on a farm?",
@@ -202,26 +382,106 @@ const seenQuizQuestions=[
   },
   {
     "mode": "films",
-    "q": "In which U.S. state does Minari take place?",
+    "q": "Which school does Harry Potter attend?",
     "options": [
-      "California",
-      "Arkansas",
-      "New York",
-      "Oregon"
+      "Durmstrang",
+      "Beauxbatons",
+      "Hogwarts",
+      "Ilvermorny"
     ],
-    "answer": 1,
-    "note": "The Yi family starts a farm in rural Arkansas."
+    "answer": 2,
+    "note": "Harry Potter attends Hogwarts School of Witchcraft and Wizardry.",
+    "source": "https://www.harrypotter.com/fact-file/locations/hogwarts"
   },
   {
     "mode": "films",
-    "q": "What is Lady Bird’s given name?",
+    "q": "What kind of toy is Woody in Toy Story?",
     "options": [
-      "Julie",
-      "Marion",
-      "Christine",
-      "Jenna"
+      "A space ranger",
+      "A cowboy",
+      "A race car",
+      "A dinosaur"
+    ],
+    "answer": 1,
+    "note": "Woody is the cowboy toy; Buzz Lightyear is the space ranger.",
+    "source": "https://www.pixar.com/toy-story"
+  },
+  {
+    "mode": "films",
+    "q": "On which ship do Jack and Rose meet?",
+    "options": [
+      "RMS Olympic",
+      "Queen Mary",
+      "SS United States",
+      "RMS Titanic"
+    ],
+    "answer": 3,
+    "note": "Jack and Rose meet aboard RMS Titanic on its maiden voyage.",
+    "source": "https://www.paramount.com/movies/titanic"
+  },
+  {
+    "mode": "films",
+    "q": "In Inception, where does Cobb steal secrets?",
+    "options": [
+      "Inside dreams",
+      "Inside video games",
+      "In outer space",
+      "In the distant past"
+    ],
+    "answer": 0,
+    "note": "Cobb extracts secrets from the subconscious while people dream.",
+    "source": "https://www.legendary.com/film/inception/"
+  },
+  {
+    "mode": "films",
+    "q": "Which creatures return to life in Jurassic Park?",
+    "options": [
+      "Dragons",
+      "Woolly mammoths",
+      "Dinosaurs",
+      "Giant sea monsters"
     ],
     "answer": 2,
-    "note": "Christine McPherson gives herself the name Lady Bird."
+    "note": "Jurassic Park is a theme park populated by living dinosaurs.",
+    "source": "https://www.universalpicturesathome.com/movies/jurassic-park"
+  },
+  {
+    "mode": "films",
+    "q": "Who carries the One Ring toward Mordor?",
+    "options": [
+      "Gandalf",
+      "Legolas",
+      "Aragorn",
+      "Frodo Baggins"
+    ],
+    "answer": 3,
+    "note": "Frodo Baggins is entrusted with the quest to destroy the One Ring.",
+    "source": "https://www.warnerbros.com/movies/lord-rings-fellowship-ring"
+  },
+  {
+    "mode": "films",
+    "q": "Which film features Neo, Morpheus and Trinity?",
+    "options": [
+      "Blade Runner",
+      "The Matrix",
+      "Minority Report",
+      "Tron"
+    ],
+    "answer": 1,
+    "note": "Neo, Morpheus and Trinity are central characters in The Matrix (1999).",
+    "source": "https://www.warnerbros.com/movies/matrix"
+  },
+  {
+    "mode": "films",
+    "q": "How is Darth Vader related to Luke Skywalker?",
+    "options": [
+      "He is Luke’s father",
+      "He is Luke’s brother",
+      "He is Luke’s uncle",
+      "They are unrelated"
+    ],
+    "answer": 0,
+    "note": "The Empire Strikes Back reveals that Darth Vader is Luke’s father.",
+    "source": "https://www.starwars.com/databank/darth-vader"
   }
 ];

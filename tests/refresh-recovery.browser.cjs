@@ -60,7 +60,7 @@ for(const options of [{blockedStorage:true},{brokenArtwork:true}])test(`refresh 
 });
 test('one backend client serves repeated entry and scores while movement serialization stays throttled',async t=>{
  const page=await fixture(t,{backend:true});await page.goto('https://refresh.test/');await enter(page);await page.waitForFunction(()=>SeenHub.connected);
- await page.evaluate(async()=>{SeenHub.join('Repeated entry');await SeenScores.submit({mode:'all',answers:[0,1,2,3,0],runId:crypto.randomUUID(),nickname:SeenHub.name})});assert.equal(await page.evaluate(()=>backendQA.clients),1);
+ await page.evaluate(async()=>{SeenHub.join('Repeated entry');await SeenScores.submit({mode:'all',answers:[0,1,2,3,0,1,2,3,0,1],runId:crypto.randomUUID(),nickname:SeenHub.name})});assert.equal(await page.evaluate(()=>backendQA.clients),1);
  const serialized=await page.evaluate(()=>{
   const stringify=JSON.stringify,now=performance.now.bind(performance),start=now();let count=0,clock=start;
   JSON.stringify=function(value,...args){if(value?.scene==='lobby')count++;return stringify(value,...args)};performance.now=()=>clock;

@@ -17,7 +17,7 @@
 #game-room .game-room-body{position:relative;display:block;flex:1;min-height:0;padding:24px 30px 20px;overflow:hidden;background:linear-gradient(100deg,#171f21,#354144 48%,#141c1e);border-bottom:1px solid #090f11}
 #game-room .game-room-body::before,#game-room .game-room-body::after{content:'';position:absolute;top:50%;width:5px;height:5px;border-radius:50%;background:#8d9797;box-shadow:0 1px 2px #000,inset 0 1px #c4ccca}
 #game-room .game-room-body::before{left:13px}#game-room .game-room-body::after{right:13px}
-#game-room .arcade-machine{position:relative;height:100%;min-height:0;display:grid;grid-template-rows:auto minmax(0,1fr) auto;gap:18px;padding:24px 30px 18px;border:8px solid #091012;border-radius:26px;background:radial-gradient(ellipse at 50% 0%,color-mix(in srgb,var(--game-accent) 9%,#122126),#101b20 68%);color:var(--cabinet-ink);box-shadow:0 0 0 1px #6c797466,inset 0 0 36px #0009,0 4px 5px #0008;overflow:hidden}
+#game-room .arcade-machine{position:relative;height:100%;min-height:0;display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1fr) auto;gap:18px;padding:24px 30px 18px;border:8px solid #091012;border-radius:26px;background:radial-gradient(ellipse at 50% 0%,color-mix(in srgb,var(--game-accent) 9%,#122126),#101b20 68%);color:var(--cabinet-ink);box-shadow:0 0 0 1px #6c797466,inset 0 0 36px #0009,0 4px 5px #0008;overflow:hidden}
 #game-room .arcade-machine::after{content:'';position:absolute;inset:0;z-index:2;border-radius:18px;pointer-events:none;background:repeating-linear-gradient(0deg,#0000 0 3px,#00000012 3px 4px),linear-gradient(125deg,#ffffff04,transparent 35%);box-shadow:inset 0 0 45px #0003}
 #game-room .arcade-top{display:flex;align-items:center;gap:12px;min-height:32px;font:600 10px/1.5 'DM Sans','Pretendard',sans-serif;letter-spacing:1.3px;color:var(--cabinet-muted)}
 #game-room #game-progress{display:flex;align-items:center;gap:10px}
@@ -53,9 +53,9 @@ html[lang] #game-room #game-quiz h3{flex:none;min-height:0;margin:0;color:#f3f3e
 #game-room .game-next{align-self:center;flex:none;min-width:0;min-height:44px;margin:0;padding:12px 16px;border:1px solid var(--game-light);border-radius:7px;background:var(--game-accent);color:var(--game-on-accent);box-shadow:0 3px 0 #071213;font:700 11px/1.5 'DM Sans','Pretendard',sans-serif;letter-spacing:.03em}
 #game-room .game-next:hover{transform:translateY(-1px);filter:brightness(1.1)}
 #game-room .game-next:active{transform:translateY(2px);box-shadow:none}
-#game-room .arcade-controls{min-height:25px;margin:0;padding:4px 0 0;border:0;display:flex;align-items:center;gap:12px}
-#game-room #game-indicators{margin:0;padding:3px 0;gap:7px}
-#game-room .quiz-dot{width:22px;height:4px;min-height:0;border:0;border-radius:2px;background:#415459;outline:none;box-shadow:none}
+#game-room .arcade-controls{min-width:0;min-height:25px;margin:0;padding:4px 0 0;border:0;display:flex;align-items:center;gap:12px}
+#game-room #game-indicators{margin:0;padding:3px 0;gap:5px;flex:1;flex-wrap:nowrap;min-width:0;max-width:265px}
+#game-room .quiz-dot{width:22px;flex:1 1 0;min-width:4px;max-width:22px;height:4px;min-height:0;border:0;border-radius:2px;background:#415459;outline:none;box-shadow:none}
 #game-room .quiz-dot.is-answered{background:var(--game-light)}
 #game-room .quiz-dot.is-current{background:var(--game-light);outline:0;box-shadow:0 0 8px color-mix(in srgb,var(--game-light) 40%,transparent)}
 #game-room .arcade-controls b{font:600 8px/1.5 'DM Sans','Pretendard',sans-serif;letter-spacing:2px;color:#7f9898}
@@ -132,7 +132,7 @@ html[lang="ko"] #game-room #game-quiz[data-state="complete"] .scoreboard-actions
  #game-room .game-toolbar{flex-basis:70px;padding:12px 15px;gap:12px}
  #game-room .cabinet-brand{padding-right:12px}#game-room .cabinet-brand b{font-size:27px}#game-room .cabinet-brand small{font-size:7px;letter-spacing:2.4px}
  #game-room #game-title{font-size:10px}#game-room .cabinet-title>span{font-size:7px;letter-spacing:1px;margin-bottom:5px}
- #game-room .cabinet-mode-icon{display:none}#game-room .game-toolbar>.language-toggle{min-width:36px;min-height:36px}#game-room .game-toolbar .icon-close{width:36px;height:36px}
+ #game-room .cabinet-mode-icon{width:26px;height:30px}#game-room .cabinet-mode-icon svg{width:24px;height:24px}#game-room .game-toolbar>.language-toggle{min-width:36px;min-height:36px}#game-room .game-toolbar .icon-close{width:36px;height:36px}
  #game-room .game-room-body{padding:14px 12px 12px}#game-room .game-room-body::before{left:4px}#game-room .game-room-body::after{right:4px}
  #game-room .arcade-machine{padding:17px 15px 12px;border-width:5px;border-radius:19px;gap:12px}
  #game-room .arcade-top{font-size:8px;letter-spacing:.5px;min-height:28px}#game-room #game-progress{gap:7px}#game-room #game-score{font-size:10px;padding:7px 9px}
@@ -161,7 +161,7 @@ html[lang="ko"] #game-room #game-quiz[data-state="complete"] .scoreboard-actions
 }
 @media(max-width:360px){
  #game-room .game-toolbar{gap:9px;padding-inline:12px;flex-basis:62px}#game-room .cabinet-brand{padding-right:10px}#game-room .cabinet-brand b{font-size:24px}
- #game-room #game-title{font-size:8px}#game-room .cabinet-title>span{font-size:7px}#game-room .game-toolbar>.language-toggle{min-width:32px;min-height:34px}
+ #game-room .cabinet-mode-icon{width:20px}#game-room .cabinet-mode-icon svg{width:20px;height:20px}#game-room #game-title{font-size:8px}#game-room .cabinet-title>span{font-size:7px}#game-room .game-toolbar>.language-toggle{min-width:32px;min-height:34px}
  #game-room .game-toolbar .icon-close{width:32px;height:34px}#game-room .arcade-machine{padding:12px 10px 10px;gap:10px}
  #game-room .cabinet-buttons{display:none}#game-room .cabinet-deck{flex-basis:60px;padding-inline:20px;gap:18px}
  html[lang] #game-room #game-quiz{grid-template-rows:minmax(0,1fr) 92px;gap:8px}#game-room .game-answer-slot{height:92px}
@@ -211,3 +211,6 @@ html[lang="ko"] #game-room #game-quiz[data-state="complete"] .scoreboard-actions
 html[lang="ko"] #game-room .game-options button strong{word-break:keep-all;overflow-wrap:anywhere}
 
 #game-room .cabinet-buttons button{cursor:pointer;transition:transform .12s,filter .12s}#game-room .cabinet-buttons button:hover:not(:disabled){filter:brightness(1.2);transform:translateY(-2px)}#game-room .cabinet-buttons button:active:not(:disabled){transform:translateY(2px);box-shadow:0 1px #0f181b}#game-room .cabinet-buttons button:disabled{opacity:.5;cursor:default}#game-room .cabinet-buttons button:focus-visible{outline:2px solid var(--game-light);outline-offset:2px}
+
+#game-room #game-footer-brand{font:inherit;color:inherit;letter-spacing:inherit}
+#game-room #game-photo-credits{font:inherit;letter-spacing:inherit;color:inherit;text-decoration:underline;text-underline-offset:3px;white-space:nowrap}#game-room #game-photo-credits:focus-visible{outline:2px solid var(--game-light);outline-offset:4px}

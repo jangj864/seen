@@ -1,9 +1,9 @@
 'use strict';
 // Every cabinet shares one question, answer and result renderer.
 const SeenQuizThemes=Object.freeze({
- all:{title:'SEEN QUIZ',accent:'#b74239',light:'#f0b39d',onAccent:'#fff3dc',description:'Five questions about film directors.'},
- eyes:{title:'EYES ONLY',accent:'#428b7e',light:'#a4d4b2',onAccent:'#fff3dc',description:'Guess five actors from their eyes.'},
- films:{title:'FILM CLUB',accent:'#b1893e',light:'#efcf82',onAccent:'#172a20',description:'Five questions about film stories and settings.'}
+ all:{title:'SEEN QUIZ',accent:'#b74239',light:'#f0b39d',onAccent:'#fff3dc',description:'Ten questions about famous film directors.'},
+ eyes:{title:'EYES ONLY',accent:'#428b7e',light:'#a4d4b2',onAccent:'#fff3dc',description:'Guess ten actors from their eyes.'},
+ films:{title:'FILM CLUB',accent:'#b1893e',light:'#efcf82',onAccent:'#172a20',description:'Ten questions about famous films and their worlds.'}
 });
 function createSeenQuizPlayer({canRequest=()=>true,onOpen=()=>{},onClose=()=>{},fx=()=>{},nickname=()=>undefined}={}){
 const gameRoom=document.querySelector('#game-room'),quizConfirm=document.querySelector('#game-confirm'),quizThemes=SeenQuizThemes;
@@ -25,6 +25,7 @@ function updateQuizIndicators(total,complete){
 let gameIndex=0,gameScore=0,gameAnswered=null,gameMode='all',gameQuestions=seenQuizQuestions.filter(q=>q.mode==='all'),gameRound=SeenScoreboard.createRound('all',nickname());
 function replayQuiz(){gameIndex=0;gameScore=0;gameAnswered=null;gameRound=SeenScoreboard.createRound(gameMode,nickname());renderGame();document.querySelector('#game-quiz button')?.focus({preventScroll:true})}
 function renderGame(){
+ document.querySelector('#game-photo-credits').hidden=gameMode!=='eyes';document.querySelector('#game-footer-brand').hidden=gameMode==='eyes';
  const total=gameQuestions.length,complete=gameIndex===total,q=gameQuestions[gameIndex],root=document.querySelector('#game-quiz');
  document.querySelectorAll('[data-cabinet-answer]').forEach(button=>button.disabled=complete||gameAnswered!==null);
  updateQuizIndicators(total,complete);
@@ -37,7 +38,7 @@ function renderGame(){
  const heading=document.createElement('h3');heading.textContent=q.q;question.append(heading);
  if(!complete&&q.kind==='eyes'){
   const ns='http://www.w3.org/2000/svg',visual=document.createElementNS(ns,'svg'),image=document.createElementNS(ns,'image');
-  visual.classList.add('game-eyes');visual.setAttribute('viewBox',q.crop.join(' '));visual.setAttribute('preserveAspectRatio','xMidYMid slice');visual.setAttribute('role','img');visual.setAttribute('aria-label',gameAnswered===null?'Eye detail from a film publicity still. Choose the actor below.':`Eye detail: ${q.options[q.answer]}`);
+  visual.classList.add('game-eyes');visual.setAttribute('viewBox',q.crop.join(' '));visual.setAttribute('preserveAspectRatio','xMidYMid slice');visual.setAttribute('role','img');visual.setAttribute('aria-label',gameAnswered===null?'Eye detail. Choose the actor below.':`Eye detail: ${q.options[q.answer]}`);
   image.setAttribute('href',`assets/${q.image}.jpg`);image.setAttribute('width',String(q.imageSize?.[0]||2000));image.setAttribute('height',String(q.imageSize?.[1]||1125));visual.append(image);question.append(visual);
  }
  if(!complete){const options=document.createElement('div');options.className='game-options';q.options.forEach((value,i)=>{

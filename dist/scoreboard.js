@@ -33,14 +33,14 @@ const SeenScoreboard=(()=>{
    if(entry?.is_current)row.setAttribute('aria-current','true');
    const place=element('td','scoreboard-rank'),name=element('td','scoreboard-player'),points=element('td','scoreboard-points');
    place.textContent=String(rank).padStart(2,'0');
-   if(entry){nickname(name,entry.nickname);points.textContent=`${entry.score} / ${entry.total||5}`;if(entry.is_current){const you=element('span','scoreboard-you','YOU');name.append(you)}}else{name.textContent='—';points.textContent='—';row.classList.add('is-empty')}
+   if(entry){nickname(name,entry.nickname);points.textContent=`${entry.score} / ${entry.total||total}`;if(entry.is_current){const you=element('span','scoreboard-you','YOU');name.append(you)}}else{name.textContent='—';points.textContent='—';row.classList.add('is-empty')}
    row.append(place,name,points);body.append(row);
   }
   table.append(body);tableRegion.append(table);
   const status=element('div','scoreboard-status');status.setAttribute('role','status');status.setAttribute('aria-live','polite');
   if(round.status==='ready'){
    const current=round.data?.current;
-   if(current){const personal=element('p','scoreboard-personal');personal.append(element('span','','YOUR BEST'),element('strong','',`#${current.rank}`));const name=element('span','scoreboard-personal-name');nickname(name,current.nickname);personal.append(name,element('span','',`${current.score} / ${current.total||5}`));status.append(personal)}
+   if(current){const personal=element('p','scoreboard-personal');personal.append(element('span','','YOUR BEST'),element('strong','',`#${current.rank}`));const name=element('span','scoreboard-personal-name');nickname(name,current.nickname);personal.append(name,element('span','',`${current.score} / ${current.total||total}`));status.append(personal)}
    else status.append(element('p','','No score recorded yet.'));
   }else if(round.status==='error'){
    status.append(element('p','','Rankings unavailable. Please try again.'));

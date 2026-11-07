@@ -8,7 +8,7 @@ The entry page is an interactive isometric cinema lobby drawn with Canvas 2D. Wa
 
 ## Game Room
 
-A green doorway on the left of the lobby opens on approach and automatically launches SEEN Quiz when crossed. Click the door or choose The Game Room in The Program to walk there. Three arcade cabinets offer five-question director, actor-eye and film-trivia rounds, with answer explanations, shared Top 10 results, replay, and return to the lobby. Progress is preserved during the current visit.
+A green doorway on the left of the lobby opens on approach and automatically launches SEEN Quiz when crossed. Click the door or choose The Game Room in The Program to walk there. Three arcade cabinets offer ten-question director, actor-eye and film-trivia rounds, with answer explanations, shared Top 10 results, replay, and return to the lobby. Progress is preserved during the current visit.
 
 ## Preview
 
@@ -57,15 +57,15 @@ Validation included two independent browser contexts for live presence/movement,
 
 ## Arcade high scores
 
-Each of the three five-question quizzes shows a shared Top 10 after completion, using the nickname entered on the admission ticket. The best score per nickname and quiz is ranked first; equal scores use the time that record was achieved. Replaying starts a new run; reopening a result or changing language keeps the same run id and does not submit again. Empty positions remain empty.
+Each of the three ten-question quizzes shows a shared Top 10 after completion, using the nickname entered on the admission ticket. The best score per nickname and quiz is ranked first; equal scores use the time that record was achieved. Replaying starts a new run; reopening a result or changing language keeps the same run id and does not submit again. Empty positions remain empty.
 
-`quiz-scores.js` submits the five answer choices to `public.seen_quiz_scores`; the database derives the score and supplies its own timestamp. Public clients can insert only run id, nickname, mode and choices, and can read public ranking fields. They cannot change scores, timestamps or existing records. The invoker RPC `seen_quiz_leaderboard` returns the Top 10 and the current nickname's best rank, including ranks below 10. Schema reference: `backend/seen-quiz-scores.sql`. The SQL verification fixtures roll back all test records. `scoreboard.js` and `arcade-experience.css` supply the shared retro result view, including loading, retry and narrow-screen scrolling.
+`quiz-scores.js` submits ten answer choices to `public.seen_quiz_scores_v2`; the database derives the score and supplies its own timestamp. Public clients can insert only run id, nickname, mode and choices, and can read public ranking fields. They cannot change scores, timestamps or existing records. The invoker RPC `seen_quiz_leaderboard_v2` returns the Top 10 and the current nickname's best rank, including ranks below 10. Schema reference: `backend/seen-quiz-scores-v2.sql`. The original five-question table and RPC remain intact for legacy records and cached older clients; ten-question rounds use their own rankings. The SQL verification fixtures roll back all test records. `scoreboard.js` and `arcade-experience.css` supply the shared retro result view, including loading, retry and narrow-screen scrolling.
 
 ## Entry, NPC conversations, and pixel arcade
 
 Visitors enter a 2–20 character nickname through a loading/onboarding ticket before joining live presence. Names appear above avatars. Ticket and popcorn staff offer conversations; seated NPCs can accept or decline seat requests. Live visitors receive a Yes/No request and only move after accepting. Auditorium guests face the screen; the lobby bench guest faces the open side of the bench.
 
-Quiz panels use a local Press Start 2P font (OFL license in `dist/assets/`) and pixel borders, cards, progress indicators, and CRT styling. Responsive question/feedback regions preserve panel height before and after answers. The compact CRT playfield removes the side marquee and segmented progress bar, keeping questions and answer cards together. Validation covered all 15 questions at four viewport sizes, NPC Yes/No responses, live visitor request/reply, and navigation/jump tests.
+Quiz panels use a local Press Start 2P font (OFL license in `dist/assets/`) and pixel borders, cards, progress indicators, and CRT styling. Responsive question/feedback regions preserve panel height before and after answers. The compact CRT playfield removes the side marquee and segmented progress bar, keeping questions and answer cards together. Validation covered all 30 questions at four viewport sizes, NPC Yes/No responses, live visitor request/reply, and navigation/jump tests.
 
 NPC identities appear within interaction range. Approach and click/tap a character for an anchored, non-modal dialogue bubble with branching choices. A distant click approaches the character without opening dialogue. The speaker pauses and faces the visitor during the conversation, then resumes walking without snapping to a new position. Staff wear red uniforms, cream aprons and caps. The red arcade machine has no foreground NPC. Walking guests turn with their travel direction and use a faster walking cycle. Shared crowd navigation adds standing-person footprints to click routes and manual collision checks, including the lobby planter; moving guests pause rather than cross the local visitor.
 
@@ -79,7 +79,7 @@ Validation covered switching an answered quiz in both directions without changin
 
 A shared mobile camera enlarges the walking scenes and offers an Overview / Follow toggle. Projection, nameplates and pointer hits use the same camera; touch doors and people have expanded targets. Visible screening controls provide article reading, seat selection and return to the lobby, while the arcade offers three keyboard-accessible cabinet buttons. Native buttons and selects retain their standard Space/Enter/arrow behavior.
 
-Cinema articles support `#read/table`, `#read/ladybird`, `#read/yang` and `#read/minari` links. Browser Back/Forward closes and restores the article. Reading position and exact unposted comment drafts are kept per article in this tab, including reloads when session storage is available. Successful posting clears only the matching draft; failures and newer replacement drafts are retained. Background poster loading no longer blocks admission. Reading type is 16px on narrow screens and 18px on larger screens.
+Cinema articles support `#read/table`, `#read/ladybird`, `#read/yang` and `#read/minari` links. Within an active reading visit, browser Back/Forward closes and restores the article. Returning home starts a new visit: older article entries cannot reopen a story, including when an admitted document is restored from the browser cache. Direct article links and article refreshes still work. Reading position and exact unposted comment drafts are kept per article in this tab, including reloads when session storage is available. Successful posting clears only the matching draft; failures and newer replacement drafts are retained. Background poster loading no longer blocks admission. Reading type is 16px on narrow screens and 18px on larger screens.
 
 `film-catalog.js` supplies the five upcoming films to both editions, and `articles.js` supplies their shared essays. Recommendation PNGs wrap long Korean and Latin strings without clipping. Conversation sessions reject stale async seat replies after a conversation closes or changes.
 
@@ -112,3 +112,11 @@ All three quizzes use the same front-facing cabinet, inset CRT playfield, answer
 The wall projection and reading view use the same film still and article title with black masking, a matte screen texture, restrained lighting and dark velvet curtains. `cinema-experience.css` owns the reading frame and transition styling; shared scene controls remain in `experience.css`. The 16:9 title card fills one screen, and the introduction, article and comments scroll inside that fixed surface. Image credits remain visible on the title card.
 
 The wall’s tiny perforation texture is cached per drawing context, including the transition snapshot. Curtain opening never scales the wall screen. Browser checks cover both languages, title/credit bounds, internal scrolling, draft restoration and motion cancellation.
+
+## General cinema quiz expansion
+
+Each cabinet has ten questions: film directors, actors identified by eye details, and film stories/characters. The selection combines SEEN editorial films with widely known cinema, including Inception, Titanic, Star Wars, Harry Potter, Toy Story, The Matrix and The Lord of the Rings. `quiz-data.js` keeps source URLs alongside the new question notes, and `i18n-data.js` supplies Korean questions, options and explanations.
+
+The five additional actor photographs are locally hosted under the Creative Commons licenses listed in `assets/quiz-photo-credits.json` and `quiz-credits.html`, linked from the eye cabinet. Full resized photographs remain intact; SVG view boxes display only the eye details. Movie still credits remain with A24.
+
+The ten-question database contract derives all scores on the server, accepts only ten valid choices, and keeps the original five-question scores intact. `backend/seen-quiz-scores-v2.test.sql` verifies ten-point scoring, best scores, ties, separate modes, Top 10 ranks and anonymous permissions inside a rolled-back transaction. No QA rankings are published.

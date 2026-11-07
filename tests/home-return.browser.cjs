@@ -36,3 +36,27 @@ test('direct article links, refresh and in-session Back/Forward still restore th
  await page.goBack();await page.waitForFunction(()=>!document.querySelector('#screen-article').open);assert.equal(await page.evaluate(()=>document.body.dataset.scene),'screening');
  await page.goForward();await ready(page);assert.equal(new URL(page.url()).hash,'#read/ladybird');
 });
+test('older article entries cannot reopen after returning home',async t=>{
+ const page=await fixture(t,1100);await page.goto('https://home.test/');await login(page);await story(page);
+ await page.locator('.comment-form textarea').fill('Keep this draft after going home');
+ await page.evaluate(()=>{near=rooms[2];enter();openProgram()});await ready(page);
+ await page.evaluate(()=>articleHistory.home());await assertHome(page);
+ await page.goBack();await assertHome(page);
+ await page.goBack();await assertHome(page);
+ await page.goForward();await assertHome(page);
+ await story(page);assert.equal(await page.locator('.comment-form textarea').inputValue(),'Keep this draft after going home');
+});
+test('a new home document invalidates article entries left in the previous document',async t=>{
+ const page=await fixture(t,1100);await page.goto('https://home.test/');await login(page);await story(page);
+ // An old document can be restored without re-running its startup code (BFCache).
+ const oldState=await page.evaluate(()=>history.state);
+ await page.goto('https://home.test/');await login(page);await assertHome(page);
+ await page.evaluate(state=>{history.pushState(state,'','#read/ladybird');dispatchEvent(new PopStateEvent('popstate',{state}))},oldState);
+ await assertHome(page);
+});
+test('restoring an admitted page from the browser cache returns home and keeps drafts',async t=>{
+ const page=await fixture(t,393);await page.goto('https://home.test/');await login(page);await story(page);
+ await page.locator('.comment-form textarea').fill('Cached visit draft');
+ await page.evaluate(()=>dispatchEvent(new PageTransitionEvent('pageshow',{persisted:true})));await assertHome(page);
+ await story(page);assert.equal(await page.locator('.comment-form textarea').inputValue(),'Cached visit draft');
+});

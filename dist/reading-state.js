@@ -24,20 +24,32 @@ const SeenReading=(()=>{
  }
  function createHistory({host,ids,onChange}){
   const history=host.history,location=host.location;
-  let lastRoute='',started=false;
+  let lastRoute='',started=false,visit='',visitStorageBlocked=false;
+  const visitKey='seen-reading-visit-v1';
+  function storedVisit(){if(visitStorageBlocked)return '';try{return host.sessionStorage?.getItem(visitKey)||''}catch{return ''}}
+  function newVisit(){visit=Date.now().toString(36)+'-'+Math.random().toString(36).slice(2);try{host.sessionStorage?.setItem(visitKey,visit)}catch{visitStorageBlocked=true}return visit}
+  function currentVisit(){return storedVisit()||visit||newVisit()}
   const marker=()=>history.state?.[stateKey];
+  visit=storedVisit()||(marker()?.version===2?marker().visit:'')||'';
   const urlWithoutArticle=()=>location.pathname+location.search+(articleFromHash(location.hash,ids)?'':location.hash);
-  function state(article,room,owned){return{...(history.state&&typeof history.state==='object'?history.state:{}),[stateKey]:{version:1,article,room,owned}}}
-  function notify(force=false){const article=articleFromHash(location.hash,ids),room=marker()?.room||null,key=article+'|'+room;if(!force&&lastRoute===key)return;lastRoute=key;onChange({article,room})}
+  function state(article,room,owned){return{...(history.state&&typeof history.state==='object'?history.state:{}),[stateKey]:{version:2,visit:currentVisit(),article,room,owned}}}
+  function stale(){const saved=marker();return saved&&(saved.version!==2||saved.visit!==currentVisit())}
+  function notify(force=false){
+   // A home visit retires every older reader entry, including cached documents.
+   // Read shared tab storage each time; a restored document can hold an old token.
+   if(stale()){home();return}
+   const article=articleFromHash(location.hash,ids),room=marker()?.room||null,key=article+'|'+room;if(!force&&lastRoute===key)return;lastRoute=key;onChange({article,room});
+  }
   function home(){
+   newVisit();
    history.replaceState(state(null,null,false),'',location.pathname+location.search);notify(true);
   }
   function start({resume=true}={}){
    if(started)return;started=true;
-   if(!resume)home();
-   const article=articleFromHash(location.hash,ids);
+   let article=articleFromHash(location.hash,ids);
+   if(!resume||!article||marker()?.version===2&&stale()){home();article=null}
    // A pasted link gets a local seats entry, so closing cannot leave the site.
-   if(article&&!(marker()?.version===1&&marker()?.article===article&&marker()?.owned)){
+   if(article&&!(marker()?.version===2&&marker()?.article===article&&marker()?.owned)){
     const url=location.pathname+location.search;
     history.replaceState(state(null,article,false),'',url);
     history.pushState(state(article,article,true),'',url+'#read/'+encodeURIComponent(article));

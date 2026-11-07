@@ -225,7 +225,7 @@ const articleHistory=SeenReading.createHistory({host:window,ids:rooms.map(room=>
 // Returning to the admission form through browser history is a new visit,
 // while an explicit article link or refresh still restores the chosen story.
 articleHistory.start({resume:performance.getEntriesByType('navigation')[0]?.type!=='back_forward'});
-addEventListener('pageshow',event=>{if(event.persisted&&!SeenHub.entered)articleHistory.home()});
+addEventListener('pageshow',event=>{if(event.persisted){saveReading();articleHistory.home()}});
 document.querySelector('.site-header .logo').addEventListener('click',event=>{
  if(event.button!==0||event.metaKey||event.ctrlKey||event.shiftKey||event.altKey)return;
  saveReading();articleHistory.home();

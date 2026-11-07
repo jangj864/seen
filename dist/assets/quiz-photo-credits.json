@@ -1,0 +1,52 @@
+[
+  {
+    "id": "tom-cruise",
+    "file": "quiz-tom-cruise.jpg",
+    "source": "https://commons.wikimedia.org/wiki/File:Tom_Cruise_by_Gage_Skidmore_2.jpg",
+    "original": "https://upload.wikimedia.org/wikipedia/commons/3/33/Tom_Cruise_by_Gage_Skidmore_2.jpg",
+    "author": "Gage Skidmore",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+    "changes": "Resized for the web; an eye detail is displayed in the quiz."
+  },
+  {
+    "id": "leonardo-dicaprio",
+    "file": "quiz-leonardo-dicaprio.jpg",
+    "source": "https://commons.wikimedia.org/wiki/File:Leonardo_DiCaprio_2019_by_Glenn_Francis_(cropped).jpg",
+    "original": "https://upload.wikimedia.org/wikipedia/commons/f/fe/Leonardo_DiCaprio_2019_by_Glenn_Francis_%28cropped%29.jpg",
+    "author": "Glenn Francis / Toglenn",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "changes": "Resized for the web; an eye detail is displayed in the quiz."
+  },
+  {
+    "id": "keanu-reeves",
+    "file": "quiz-keanu-reeves.jpg",
+    "source": "https://commons.wikimedia.org/wiki/File:Keanu_Reeves_2019.jpg",
+    "original": "https://upload.wikimedia.org/wikipedia/commons/d/d3/Keanu_Reeves_2019.jpg",
+    "author": "Governo do Estado de São Paulo",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+    "changes": "Resized for the web; an eye detail is displayed in the quiz."
+  },
+  {
+    "id": "robert-downey",
+    "file": "quiz-robert-downey.jpg",
+    "source": "https://commons.wikimedia.org/wiki/File:Robert_Downey_Jr_2014_Comic_Con_(cropped).jpg",
+    "original": "https://upload.wikimedia.org/wikipedia/commons/9/94/Robert_Downey_Jr_2014_Comic_Con_%28cropped%29.jpg",
+    "author": "Gage Skidmore",
+    "license": "CC BY-SA 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+    "changes": "Resized for the web; an eye detail is displayed in the quiz."
+  },
+  {
+    "id": "emma-stone",
+    "file": "quiz-emma-stone.jpg",
+    "source": "https://commons.wikimedia.org/wiki/File:Emma_Stone_(2018).jpg",
+    "original": "https://upload.wikimedia.org/wikipedia/commons/9/91/Emma_Stone_%282018%29.jpg",
+    "author": "Greg2600",
+    "license": "CC BY-SA 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+    "changes": "Resized for the web; an eye detail is displayed in the quiz."
+  }
+]

@@ -7,7 +7,7 @@ window.supabase={
  createClient(){return{
   channel(){return channel},
   from(){return{async insert(row){arcadeQA.writes.push(row);return{error:null}}}},
-  async rpc(){return{error:null,data:{entries:Array.from({length:10},(_,i)=>({rank:i+1,nickname:i?'Player '+(i+1):'Arcade QA',score:i?3:4,total:5,is_current:!i})),current:{rank:1,nickname:'Arcade QA',score:4,total:5}}}}
+  async rpc(){return{error:null,data:{entries:Array.from({length:10},(_,i)=>({rank:i+1,nickname:i?'Player '+(i+1):'Arcade QA',score:i?8:9,total:10,is_current:!i})),current:{rank:1,nickname:'Arcade QA',score:9,total:10}}}}
  }}
 };`;
 async function fixture(t,width,height){
@@ -25,7 +25,7 @@ async function cardsFit(page){
   return{room:room.getBoundingClientRect().toJSON(),screen:screen.getBoundingClientRect().toJSON(),heading:heading.getBoundingClientRect().toJSON(),cards:cards.map(e=>({rect:e.getBoundingClientRect().toJSON(),label:e.querySelector('strong').getBoundingClientRect().toJSON(),font:parseFloat(getComputedStyle(e.querySelector('strong')).fontSize)})),overflow:room.scrollWidth>room.clientWidth+1};
  });assert.equal(layout.overflow,false);assert(layout.room.top>=0&&layout.room.bottom<=page.viewportSize().height);assert.equal(layout.cards.length,4);
  assert(layout.heading.bottom<=layout.cards[0].rect.top-5,'question and answer cards never overlap');
- for(const {rect,label,font}of layout.cards){assert(rect.width>=90&&rect.height>=44,'cards keep usable touch targets');assert(font>=12);assert(label.top>=rect.top&&label.bottom<=rect.bottom+1,'answer text stays inside its card');assert(rect.left>=layout.screen.left&&rect.right<=layout.screen.right)}
+ for(const {rect,label,font}of layout.cards){assert(rect.width>=90&&rect.height>=44,'cards keep usable touch targets');assert(font>=12);assert(label.top>=rect.top&&label.bottom<=rect.bottom+1,'answer text stays inside its card');assert(rect.left>=layout.screen.left&&rect.right<=layout.screen.right,JSON.stringify({rect,screen:layout.screen}))}
  return layout.screen;
 }
 for(const[width,height]of[[320,568],[393,852],[844,390],[1440,1000]])test(`all cabinets keep questions, feedback and rankings usable at ${width}×${height}`,async t=>{
@@ -36,7 +36,7 @@ for(const[width,height]of[[320,568],[393,852],[844,390],[1440,1000]])test(`all c
   if(await page.locator('#game-quiz').getAttribute('data-state')==='complete')await page.locator('.scoreboard-actions .game-next').click();
   if(mode==='eyes')assert.equal(await page.locator('.game-eyes').getAttribute('preserveAspectRatio'),'xMidYMid slice','the eye crop fills its frame without revealing the rest of the face');
   const screen=await cardsFit(page);assert.equal(await page.locator('.cabinet-mode-icon svg').count(),1);
-  for(let index=0;index<5;index++){
+  for(let index=0;index<10;index++){
    await cardsFit(page);
    const answer=await page.evaluate(({mode,index})=>seenQuizQuestions.filter(q=>q.mode===mode)[index].answer,{mode,index}),chosen=index===0?(answer+1)%4:answer;
    if(index===0&&width>700)await page.locator(`[data-cabinet-answer="${chosen}"]`).click();else await page.keyboard.press(index%2?'ABCD'[chosen]:String(chosen+1));
@@ -51,7 +51,7 @@ for(const[width,height]of[[320,568],[393,852],[844,390],[1440,1000]])test(`all c
   const table=page.locator('.scoreboard-table-scroll');await table.evaluate(e=>e.scrollTop=e.scrollHeight);assert(await page.locator('.scoreboard-table tbody tr:last-child').isVisible());
   assert.equal(await page.locator('.scoreboard-actions .game-next').isVisible(),true);await page.keyboard.press('Escape');assert.equal(await page.locator('#game-room').isVisible(),false);
  }
- assert.equal(await page.evaluate(()=>arcadeQA.writes.length),6,'one score per completed round');assert((await page.evaluate(()=>arcadeQA.writes)).every(row=>row.nickname==='Arcade QA'));
+ assert.equal(await page.evaluate(()=>arcadeQA.writes.length),6,'one score per completed round');assert((await page.evaluate(()=>arcadeQA.writes)).every(row=>row.nickname==='Arcade QA'&&row.answers.length===10));
 });
 
 // Regression: feedback used to shrink the question pane and clip the bottom cards.
