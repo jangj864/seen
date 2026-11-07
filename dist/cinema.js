@@ -207,9 +207,13 @@ function openProgram(fromHistory=false){
   restore();requestAnimationFrame(()=>{restore();if(restoreToken===articleRestoreToken)stopArticleRestore()});
  }));
 }
-const articleHistory=SeenReading.createHistory({host:window,ids:rooms.map(room=>room.article),onChange:({article})=>{
+const articleHistory=SeenReading.createHistory({host:window,ids:rooms.map(room=>room.article),onChange:({article,room})=>{
  if(!SeenHub.entered)return;
- if(!article){closeProgram(false);return}
+ if(!article){
+  closeProgram(false);
+  if(!room){if(isSceneOpen('screening'))closeScene('screening');if(isSceneOpen('arcade-room'))leaveArcade();if(filmDialog.open)filmDialog.close()}
+  return;
+ }
  const destination=rooms.find(item=>item.article===article);if(!destination)return;
  if(currentRoom!==destination||!isSceneOpen('screening')){
   if(isSceneOpen('arcade-room'))leaveArcade();
@@ -218,7 +222,14 @@ const articleHistory=SeenReading.createHistory({host:window,ids:rooms.map(room=>
  }
  openProgram(true);
 }});
-articleHistory.start();
+// Returning to the admission form through browser history is a new visit,
+// while an explicit article link or refresh still restores the chosen story.
+articleHistory.start({resume:performance.getEntriesByType('navigation')[0]?.type!=='back_forward'});
+addEventListener('pageshow',event=>{if(event.persisted&&!SeenHub.entered)articleHistory.home()});
+document.querySelector('.site-header .logo').addEventListener('click',event=>{
+ if(event.button!==0||event.metaKey||event.ctrlKey||event.shiftKey||event.altKey)return;
+ saveReading();articleHistory.home();
+});
 document.addEventListener('seen-welcome-complete',()=>articleHistory.sync());
 for(const id of ['projection','start-program']){const control=document.getElementById(id);if(control)control.onclick=openProgram}
 document.querySelector('#back-to-seats').onclick=()=>closeProgram();
@@ -246,7 +257,7 @@ document.addEventListener('seen-comment-posted',event=>{
  if(field&&field.value.trim()===body.trim())field.value='';
  saveReading();
 });
-function leaveScreening(){if(screenArticle.open)closeProgram();closeScene('screening');canvas.focus({preventScroll:true})}
+function leaveScreening(){closeProgram(false);pendingReadingFrame=null;articleHistory.home();closeScene('screening');canvas.focus({preventScroll:true})}
 document.querySelector('#return-lobby')?.addEventListener('click',leaveScreening);
 document.querySelector('#screening').addEventListener('close',()=>{keys.clear();target=null;lobbyVelocity={x:0,y:0};if(currentRoom){const a=roomApproach(currentRoom);player={x:a.x,y:a.y+.35};}setNear();});
 const directory=document.querySelector('#directory'),toggle=document.querySelector('#index-toggle');function closeIndex(){directory.hidden=true;toggle.setAttribute('aria-expanded','false');toggle.focus()}toggle.onclick=()=>{directory.hidden=!directory.hidden;toggle.setAttribute('aria-expanded',String(!directory.hidden));if(!directory.hidden){hideDoorPreview();document.querySelector('#close-index').focus()}};document.querySelector('#close-index').onclick=closeIndex;document.querySelector('#room-list').innerHTML=rooms.map((r,i)=>`<button data-room="${i}"><b>${r.n}</b><span><strong>${r.name}</strong><small>${r.sub}</small></span><span style="margin-left:auto">↗</span></button>`).join('')+'<button data-game-room><b>G</b><span><strong>The Game Room</strong><small>PLAY THE SEEN QUIZ</small></span><span style="margin-left:auto">↗</span></button>';document.querySelector('#room-list').onclick=e=>{if(!e.target.closest('[data-game-room],[data-room]'))return;if(isSceneOpen('screening'))closeScene('screening');if(isSceneOpen('arcade-room'))leaveArcade();if(filmDialog.open)filmDialog.close();if(e.target.closest('[data-game-room]')){closeIndex();walkToGame();return}const b=e.target.closest('[data-room]');if(!b)return;const r=rooms[Number(b.dataset.room)];closeIndex();walkToScreen(r)};addEventListener('keydown',e=>{if(e.key==='Escape'&&!directory.hidden)closeIndex()});

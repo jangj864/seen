@@ -29,8 +29,12 @@ const SeenReading=(()=>{
   const urlWithoutArticle=()=>location.pathname+location.search+(articleFromHash(location.hash,ids)?'':location.hash);
   function state(article,room,owned){return{...(history.state&&typeof history.state==='object'?history.state:{}),[stateKey]:{version:1,article,room,owned}}}
   function notify(force=false){const article=articleFromHash(location.hash,ids),room=marker()?.room||null,key=article+'|'+room;if(!force&&lastRoute===key)return;lastRoute=key;onChange({article,room})}
-  function start(){
+  function home(){
+   history.replaceState(state(null,null,false),'',location.pathname+location.search);notify(true);
+  }
+  function start({resume=true}={}){
    if(started)return;started=true;
+   if(!resume)home();
    const article=articleFromHash(location.hash,ids);
    // A pasted link gets a local seats entry, so closing cannot leave the site.
    if(article&&!(marker()?.version===1&&marker()?.article===article&&marker()?.owned)){
@@ -54,7 +58,7 @@ const SeenReading=(()=>{
    if(marker()?.owned&&marker()?.article===article){history.back();return}
    history.replaceState(state(null,article,false),'',location.pathname+location.search);notify(true);
   }
-  return{start,open,close,sync:()=>notify(true)};
+  return{start,open,close,home,sync:()=>notify(true)};
  }
  return{articleFromHash,createStore,createHistory};
 })();

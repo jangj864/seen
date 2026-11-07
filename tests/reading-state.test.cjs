@@ -64,3 +64,12 @@ test('one damaged entry cannot discard other saved article drafts on reload',()=
  const store=load().createStore({getItem:()=>raw});
  assert.equal(store.read('ladybird').body,'  남겨 둔 초안  ');assert.equal(store.read('ladybird').scroll,540);assert.equal(store.read('broken').body,'');
 });
+
+test('returning to admission clears a historical article and room without creating another entry',()=>{
+ const browser=host('https://seen.test/seen/?issue=2#read/ladybird'),changes=[];
+ browser.api.history.replaceState({custom:'retained',seenReading:{version:1,article:'ladybird',room:'ladybird',owned:true}},'',browser.api.location.pathname+browser.api.location.search+browser.api.location.hash);
+ const history=load().createHistory({host:browser.api,ids:['table','ladybird'],onChange:route=>changes.push({...route})});
+ history.start({resume:false});assert.equal(browser.api.location.hash,'');assert.equal(browser.entries.length,1);assert.equal(changes.at(-1).article,null);assert.equal(changes.at(-1).room,null);assert.equal(browser.api.history.state.custom,'retained');
+ history.sync();assert.equal(changes.at(-1).article,null);
+ history.open('table');history.home();assert.equal(browser.api.location.hash,'');assert.equal(changes.at(-1).room,null);assert.equal(browser.entries.length,2);
+});
