@@ -28,16 +28,25 @@ async function cardsFit(page){
  for(const {rect,label,font}of layout.cards){assert(rect.width>=90&&rect.height>=44,'cards keep usable touch targets');assert(font>=12);assert(label.top>=rect.top&&label.bottom<=rect.bottom+1,'answer text stays inside its card');assert(rect.left>=layout.screen.left&&rect.right<=layout.screen.right,JSON.stringify({rect,screen:layout.screen}))}
  return layout.screen;
 }
+async function eyeCropFits(page,index){
+ const detail=await page.evaluate(async index=>{
+  const q=seenQuizQuestions.filter(q=>q.mode==='eyes')[index],visual=document.querySelector('.game-eyes'),crop=visual.querySelector('svg'),image=crop.querySelector('image'),photo=new Image();photo.src=image.getAttribute('href');await photo.decode();
+  const [x,y,w,h]=q.crop,matrix=image.getScreenCTM(),point=(x,y)=>new DOMPoint(x,y).matrixTransform(matrix);
+  return{frame:visual.getBoundingClientRect().toJSON(),corners:[point(x,y),point(x+w,y+h)].map(p=>({x:p.x,y:p.y})),clip:crop.getAttribute('overflow'),viewBox:crop.getAttribute('viewBox'),expectedCrop:q.crop.join(' '),natural:[photo.naturalWidth,photo.naturalHeight],expectedSize:q.imageSize||[2000,1125]};
+ },index);
+ assert.equal(detail.clip,'hidden','letterboxing cannot reveal the rest of the face');assert.equal(detail.viewBox,detail.expectedCrop);assert.deepEqual(detail.natural,detail.expectedSize,'crop coordinates match the actual photo dimensions');
+ for(const point of detail.corners){assert(point.x>=detail.frame.left-.5&&point.x<=detail.frame.right+.5,`question ${index+1}: the complete eye pair stays inside the horizontal frame`);assert(point.y>=detail.frame.top-.5&&point.y<=detail.frame.bottom+.5,`question ${index+1}: the complete eye pair stays inside the vertical frame`)}
+}
 for(const[width,height]of[[320,568],[393,852],[844,390],[1440,1000]])test(`all cabinets keep questions, feedback and rankings usable at ${width}×${height}`,async t=>{
  const page=await fixture(t,width,height);
  for(const language of ['en','ko'])for(const mode of ['all','eyes','films']){
   await page.evaluate(({language,mode})=>{SeenI18n.setLanguage(language);openQuiz(mode)},{language,mode});
   // Replaying creates a fresh round when returning to the same game mode.
   if(await page.locator('#game-quiz').getAttribute('data-state')==='complete')await page.locator('.scoreboard-actions .game-next').click();
-  if(mode==='eyes')assert.equal(await page.locator('.game-eyes').getAttribute('preserveAspectRatio'),'xMidYMid slice','the eye crop fills its frame without revealing the rest of the face');
+  if(mode==='eyes')assert.equal(await page.locator('.game-eyes').getAttribute('preserveAspectRatio'),'xMidYMid meet','the complete eye crop fits its frame');
   const screen=await cardsFit(page);assert.equal(await page.locator('.cabinet-mode-icon svg').count(),1);
   for(let index=0;index<10;index++){
-   await cardsFit(page);
+   await cardsFit(page);if(mode==='eyes')await eyeCropFits(page,index);
    const answer=await page.evaluate(({mode,index})=>seenQuizQuestions.filter(q=>q.mode===mode)[index].answer,{mode,index}),chosen=index===0?(answer+1)%4:answer;
    if(index===0&&width>700)await page.locator(`[data-cabinet-answer="${chosen}"]`).click();else await page.keyboard.press(index%2?'ABCD'[chosen]:String(chosen+1));
    assert.equal(await page.locator('#game-quiz').getAttribute('data-state'),index?'correct':'wrong');assert.equal(await page.locator('.game-options .correct').count(),1);assert.equal(await page.locator('.game-options .wrong').count(),index?0:1);

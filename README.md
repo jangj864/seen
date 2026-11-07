@@ -117,7 +117,7 @@ The wall’s tiny perforation texture is cached per drawing context, including t
 
 Each cabinet has ten questions: film directors, actors identified by eye details, and film stories/characters. The selection combines SEEN editorial films with widely known cinema, including Inception, Titanic, Star Wars, Harry Potter, Toy Story, The Matrix and The Lord of the Rings. `quiz-data.js` keeps source URLs alongside the new question notes, and `i18n-data.js` supplies Korean questions, options and explanations.
 
-The five additional actor photographs are locally hosted under the Creative Commons licenses listed in `assets/quiz-photo-credits.json` and `quiz-credits.html`, linked from the eye cabinet. Full resized photographs remain intact; SVG view boxes display only the eye details. Movie still credits remain with A24.
+The nine actor portrait photographs are locally hosted under the Creative Commons licenses listed in `assets/quiz-photo-credits.json` and `quiz-credits.html`, linked from the eye cabinet. Full photographs remain intact; nested SVG viewports fit each complete eye pair and hide the rest of the face at all screen ratios. Four unsuitable stills were replaced with clear portraits. The remaining Saoirse Ronan still is credited to A24. Browser checks verify the actual image dimensions and complete crop bounds for all ten questions in both languages at four viewport sizes.
 
 The ten-question database contract derives all scores on the server, accepts only ten valid choices, and keeps the original five-question scores intact. `backend/seen-quiz-scores-v2.test.sql` verifies ten-point scoring, best scores, ties, separate modes, Top 10 ranks and anonymous permissions inside a rolled-back transaction. No QA rankings are published.
 
@@ -126,3 +126,11 @@ The ten-question database contract derives all scores on the server, accepts onl
 `createSeenSceneLoop` schedules only the visible walking scene and cancels its pending frame when the scene or browser tab becomes hidden. Showing the scene resumes its existing movement state with one frame loop. Camera tools, seat controls and nameplate layers update their DOM attributes and styles only when values change. In the regression fixture, 60 displayed frames previously ran 180 scene callbacks; they now run 60, without changing the visible frame rate.
 
 Pending seat handoffs belong to their original room visit. Leaving, entering another auditorium, choosing another destination or moving manually cancels retries so an old acceptance cannot move the visitor later. Valid handoffs still wait for the occupant to leave before walking to the seat. `tests/performance-lifecycle.browser.cjs` verifies callback counts, stable layout attributes, tab visibility, cancelled handoffs and successful handoffs using local fixtures.
+
+## Portrait posters and Korean film copy
+
+All eight film listings use portrait poster artwork, with complete images fitted inside 2:3 frames in the program, film details and magazine. The isometric wall uses the same proportions and a separate date strip. No poster is stretched or trimmed on hover. Article stills remain separate from the portrait poster assets. `assets/film-poster-sources.json` records the artwork sources.
+
+`film-catalog.js` keeps Korean titles and original synopsis adaptations alongside the canonical English records. Localization registers those same translations in every view. The confirmed Korean release titles for The Hunger Games: Sunrise on the Reaping and Hexed replace the previous literal translations. Upcoming films whose Korean release titles were not confirmed use clearly labelled transliterations in the Korean detail view. The magazine's saved ballot values and watchlist ids remain compatible with existing browser data.
+
+`tests/poster-localization.browser.cjs` checks the wall's image transforms, all five film-detail views, all eight magazine posters and synopses, and KR/EN switching at phone, landscape and desktop sizes. Set `SEEN_SCREENSHOT_DIR` to an existing directory to save visual QA screenshots.

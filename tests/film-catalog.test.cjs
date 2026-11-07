@@ -41,6 +41,16 @@ test('scene DOM attachments cannot mutate the canonical releases or another scen
  assert.ok(catalog.upcoming.every(Object.isFrozen));
 });
 
+test('all eight poster entries carry sourced Korean titles and original synopsis adaptations',()=>{
+ const {catalog}=loadCatalog(),credits=JSON.parse(fs.readFileSync(path.join(dist,'assets/film-poster-sources.json'),'utf8'));
+ assert.equal(catalog.magazine.length,8);assert.equal(credits.posters.length,8);
+ for(const film of catalog.magazine){
+  assert.match(film.korean.title,/[가-힣]/);assert(film.korean.synopsis.length>=60,film.id);assert.match(film.korean.source,/^https:\/\//);assert(Object.isFrozen(film.korean));
+  assert(credits.posters.some(p=>p.file===`${film.image}.${film.ext||'jpg'}`),film.id);
+ }
+ assert.equal(catalog.upcoming[0].korean.title,'헝거게임 50번째 추첨의 날');assert.equal(catalog.upcoming[1].korean.title,'헥스: 마녀왕국');
+});
+
 test('magazine consumes the shared articles while retaining colophon and source register',()=>{
  const context=loadCatalog();
  vm.runInContext(fs.readFileSync(path.join(dist,'articles.js'),'utf8'),context);

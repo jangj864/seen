@@ -168,7 +168,7 @@ window.SEEN_KO={
  "Minari": "미나리",
  "Lady Bird": "레이디 버드",
  "After Yang": "애프터 양",
- "Hexed": "헥스드",
+ "Hexed": "헥스: 마녀왕국",
  "San Francisco": "샌프란시스코",
  "Sacramento": "새크라멘토",
  "Los Angeles": "로스앤젤레스",
@@ -187,10 +187,10 @@ window.SEEN_KO={
  "Hayao Miyazaki wrote and directed Spirited Away (2001).": "미야자키 하야오가 〈센과 치히로의 행방불명〉(2001)의 각본과 연출을 맡았습니다.",
  "Bong Joon Ho directed Parasite (2019).": "봉준호 감독이 〈기생충〉(2019)을 연출했습니다.",
  "Saoirse Ronan plays Lady Bird in Lady Bird (2017). Publicity still courtesy A24.": "시얼샤 로넌이 〈레이디 버드〉(2017)의 주인공을 연기했습니다. 스틸 제공: A24.",
- "Colin Farrell plays Jake in After Yang (2022). Publicity still courtesy A24.": "콜린 패럴이 〈애프터 양〉(2022)에서 제이크를 연기했습니다. 스틸 제공: A24.",
- "Laurie Metcalf plays Marion, Lady Bird’s mother. Publicity still courtesy A24.": "로리 멧커프가 레이디 버드의 엄마 매리언을 연기했습니다. 스틸 제공: A24.",
- "Steven Yeun plays Jacob in Minari (2020). Publicity still courtesy A24.": "스티븐 연이 〈미나리〉(2020)에서 제이콥을 연기했습니다. 스틸 제공: A24.",
- "Han Ye-ri plays Monica in Minari (2020). Publicity still courtesy A24.": "한예리가 〈미나리〉(2020)에서 모니카를 연기했습니다. 스틸 제공: A24.",
+ "Colin Farrell plays Jake in After Yang (2022).": "콜린 패럴이 〈애프터 양〉(2022)에서 제이크를 연기했습니다.",
+ "Laurie Metcalf plays Marion, Lady Bird’s mother.": "로리 멧커프가 레이디 버드의 엄마 매리언을 연기했습니다.",
+ "Steven Yeun plays Jacob in Minari (2020).": "스티븐 연이 〈미나리〉(2020)에서 제이콥을 연기했습니다.",
+ "Han Ye-ri plays Monica in Minari (2020).": "한예리가 〈미나리〉(2020)에서 모니카를 연기했습니다.",
  "Yang’s malfunction leads Jake to discover a life he did not know about.": "양의 고장을 계기로 제이크는 자신이 몰랐던 양의 삶을 발견합니다.",
  "Minari, directed by Lee Isaac Chung, follows a family’s move to a farm.": "정이삭 감독의 〈미나리〉는 한 가족이 농장으로 이사하는 이야기입니다.",
  "Sacramento is both the home she resists and a place she learns to see differently.": "새크라멘토는 떠나고 싶은 고향이자, 새롭게 바라보게 되는 장소입니다.",
@@ -291,9 +291,9 @@ window.SEEN_KO={
  "No comments yet. Start the conversation.": "아직 댓글이 없어요. 첫 이야기를 남겨주세요.",
  "Comments could not load. Try again in a moment.": "댓글을 불러오지 못했어요. 잠시 후 다시 시도해주세요.",
  "Reader comments": "독자 댓글",
- "The Hunger Games: Sunrise on the Reaping": "헝거 게임: 수확의 일출",
- "Sunrise on the Reaping": "수확의 일출",
- "SUNRISE ON THE REAPING": "수확의 일출",
+ "The Hunger Games: Sunrise on the Reaping": "헝거게임 50번째 추첨의 날",
+ "Sunrise on the Reaping": "헝거게임 50번째 추첨의 날",
+ "SUNRISE ON THE REAPING": "헝거게임 50번째 추첨의 날",
  "Focker-In-Law": "포커 인 로",
  "Ebenezer": "에베니저",
  "Godzilla Minus Zero": "고질라 마이너스 제로",
@@ -643,11 +643,11 @@ window.SEEN_KO_ARTICLES={
 window.SEEN_KO_CREDIT_LISTS={
  "2": [
   [
-   "헝거 게임: 수확의 일출 — Lionsgate",
-   "미국 개봉 예정: 2026년 11월 20일. 이미지: 영화 공식 사이트, Lionsgate."
+   "헝거게임 50번째 추첨의 날 — Lionsgate",
+   "미국 개봉 예정: 2026년 11월 20일. 국내 포스터: Lionsgate / 누리픽쳐스, 씨네21 수록."
   ],
   [
-   "헥스드 — Disney",
+   "헥스: 마녀왕국 — Disney",
    "미국 개봉 예정: 2026년 11월 25일. 포스터: Disney / Walt Disney Animation Studios."
   ],
   [

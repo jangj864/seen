@@ -16,9 +16,11 @@ const upcomingFilms=SeenFilmCatalog.createUpcoming();
 const posterPositions=[.25,4.15,8.30,12.45,16.85];
 const posterLayer=document.querySelector('#wall-posters');
 upcomingFilms.forEach((film,i)=>{const im=new Image();im.onload=()=>lobbyRevision++;im.src=`assets/${film.image}.${film.ext||'jpg'}`;images[film.image]=im;const button=document.createElement('button');button.className='wall-poster';button.dataset.film=film.id;button.setAttribute('aria-label',`View ${film.title}, in theaters ${film.date}`);button.title=`${film.title} · ${film.stamp} · Click for details`;posterLayer.append(button);film.button=button;});
-let posterReturnFocus=null;
+let posterReturnFocus=null,selectedFilm=null;
+function updateFilmTitleNote(){const note=document.querySelector('#film-title-note');note.hidden=SeenI18n.language!=='ko'||selectedFilm?.korean.titleStatus!=='transliterated'}
+document.addEventListener('seen-language-change',updateFilmTitleNote);
 const filmDialog=document.querySelector('#film-details');
-function openFilm(film){keys.clear();target=null;posterReturnFocus=film.button;document.querySelector('#film-title').textContent=film.title;const image=document.querySelector('#film-poster');image.src=`assets/${film.image}.${film.ext||'jpg'}`;image.alt=`${film.title} — official publicity artwork`;document.querySelector('#film-credit').textContent=`Artwork: ${film.studio}`;document.querySelector('#film-facts').replaceChildren();for(const [label,value]of [['US RELEASE',film.date],['DIRECTOR',film.director],['STUDIO',film.studio]]){const dt=document.createElement('dt'),dd=document.createElement('dd');dt.textContent=label;dd.textContent=value;document.querySelector('#film-facts').append(dt,dd)}document.querySelector('#film-synopsis').textContent=film.synopsis;document.querySelector('#film-question').textContent=film.question;document.querySelector('#film-official').href=film.url;filmDialog.showModal();}
+function openFilm(film){selectedFilm=film;updateFilmTitleNote();keys.clear();target=null;posterReturnFocus=film.button;document.querySelector('#film-title').textContent=film.title;const image=document.querySelector('#film-poster');image.src=`assets/${film.image}.${film.ext||'jpg'}`;image.alt=`${film.title} — official publicity artwork`;document.querySelector('#film-credit').textContent=`Artwork: ${film.studio}`;document.querySelector('#film-facts').replaceChildren();for(const [label,value]of [['US RELEASE',film.date],['DIRECTOR',film.director],['STUDIO',film.studio]]){const dt=document.createElement('dt'),dd=document.createElement('dd');dt.textContent=label;dd.textContent=value;document.querySelector('#film-facts').append(dt,dd)}document.querySelector('#film-synopsis').textContent=film.synopsis;document.querySelector('#film-question').textContent=film.question;document.querySelector('#film-official').href=film.url;filmDialog.showModal();}
 upcomingFilms.forEach(film=>film.button.addEventListener('click',()=>openFilm(film)));
 document.querySelector('#close-film').onclick=()=>filmDialog.close();filmDialog.addEventListener('close',()=>{keys.clear();posterReturnFocus?.focus({preventScroll:true})});filmDialog.addEventListener('click',e=>{if(e.target===filmDialog){const r=filmDialog.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)filmDialog.close()}});
 let w=0,h=0,scale=1,ox=0,oy=0,player={x:9.4,y:4.5},target=null,near=null,keys=new Set(),last=0,phase=0,walk=false,lobbyHeading=-Math.PI/2,lobbyGait=0,lobbyVelocity={x:0,y:0};
@@ -52,7 +54,14 @@ function box(x,y,z,dx,dy,dz,top,front,side){poly([[x,y,z+dz],[x+dx,y,z+dz],[x+dx
 function text(t,x,y,z,size,color='#eee8db',plane='screen'){t=SeenI18n.t(t);const q=p(x,y,z);ctx.save();if(plane==='wall')ctx.transform(.86,.43,0,1,q.x,q.y);else if(plane==='floor')ctx.transform(.86,-.43,.86,.43,q.x,q.y);else ctx.translate(q.x,q.y);ctx.fillStyle=color;ctx.font=`600 ${size*scale}px "Barlow Condensed","Pretendard",sans-serif`;ctx.textAlign='center';ctx.fillText(t,0,0);ctx.restore()}
 function shadow(x,y,dx,dy,opacity=.12){poly([[x-.08,y-.03,.012],[x+dx+.18,y-.03,.012],[x+dx+.38,y+dy+.21,.012],[x+.12,y+dy+.21,.012]],`rgba(55,44,28,${opacity})`)}
 function ellipse(x,y,z,rx,ry,color){const q=p(x,y,z);ctx.beginPath();ctx.ellipse(q.x,q.y,rx*scale,ry*scale,0,0,Math.PI*2);ctx.fillStyle=color;ctx.fill()}
-function poster(x,film){const a=p(x,.34,2.95),b=p(x+1.1,.34,2.95),c=p(x,.34,.7),im=images[film.image];ctx.save();ctx.transform((b.x-a.x)/100,(b.y-a.y)/100,(c.x-a.x)/150,(c.y-a.y)/150,a.x,a.y);ctx.fillStyle='#f0dfba';ctx.fillRect(-4,-4,108,158);ctx.fillStyle='#272722';ctx.fillRect(0,0,100,150);if(im.complete&&im.naturalWidth){ctx.drawImage(im,0,0,100,132)}ctx.fillStyle='#e6cda0';ctx.fillRect(0,132,100,18);ctx.fillStyle='#55382a';ctx.font='bold 7px sans-serif';ctx.textAlign='center';ctx.fillText('UPCOMING · '+film.stamp,50,144);ctx.restore();const transform=`matrix(${(b.x-a.x)/100},${(b.y-a.y)/100},${(c.x-a.x)/150},${(c.y-a.y)/150},${a.x},${a.y})`;if(film.button.style.transform!==transform)film.button.style.transform=transform;}
+function poster(x,film){
+ const a=p(x,.34,2.95),b=p(x+1.5,.34,2.95),c=p(x,.34,.46),im=images[film.image];
+ ctx.save();ctx.transform((b.x-a.x)/100,(b.y-a.y)/100,(c.x-a.x)/166,(c.y-a.y)/166,a.x,a.y);
+ ctx.fillStyle='#f0dfba';ctx.fillRect(-4,-4,108,174);ctx.fillStyle='#181c19';ctx.fillRect(0,0,100,150);
+ if(im.complete&&im.naturalWidth){const fit=Math.min(100/im.naturalWidth,150/im.naturalHeight),width=im.naturalWidth*fit,height=im.naturalHeight*fit;ctx.drawImage(im,(100-width)/2,(150-height)/2,width,height)}
+ ctx.fillStyle='#e6cda0';ctx.fillRect(0,150,100,16);ctx.fillStyle='#55382a';ctx.font='600 7px "DM Sans","Pretendard",sans-serif';ctx.textAlign='center';ctx.fillText(SeenI18n.t('UPCOMING')+' · '+SeenI18n.t(film.stamp),50,161);ctx.restore();
+ const transform=`matrix(${(b.x-a.x)/100},${(b.y-a.y)/100},${(c.x-a.x)/166},${(c.y-a.y)/166},${a.x},${a.y})`;if(film.button.style.transform!==transform)film.button.style.transform=transform;
+}
 function door(r){const x=r.x,y=r.y,angle=r.open*Math.PI*.46;poly([[x+.16,y+.32,.008],[x+1.44,y+.32,.008],[x+1.44,y+1.4,.008],[x+.16,y+1.4,.008]],'#984732');poly([[x+.195,y+.35,.012],[x+1.405,y+.35,.012],[x+1.405,y+1.365,.012],[x+.195,y+1.365,.012]],'#b4533c');box(x-.02,y-.1,0,1.7,.25,2.65,'#f0d2a8','#7e2520','#642723');box(x+.14,y+.17,0,1.32,.08,2.35,'#b84030','#201f1b','#443128');
 box(x+.16,y+.26,.012,1.28,.09,.018,'#d8c29b','#ad9873','#968367');
 // Two hinged leaves swing into the lobby, revealing the dark auditorium opening.
@@ -95,7 +104,7 @@ poly([[0,0,-.2],[18.8,0,-.2],[18.8,9,-.2],[0,9,-.2]],'#a99b80');box(0,0,-.15,18.
 // Cutaway architecture: the entire lobby is visible, with real floor-space navigation.
 box(-.16,-.15,0,18.96,.35,3.3,'#eddfc3','#b8b49c','#93947c');box(-.16,0,0,.28,7.1,1.25,'#e0d4b9','#bdaf8d','#a79a7a');
 for(let x=.4;x<18.4;x+=.55)box(x,.22,.2,.025,.025,2.8,'#b2ac94','#a4a38c','#a4a38c');
-text('S E E N   C I N E M A',posterPositions[Math.floor(posterPositions.length/2)]+.55,.26,3.06,.30,'#a84832','wall');
+text('S E E N   C I N E M A',posterPositions[Math.floor(posterPositions.length/2)]+.75,.26,3.06,.30,'#a84832','wall');
 upcomingFilms.forEach((film,i)=>poster(posterPositions[i],film));rooms.forEach(door);gameEntrance();
 // Side screening room, brought into the open as a freestanding entrance.
 

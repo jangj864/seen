@@ -1,0 +1,52 @@
+{
+  "checkedAt": "2026-11-06",
+  "display": "Portrait 2:3 frames; complete source artwork is fitted without cropping or stretching.",
+  "posters": [
+    {
+      "file": "hunger-poster.jpg",
+      "credit": "Lionsgate / Nuri Pictures; Korean theatrical poster via Cine21",
+      "source": "https://cine21.com/movie/info/?movie_id=63412",
+      "imageUrl": "https://image.cine21.com/cine21/poster/2026/1015/63412_6ad09645084f1.jpg"
+    },
+    {
+      "file": "hexed-poster.jpg",
+      "credit": "Disney",
+      "source": "https://movies.disney.com/hexed",
+      "imageUrl": "https://lumiere-a.akamaihd.net/v1/images/g_disneymovies_hexed_payoff_12e41277.jpeg"
+    },
+    {
+      "file": "focker-poster.jpg",
+      "credit": "Universal Pictures",
+      "source": "https://www.universalpictures.com/movies/focker-in-law/"
+    },
+    {
+      "file": "ebenezer-poster.jpg",
+      "credit": "Paramount Pictures",
+      "source": "https://www.paramount.com/movies/ebenezer",
+      "imageUrl": "https://public-website-assets.paramountpictures.com/paramount2025/styles/poster_medium/s3/2026-07/ebenezer_onesheet.jpg?itok=6NLY5ry2"
+    },
+    {
+      "file": "godzilla-poster.png",
+      "credit": "TOHO / GKIDS",
+      "source": "https://gkids.com/2026/10/06/tickets-now-on-sale-for-godzilla-minus-zero/",
+      "imageUrl": "https://i0.wp.com/gkids.com/wp-content/uploads/2026/10/GMZ_IMAX_WEB_EN_GKIDS_27x39-5_01A.png?resize=700,1024&ssl=1"
+    },
+    {
+      "file": "ladybird-poster.jpg",
+      "credit": "A24",
+      "source": "https://a24films.com/films/lady-bird",
+      "imageUrl": "https://api-asset-production.s3.amazonaws.com/media/images/letterboxd_-_Artboard_1122x-100.jpg"
+    },
+    {
+      "file": "yang-poster.jpg",
+      "credit": "A24",
+      "source": "https://a24films.com/films/after-yang"
+    },
+    {
+      "file": "minari-poster.jpg",
+      "credit": "A24",
+      "source": "https://a24films.com/films/minari",
+      "imageUrl": "https://api-asset-production.s3.amazonaws.com/media/images/letterboxd_-_Artboard_1032x-100.jpg"
+    }
+  ]
+}

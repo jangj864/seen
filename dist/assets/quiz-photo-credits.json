@@ -48,5 +48,45 @@
     "license": "CC BY-SA 2.0",
     "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
     "changes": "Resized for the web; an eye detail is displayed in the quiz."
+  },
+  {
+    "id": "colin-farrell",
+    "file": "quiz-colin-farrell.jpg",
+    "source": "https://commons.wikimedia.org/wiki/File:Colin_Farrell_by_Gage_Skidmore.jpg",
+    "original": "https://upload.wikimedia.org/wikipedia/commons/d/d4/Colin_Farrell_by_Gage_Skidmore.jpg",
+    "author": "Gage Skidmore",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+    "changes": "Commons 960px thumbnail; an eye detail is displayed in the quiz."
+  },
+  {
+    "id": "laurie-metcalf",
+    "file": "quiz-laurie-metcalf.jpg",
+    "source": "https://commons.wikimedia.org/wiki/File:LaurieMetcalfFeb08.jpg",
+    "original": "https://upload.wikimedia.org/wikipedia/commons/d/dd/LaurieMetcalfFeb08.jpg",
+    "author": "John Harrison",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+    "changes": "Original JPEG unchanged; an eye detail is displayed in the quiz."
+  },
+  {
+    "id": "steven-yeun",
+    "file": "quiz-steven-yeun.jpg",
+    "source": "https://commons.wikimedia.org/wiki/File:Steven_Yeun_2016.jpg",
+    "original": "https://upload.wikimedia.org/wikipedia/commons/1/1e/Steven_Yeun_2016.jpg",
+    "author": "Gage Skidmore",
+    "license": "CC BY-SA 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0/",
+    "changes": "Commons 960px thumbnail; an eye detail is displayed in the quiz."
+  },
+  {
+    "id": "han-ye-ri",
+    "file": "quiz-han-ye-ri.png",
+    "source": "https://commons.wikimedia.org/wiki/File:Han_Ye-ri_at_2025_Marie_Claire_Asia_Star_Awards.png",
+    "original": "https://upload.wikimedia.org/wikipedia/commons/1/1a/Han_Ye-ri_at_2025_Marie_Claire_Asia_Star_Awards.png",
+    "author": "Marie Claire Korea",
+    "license": "CC BY 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/3.0/",
+    "changes": "Commons 960px PNG thumbnail; an eye detail is displayed in the quiz."
   }
 ]

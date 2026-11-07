@@ -37,9 +37,11 @@ function renderGame(){
  root.replaceChildren();const question=document.createElement('div');question.className='game-question';
  const heading=document.createElement('h3');heading.textContent=q.q;question.append(heading);
  if(!complete&&q.kind==='eyes'){
-  const ns='http://www.w3.org/2000/svg',visual=document.createElementNS(ns,'svg'),image=document.createElementNS(ns,'image');
-  visual.classList.add('game-eyes');visual.setAttribute('viewBox',q.crop.join(' '));visual.setAttribute('preserveAspectRatio','xMidYMid slice');visual.setAttribute('role','img');visual.setAttribute('aria-label',gameAnswered===null?'Eye detail. Choose the actor below.':`Eye detail: ${q.options[q.answer]}`);
-  image.setAttribute('href',`assets/${q.image}.jpg`);image.setAttribute('width',String(q.imageSize?.[0]||2000));image.setAttribute('height',String(q.imageSize?.[1]||1125));visual.append(image);question.append(visual);
+  const ns='http://www.w3.org/2000/svg',visual=document.createElementNS(ns,'svg'),crop=document.createElementNS(ns,'svg'),image=document.createElementNS(ns,'image'),[,,width,height]=q.crop;
+  visual.classList.add('game-eyes');visual.setAttribute('viewBox',`0 0 ${width} ${height}`);visual.setAttribute('preserveAspectRatio','xMidYMid meet');visual.setAttribute('role','img');visual.setAttribute('aria-label',gameAnswered===null?'Eye detail. Choose the actor below.':`Eye detail: ${q.options[q.answer]}`);
+  // Fit the complete eye pair at any screen ratio; the inner viewport hides the rest of the portrait.
+  crop.setAttribute('viewBox',q.crop.join(' '));crop.setAttribute('width',String(width));crop.setAttribute('height',String(height));crop.setAttribute('overflow','hidden');
+  image.setAttribute('href',`assets/${q.image}.${q.imageExt||'jpg'}`);image.setAttribute('width',String(q.imageSize?.[0]||2000));image.setAttribute('height',String(q.imageSize?.[1]||1125));crop.append(image);visual.append(crop);question.append(visual);
  }
  if(!complete){const options=document.createElement('div');options.className='game-options';q.options.forEach((value,i)=>{
   const button=document.createElement('button');button.dataset.gameAnswer=String(i);button.setAttribute('aria-keyshortcuts',`${'ABCD'[i]} ${i+1}`);const letter=document.createElement('span');letter.textContent='ABCD'[i];const label=document.createElement('strong');label.textContent=value;button.append(letter,label);button.setAttribute('aria-pressed',String(gameAnswered===i));

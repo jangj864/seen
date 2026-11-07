@@ -42,7 +42,7 @@ html[lang] #game-room #game-quiz h3{flex:none;min-height:0;margin:0;color:#f3f3e
 #game-room .game-options button.wrong>span{background:#db968b;border-color:#efbbaf;color:#40242b}
 #game-room .game-options button.is-muted{opacity:.42;background:#1b292f;border-color:#415459;box-shadow:0 2px 0 #091418}
 #game-room .answer-mark{position:absolute;right:14px;top:50%;transform:translateY(-50%);font:700 20px/1 'DM Sans','Pretendard',sans-serif;color:inherit}
-#game-room .game-eyes{display:block;flex:0 1 112px;height:112px;min-height:64px;width:100%;margin:0;border:1px solid #6e8580;border-radius:10px;background:#0a1318;box-shadow:0 0 0 4px #091418,0 4px 14px #0004}
+#game-room .game-eyes{display:block;flex:0 1 112px;height:112px;min-height:64px;width:100%;max-width:480px;align-self:center;margin:0;border:1px solid #6e8580;border-radius:10px;background:#0a1318;box-shadow:0 0 0 4px #091418,0 4px 14px #0004}
 #game-room .game-question:has(.game-eyes){gap:16px}
 #game-room .game-question:has(.game-eyes) .game-options{grid-template-rows:repeat(2,auto)}
 #game-room .game-question:has(.game-eyes) .game-options button{min-height:64px;padding-block:12px}

@@ -157,15 +157,19 @@ const seenQuizQuestions=[
       "Jake Gyllenhaal"
     ],
     "answer": 2,
-    "note": "Colin Farrell plays Jake in After Yang (2022). Publicity still courtesy A24.",
-    "image": "yang",
+    "note": "Colin Farrell plays Jake in After Yang (2022).",
+    "image": "quiz-colin-farrell",
     "crop": [
-      820,
-      260,
-      320,
-      110
+      305,
+      475,
+      420,
+      145
     ],
-    "mode": "eyes"
+    "mode": "eyes",
+    "imageSize": [
+      960,
+      1465
+    ]
   },
   {
     "mode": "eyes",
@@ -177,18 +181,18 @@ const seenQuizQuestions=[
       "Frances McDormand"
     ],
     "answer": 1,
-    "note": "Laurie Metcalf plays Marion, Lady Bird’s mother. Publicity still courtesy A24.",
+    "note": "Laurie Metcalf plays Marion, Lady Bird’s mother.",
     "kind": "eyes",
-    "image": "ladybird-mother",
+    "image": "quiz-laurie-metcalf",
     "imageSize": [
-      1200,
-      600
+      529,
+      513
     ],
     "crop": [
-      342,
-      185,
-      105,
-      43
+      153,
+      190,
+      156,
+      58
     ]
   },
   {
@@ -201,14 +205,18 @@ const seenQuizQuestions=[
       "Randall Park"
     ],
     "answer": 2,
-    "note": "Steven Yeun plays Jacob in Minari (2020). Publicity still courtesy A24.",
+    "note": "Steven Yeun plays Jacob in Minari (2020).",
     "kind": "eyes",
-    "image": "minari",
+    "image": "quiz-steven-yeun",
     "crop": [
-      754,
-      156,
-      107,
-      46
+      385,
+      340,
+      345,
+      135
+    ],
+    "imageSize": [
+      960,
+      1245
     ]
   },
   {
@@ -221,15 +229,20 @@ const seenQuizQuestions=[
       "Han Ye-ri"
     ],
     "answer": 3,
-    "note": "Han Ye-ri plays Monica in Minari (2020). Publicity still courtesy A24.",
+    "note": "Han Ye-ri plays Monica in Minari (2020).",
     "kind": "eyes",
-    "image": "minari",
+    "image": "quiz-han-ye-ri",
     "crop": [
-      1741,
-      429,
-      39,
-      16
-    ]
+      300,
+      320,
+      245,
+      110
+    ],
+    "imageSize": [
+      960,
+      1479
+    ],
+    "imageExt": "png"
   },
   {
     "mode": "eyes",
