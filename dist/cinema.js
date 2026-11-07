@@ -109,7 +109,7 @@ props.sort((a,b)=>a.depth-b.depth).forEach(item=>item.paint());seenFlushNameTags
 
 }
 function setNear(){const next=rooms.find(r=>{const a=roomApproach(r);return Math.hypot(player.x-a.x,player.y-a.y)<1.1})||null;{near=next;seenSetText(lobbyLocation,Math.hypot(player.x-1.4,player.y-6)<1.4?'OUTSIDE THE GAME ROOM':near?`OUTSIDE SCREEN ${near.n}`:'YOU ARE IN THE LOBBY')}}
-function frame(t){const dt=Math.min((t-last)/1000,.04);last=t;if(document.hidden||!isSceneOpen('lobby-scene')){lobbyPaintKey='';requestAnimationFrame(frame);return}const paused=!SeenHub.entered||!!document.querySelector('dialog[open]')||isSceneOpen('arcade-room')||gameRoom.open||filmDialog.open||isSceneOpen('screening')||!directory.hidden;let vx=0,vy=0;
+function frame(t){const dt=Math.min((t-last)/1000,.04);last=t;if(document.hidden||!isSceneOpen('lobby-scene')){lobbyPaintKey='';return}const paused=!SeenHub.entered||!!document.querySelector('dialog[open]')||isSceneOpen('arcade-room')||gameRoom.open||filmDialog.open||isSceneOpen('screening')||!directory.hidden;let vx=0,vy=0;
 if(!paused)lobbyJump.step(dt);
 if(!paused){if(keys.has('ArrowUp')||keys.has('w')){vx--;vy--}if(keys.has('ArrowDown')||keys.has('s')){vx++;vy++}if(keys.has('ArrowLeft')||keys.has('a')){vx--;vy++}if(keys.has('ArrowRight')||keys.has('d')){vx++;vy--}const manual=!!(vx||vy),before={...player};
 if(manual){
@@ -123,14 +123,14 @@ if(manual){
 const distance=Math.hypot(player.x-before.x,player.y-before.y);walk=distance>.0005;lobbyGait+=(Math.min(1,distance/Math.max(dt,.001)/2.8)-lobbyGait)*(1-Math.exp(-dt*12));if(walk){phase+=distance*12;const angle=Math.atan2(player.y-before.y,player.x-before.x),difference=Math.atan2(Math.sin(angle-lobbyHeading),Math.cos(angle-lobbyHeading));lobbyHeading+=difference*(reduced?1:1-Math.exp(-dt*12))}setNear();}else{walk=false;lobbyVelocity={x:0,y:0};lobbyGait=0;}
 gameOpen+=((Math.hypot(player.x-.5,player.y-6)<2?1:0)-gameOpen)*(reduced?1:1-Math.exp(-dt*10));if(!paused&&player.x<.78&&Math.abs(player.y-6)<.58&&gameOpen>.65)enterGame();
 for(const r of rooms){const open=Math.hypot(player.x-(r.x+.8),player.y-(r.y+.65))<1.9?1:0;r.open+=(open-r.open)*(reduced?1:1-Math.exp(-dt*10));}if(!paused){const passage=rooms.find(r=>Math.abs(player.x-(r.x+.8))<.45&&player.y<r.y+.70&&r.open>.65);if(passage){near=passage;enter();}}
-if(!isSceneOpen('lobby-scene')){lobbyPaintKey='';requestAnimationFrame(frame);return}
+if(!isSceneOpen('lobby-scene')){lobbyPaintKey='';return}
 updateLobbyCamera(dt);
 seenSetData(canvas,'jumpPhase',lobbyJump.active?'active':'idle');seenSetData(canvas,'jumpCrouch',lobbyJump.crouch.toFixed(3));seenSetData(canvas,'jumpTuck',lobbyJump.tuck.toFixed(3));seenSetData(canvas,'jump',lobbyJump.height.toFixed(3));seenSetData(canvas,'gameDoor',gameOpen.toFixed(2));seenSetData(canvas,'doors',rooms.map(r=>r.open.toFixed(2)).join(','));seenSetData(canvas,'position',`${player.x.toFixed(3)},${player.y.toFixed(3)}`);seenSetData(canvas,'motion',walk?'walking':'idle');
 // Repaint only when projected geometry, images, fonts, or navigation change.
 if(isSceneOpen('lobby-scene')&&SeenHub.entered)SeenTalk?.nearby({scene:'lobby',x:player.x,y:player.y,project:p,canvas});
 if(!paused)SeenHub.publish({scene:'lobby',x:player.x,y:player.y,heading:lobbyHeading,posture:0,jump:lobbyJump.height,moving:walk});
 const paintKey=[SeenHub.revision,lobbyRevision,seenFontRevision,lobbyJump.height.toFixed(3),lobbyJump.crouch.toFixed(3),lobbyJump.tuck.toFixed(3),canvas.dataset.position,canvas.dataset.doors,canvas.dataset.gameDoor,lobbyHeading.toFixed(3),lobbyGait.toFixed(3),phase.toFixed(3),target?.x,target?.y].join('|');
-if(paintKey!==lobbyPaintKey){draw();lobbyPaintKey=paintKey} requestAnimationFrame(frame)}requestAnimationFrame(frame);
+if(paintKey!==lobbyPaintKey){draw();lobbyPaintKey=paintKey} }createSeenSceneLoop(document.querySelector('#lobby-scene'),frame);
 canvas.addEventListener('pointerdown',e=>{
  if(!e.isPrimary||e.button>0||!SeenHub.entered||document.querySelector('dialog[open]'))return;
  if(e.pointerType==='touch')e.preventDefault();

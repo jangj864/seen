@@ -120,3 +120,9 @@ Each cabinet has ten questions: film directors, actors identified by eye details
 The five additional actor photographs are locally hosted under the Creative Commons licenses listed in `assets/quiz-photo-credits.json` and `quiz-credits.html`, linked from the eye cabinet. Full resized photographs remain intact; SVG view boxes display only the eye details. Movie still credits remain with A24.
 
 The ten-question database contract derives all scores on the server, accepts only ten valid choices, and keeps the original five-question scores intact. `backend/seen-quiz-scores-v2.test.sql` verifies ten-point scoring, best scores, ties, separate modes, Top 10 ranks and anonymous permissions inside a rolled-back transaction. No QA rankings are published.
+
+## Scene lifecycle and rendering cost
+
+`createSeenSceneLoop` schedules only the visible walking scene and cancels its pending frame when the scene or browser tab becomes hidden. Showing the scene resumes its existing movement state with one frame loop. Camera tools, seat controls and nameplate layers update their DOM attributes and styles only when values change. In the regression fixture, 60 displayed frames previously ran 180 scene callbacks; they now run 60, without changing the visible frame rate.
+
+Pending seat handoffs belong to their original room visit. Leaving, entering another auditorium, choosing another destination or moving manually cancels retries so an old acceptance cannot move the visitor later. Valid handoffs still wait for the occupant to leave before walking to the seat. `tests/performance-lifecycle.browser.cjs` verifies callback counts, stable layout attributes, tab visibility, cancelled handoffs and successful handoffs using local fixtures.

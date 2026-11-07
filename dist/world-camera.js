@@ -9,7 +9,7 @@ function createSeenWorldCamera({scene,onChange,zoom=1.8,home=null,deadZone={x:0,
  button.onclick=()=>{overview=!overview;focus=null;previous=null;label();onChange()};
  document.addEventListener('seen-language-change',label);label();
  return{view({width,height,unit,ox,oy,x,y,dt=1}){
-  const mobile=width<=700&&height>0;tools.hidden=!mobile;
+  const mobile=width<=700&&height>0;if(tools.hidden!==!mobile)tools.hidden=!mobile;
   if(!mobile||overview){focus=null;const next={unit,ox,oy};const changed=!previous||Object.keys(next).some(k=>previous[k]!==next[k]);previous=next;return{...next,changed}}
   if(home){x=home.x+Math.sign(x-home.x)*Math.max(0,Math.abs(x-home.x)-deadZone.x);y=home.y+Math.sign(y-home.y)*Math.max(0,Math.abs(y-home.y)-deadZone.y)}
   if(!focus||dt>=1)focus={x,y};

@@ -70,6 +70,6 @@ function seenPrepareNameTags(project,canvas){
  let layer=seenNameLayers.get(canvas);
  if(!layer){layer=document.createElement('canvas');layer.className='seen-name-layer';layer.setAttribute('aria-hidden','true');canvas.insertAdjacentElement('afterend',layer);seenNameLayers.set(canvas,layer)}
  if(layer.width!==canvas.width)layer.width=canvas.width;if(layer.height!==canvas.height)layer.height=canvas.height;
- const width=canvas.clientWidth,height=canvas.clientHeight;Object.assign(layer.style,{left:canvas.offsetLeft+'px',top:canvas.offsetTop+'px',width:width+'px',height:height+'px'});
+ const width=canvas.clientWidth,height=canvas.clientHeight;for(const [key,value]of Object.entries({left:canvas.offsetLeft+'px',top:canvas.offsetTop+'px',width:width+'px',height:height+'px'}))seenSetStyle(layer,key,value);
  const context=layer.getContext('2d');context.setTransform(canvas.width/Math.max(1,width),0,0,canvas.height/Math.max(1,height),0,0);context.clearRect(0,0,width,height);project.nameTagQueue=[];project.nameTagContext=context;
 }

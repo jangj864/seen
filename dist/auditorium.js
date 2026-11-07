@@ -19,6 +19,8 @@ function updateCamera(dt){if(!viewport)return;const view=camera.view({...viewpor
 screenStill.addEventListener('load',()=>roomRevision++);
 const chairDrawOrder=[...chairs].sort((a,b)=>(a.x+a.y)-(b.x+b.y)),chairHitOrder=[...chairDrawOrder].reverse();
 const chairById=new Map(chairs.map(seat=>[seat.id,seat]));
+let seatRequest=0,seatRetry=0;
+function cancelSeatRequest(){seatRequest++;clearTimeout(seatRetry);seatRetry=0}
 const navigation=createSeenCrowdNavigation(createSeenRoomNavigation(chairs),()=>SeenHub.people('screen-'+currentRoom.n)),roomJump=createSeenJump();
 function jump(){if(!active()||seated||motion)return;roomJump.start();world.focus({preventScroll:true})}
 const active=()=>SeenHub.entered&&!document.querySelector('dialog[open]')&&!document.hidden&&isSceneOpen('screening')&&!room.hidden&&!articleDialog.open;
@@ -92,15 +94,29 @@ function occupied(x,y){return navigation.blocked(x,y)}
 function ease(t){return t*t*(3-2*t)}
 function turnToward(angle,dt){let difference=Math.atan2(Math.sin(angle-heading),Math.cos(angle-heading));heading+=difference*(1-Math.exp(-dt*12))}
 function stand(){if(motion)return;if(!seated){afterStand?.();afterStand=null;return}motion={kind:'stand',elapsed:0,duration:reduced ? .01 : .55,from:{...visitor},to:{x:seated.x+.33,y:seated.y-.33}};path=[];velocity={x:0,y:0};seenSetText(status,'Standing up…');sit.disabled=true;}
-function requestAction(action){if(seated||motion){afterStand=action;if(!motion)stand()}else action()}
+function requestAction(action){cancelSeatRequest();if(seated||motion){afterStand=action;if(!motion)stand()}else action()}
 function occupant(s){return SeenHub.people('screen-'+currentRoom.n).find(v=>v.posture>.5&&Math.hypot(v.x-(s.x+.33),v.y-(s.y+.22))<.3)}
 function hostSeat(s){return !!occupant(s)}
 function freeSeat(except){return chairs.find(s=>s.id!==except&&s.id!==seated?.id&&!hostSeat(s))}
-function requestOccupiedSeat(seat,person=occupant(seat)){if(!person)return;if(!SeenTalk.canTalk(person)){requestAction(()=>{pendingSeat=null;path=navigation.route(visitor,{x:seat.x+.33,y:seat.y-.33});seenSetText(status,`Walking over. Tap ${person.name} again to talk.`)});return;}held.clear();path=[];pendingSeat=null;SeenTalk.askSeat(person,{seatId:seat.id,scene:'screen-'+currentRoom.n,onYes:()=>{if(person.npc){const next=freeSeat(seat.id);if(!next)return;SeenHub.relocateNpc(person,'screen-'+currentRoom.n,next)}let tries=0;const take=()=>{if(hostSeat(seat)){if(++tries<20)setTimeout(take,180);else seenSetText(status,'The seat is not free yet. Please try again.');return}planSeat(seat.id)};take()}})}
+function requestOccupiedSeat(seat,person=occupant(seat)){
+ cancelSeatRequest();if(!person)return;
+ if(!SeenTalk.canTalk(person)){requestAction(()=>{pendingSeat=null;path=navigation.route(visitor,{x:seat.x+.33,y:seat.y-.33});seenSetText(status,`Walking over. Tap ${person.name} again to talk.`)});return}
+ const request=seatRequest,roomNumber=currentRoom.n,valid=()=>request===seatRequest&&currentRoom.n===roomNumber&&isSceneOpen('screening')&&!articleDialog.open;
+ held.clear();path=[];pendingSeat=null;
+ SeenTalk.askSeat(person,{seatId:seat.id,scene:'screen-'+roomNumber,onYes:()=>{
+  if(!valid())return;
+  if(person.npc){const next=freeSeat(seat.id);if(!next)return;SeenHub.relocateNpc(person,'screen-'+roomNumber,next)}
+  let tries=0;const take=()=>{
+   seatRetry=0;if(!valid())return;
+   if(hostSeat(seat)){if(++tries<20)seatRetry=setTimeout(take,180);else seenSetText(status,'The seat is not free yet. Please try again.');return}
+   planSeat(seat.id);
+  };take();
+ }});
+}
 document.addEventListener('seen-seat-request',e=>{const req=e.detail;if(!isSceneOpen('screening')||req.scene!=='screen-'+currentRoom.n||seated?.id!==req.seatId){SeenHub.replySeat(req,false);return}const next=freeSeat(req.seatId);if(!next){SeenHub.replySeat(req,false);return}held.clear();SeenTalk.incoming(req,()=>planSeat(next.id))});
 function nearest(){return chairs.find(s=>!hostSeat(s)&&Math.hypot(visitor.x-(s.x+.33),visitor.y-(s.y-.33))<.44)||null}
 function sitHere(){if(motion)return;roomJump.reset();if(seated){stand();return}if(!closeSeat)return;if(hostSeat(closeSeat)){requestOccupiedSeat(closeSeat);return}seated=closeSeat;seatChoices.set(currentRoom.n,seated.id);updateSeat();picker.value=seated.id;path=[];velocity={x:0,y:0};motion={kind:'sit',elapsed:0,duration:reduced ? .01 : .65,from:{...visitor},to:{x:seated.x+.33,y:seated.y+.22}};seenSetText(status,`Taking seat ${seated.id}…`);sit.disabled=true;}
-function planSeat(id,focus=true){const seat=chairById.get(id);if(!seat)return;if(hostSeat(seat)){requestOccupiedSeat(seat);return}
+function planSeat(id,focus=true){cancelSeatRequest();const seat=chairById.get(id);if(!seat)return;if(hostSeat(seat)){requestOccupiedSeat(seat);return}
 // Staying in the same seat needs no animation; neighbours share one short aisle transfer.
 if(seated?.id===seat.id&&!motion){if(focus)world.focus({preventScroll:true});return}
 if(seated&&!motion&&seat.y===seated.y&&Math.abs(seat.x-seated.x)<1.6){
@@ -122,7 +138,7 @@ if(wasAirborne&&roomJump.height===0&&occupied(visitor.x,visitor.y)){
 }
 
 let dx=0,dy=0;for(const [key,vx,vy]of [['ArrowUp',-1,-1],['w',-1,-1],['ArrowDown',1,1],['s',1,1],['ArrowLeft',-1,1],['a',-1,1],['ArrowRight',1,-1],['d',1,-1]])if(held.has(key)){dx+=vx;dy+=vy}
-const manual=!!(dx||dy);if(manual){if(seated&&!motion){afterStand=null;stand()}path=[];pendingSeat=null;}
+const manual=!!(dx||dy);if(manual){cancelSeatRequest();if(seated&&!motion){afterStand=null;stand()}path=[];pendingSeat=null;}
 if(motion?.kind==='transfer'){
  const move=motion;move.elapsed+=dt;const t=Math.min(1,move.elapsed/move.duration);
  let start,end,progress;
@@ -157,13 +173,13 @@ else if(!seated){
  if(isWalking){tick+=distance*12;turnToward(Math.atan2(visitor.y-old.y,visitor.x-old.x),dt)}
 }
 else{gait=0;isWalking=false;turnToward(-Math.PI/2,dt)}
-closeSeat=seated||nearest();sit.hidden=!closeSeat&&!motion;if(!motion&&!seated&&closeSeat)seenSetText(status,`Seat ${closeSeat.id} nearby. Enter to sit.`);else if(!motion&&!seated&&!pendingSeat)seenSetText(status,'Walk the aisles or choose a seat.');
-if(!seated&&!motion&&!exiting&&visitor.x>5.3&&visitor.x<6.7&&visitor.y>11.34){leaveThroughExit();requestAnimationFrame(loop);return}
+closeSeat=seated||nearest();const hideSeatControl=!closeSeat&&!motion;if(sit.hidden!==hideSeatControl)sit.hidden=hideSeatControl;if(!motion&&!seated&&closeSeat)seenSetText(status,`Seat ${closeSeat.id} nearby. Enter to sit.`);else if(!motion&&!seated&&!pendingSeat)seenSetText(status,'Walk the aisles or choose a seat.');
+if(!seated&&!motion&&!exiting&&visitor.x>5.3&&visitor.x<6.7&&visitor.y>11.34){leaveThroughExit();return}
 seenSetData(world,'jumpPhase',roomJump.active?'active':'idle');seenSetData(world,'jumpCrouch',roomJump.crouch.toFixed(3));seenSetData(world,'jumpTuck',roomJump.tuck.toFixed(3));seenSetData(world,'jump',roomJump.height.toFixed(3));seenSetData(world,'motion',motion?.kind||(seated?'seated':isWalking?'walking':'idle'));seenSetData(world,'position',`${visitor.x.toFixed(3)},${visitor.y.toFixed(3)}`);
 updateCamera(dt);SeenTalk.nearby({scene:'screen-'+currentRoom.n,x:visitor.x,y:visitor.y,project:point,canvas:world});SeenHub.publish({scene:'screen-'+currentRoom.n,x:visitor.x,y:visitor.y,heading,posture,jump:roomJump.height,moving:isWalking});
 const paintKey=[SeenHub.revision,roomRevision,seenFontRevision,world.dataset.curtainProgress,roomJump.height.toFixed(3),roomJump.crouch.toFixed(3),roomJump.tuck.toFixed(3),currentRoom?.n,seatChoices.get(currentRoom?.n),world.dataset.position,heading.toFixed(3),gait.toFixed(3),posture.toFixed(3),tick.toFixed(3),path.at(-1)?.x,path.at(-1)?.y].join('|');
 if(paintKey!==roomPaintKey){render();roomPaintKey=paintKey}}
-requestAnimationFrame(loop)}requestAnimationFrame(loop);
+}createSeenSceneLoop(dialog,loop);
 // Test actual projected chair faces instead of a large rectangle covering nearby aisles.
 function insideFace(px,py,vertices){let inside=false;for(let i=0,j=vertices.length-1;i<vertices.length;j=i++){const a=vertices[i],b=vertices[j];if((a.y>py)!==(b.y>py)&&px<(b.x-a.x)*(py-a.y)/(b.y-a.y)+a.x)inside=!inside}return inside}
 function chairHit(seat,px,py){
@@ -190,8 +206,8 @@ world.addEventListener('pointerdown',e=>{
  requestAction(()=>{pendingSeat=null;const target=navigation.destination(visitor,floor);autoSpeed=0;path=target?navigation.route(visitor,target):[];velocity={x:0,y:0}});world.focus({preventScroll:true});
 });
 document.addEventListener('seen-conversation-open',()=>{held.clear();path=[];pendingSeat=null;velocity={x:0,y:0};autoSpeed=0});
-addEventListener('keydown',e=>{if(!active()||seenControlTarget(e.target))return;const key=seenNavigationKey(e);if(e.code==='Space'||e.key===' '){e.preventDefault();if(!e.repeat)jump();return}if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','w','a','s','d'].includes(key)){e.preventDefault();held.add(key);world.focus({preventScroll:true})}if(key==='Enter'&&document.activeElement===world){e.preventDefault();sitHere()}});addEventListener('keyup',e=>held.delete(seenNavigationKey(e)));addEventListener('blur',()=>held.clear());dialog.addEventListener('close',()=>held.clear());document.querySelector('#start-program').addEventListener('click',()=>{held.clear();velocity={x:0,y:0}});
+addEventListener('keydown',e=>{if(!active()||seenControlTarget(e.target))return;const key=seenNavigationKey(e);if(e.code==='Space'||e.key===' '){e.preventDefault();if(!e.repeat)jump();return}if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','w','a','s','d'].includes(key)){e.preventDefault();cancelSeatRequest();held.add(key);world.focus({preventScroll:true})}if(key==='Enter'&&document.activeElement===world){e.preventDefault();sitHere()}});addEventListener('keyup',e=>held.delete(seenNavigationKey(e)));addEventListener('blur',()=>held.clear());dialog.addEventListener('close',()=>{cancelSeatRequest();held.clear()});document.querySelector('#start-program').addEventListener('click',()=>{cancelSeatRequest();held.clear();velocity={x:0,y:0}});
 const controls={up:'ArrowUp',left:'ArrowLeft',down:'ArrowDown',right:'ArrowRight'};document.querySelectorAll('[data-room-dir]').forEach(button=>{button.addEventListener('pointerdown',e=>{e.preventDefault();button.setPointerCapture(e.pointerId);held.add(controls[button.dataset.roomDir])});for(const name of ['pointerup','pointercancel','lostpointercapture'])button.addEventListener(name,()=>held.delete(controls[button.dataset.roomDir]))});
-document.addEventListener('seen-room-enter',()=>{stageReveal.elapsed=0;updateStageReveal(0);held.clear();roomJump.reset();autoSpeed=0;exiting=false;visitor={x:6,y:10.65};path=[];seated=null;pendingSeat=null;closeSeat=null;motion=null;afterStand=null;posture=0;heading=-Math.PI/2;velocity={x:0,y:0};gait=0;sit.disabled=false;sit.textContent='TAKE A SEAT';picker.value=seatChoices.get(currentRoom.n)||'';size();world.focus({preventScroll:true});render()});
+document.addEventListener('seen-room-enter',()=>{cancelSeatRequest();stageReveal.elapsed=0;updateStageReveal(0);held.clear();roomJump.reset();autoSpeed=0;exiting=false;visitor={x:6,y:10.65};path=[];seated=null;pendingSeat=null;closeSeat=null;motion=null;afterStand=null;posture=0;heading=-Math.PI/2;velocity={x:0,y:0};gait=0;sit.disabled=false;sit.textContent='TAKE A SEAT';picker.value=seatChoices.get(currentRoom.n)||'';size();world.focus({preventScroll:true});render()});
 createSeenTouchGamepad({scene:dialog,keys:held,active,jump});
 })();
