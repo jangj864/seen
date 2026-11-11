@@ -1,8 +1,8 @@
 'use strict';
 // All walking scenes use the same mobile camera and keep projection/hit testing aligned.
 function seenFitWorldView({width,height,bounds,padding=16}){
- const unit=Math.min(Math.max(1,width-2*padding)/(bounds.right-bounds.left),Math.max(1,height-2*padding)/(bounds.bottom-bounds.top));
- return{unit,ox:width/2-(bounds.left+bounds.right)/2*unit,oy:height/2-(bounds.top+bounds.bottom)/2*unit};
+ const top=bounds.paddingTop??padding,usableHeight=Math.max(1,height-top-padding),unit=Math.min(Math.max(1,width-2*padding)/(bounds.right-bounds.left),usableHeight/(bounds.bottom-bounds.top));
+ return{unit,ox:width/2-(bounds.left+bounds.right)/2*unit,oy:top+usableHeight/2-(bounds.top+bounds.bottom)/2*unit};
 }
 // Hidden canvases keep their bitmap; unchanged layouts never reallocate it.
 function seenResizeWorldCanvas(canvas,context){

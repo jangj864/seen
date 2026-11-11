@@ -31,11 +31,11 @@ test('overview toggle restores the complete original map and can return to follo
 });
 
 test('room overviews fit every floor and wall inside the actual map viewport',()=>{
- for(const bounds of [{left:-10.5,right:10.5,top:-5.4,bottom:10.5},{left:-8.8,right:10.6,top:-4.3,bottom:9.7}]){
+ for(const bounds of [{left:-10.5,right:10.5,top:-5.4,bottom:10.5},{left:-10.5,right:10.5,top:-5.4,bottom:10.5,paddingTop:56},{left:-8.8,right:10.6,top:-4.3,bottom:9.7}]){
   for(const [width,height]of [[320,180],[393,340],[430,450],[680,140]]){
    const {camera,button}=fixture({bounds,startOverview:true}),input={width,height,unit:20,ox:0,oy:0,x:6,y:6},view=camera.view(input);
    for(const x of [bounds.left,bounds.right])assert(x*view.unit+view.ox>=15.99&&x*view.unit+view.ox<=width-15.99);
-   for(const y of [bounds.top,bounds.bottom])assert(y*view.unit+view.oy>=15.99&&y*view.unit+view.oy<=height-15.99);
+   for(const y of [bounds.top,bounds.bottom])assert(y*view.unit+view.oy>=(bounds.paddingTop??16)-.01&&y*view.unit+view.oy<=height-15.99);
    assert.equal(camera.view(input).changed,false);button.onclick();assert(camera.view(input).unit>view.unit,'visitors can still choose a closer camera');
   }
  }

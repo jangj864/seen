@@ -6,7 +6,7 @@ const {chromium}=require(process.env.PLAYWRIGHT_MODULE||'playwright');
 
 const dist=path.join(__dirname,'../dist');
 const fixture=`<!doctype html><html><head><meta charset="utf-8"><title>SEEN Cinema — Issue 02</title>
- <script defer src="/i18n-data.js"></script><script defer src="/i18n.js"></script>
+ <script defer src="/interface-icons.js"></script><script defer src="/i18n-data.js"></script><script defer src="/i18n.js"></script>
  <script defer src="/core.js"></script><script defer src="/onboarding.js"></script>
  </head><body class="is-entering"><header class="site-header"></header><main><canvas id="world" tabindex="0"></canvas></main><footer class="site-footer"></footer>
  <section id="welcome" tabindex="-1"><div class="welcome-top"></div><form id="welcome-form">
@@ -29,7 +29,7 @@ async function openFixture(browser,{language='en',pending=true}={}){
    const SeenHub={name:'Guest QA',join:name=>{window.joinedName=name}};
    document.addEventListener('seen-welcome-complete',()=>window.admitted=true);
   `});
-  if(['i18n-data.js','i18n.js','onboarding.js'].includes(name))return route.fulfill({contentType:'text/javascript',body:fs.readFileSync(path.join(dist,name),'utf8')});
+  if(['interface-icons.js','i18n-data.js','i18n.js','onboarding.js'].includes(name))return route.fulfill({contentType:'text/javascript',body:fs.readFileSync(path.join(dist,name),'utf8')});
   return route.fulfill({contentType:'text/html',body:fixture});
  });
  await page.goto('http://seen.test/',{waitUntil:'domcontentloaded'});
@@ -41,14 +41,14 @@ test('a poster pending indefinitely does not block admission, validation or keyb
  const browser=await chromium.launch({channel:process.env.PLAYWRIGHT_CHANNEL||'chrome'});
  try{
   const {page,errors}=await openFixture(browser);
-  assert.equal(await page.locator('#welcome-enter').textContent(),'ENTER THE CINEMA ↗');
+  assert.equal(await page.locator('#welcome-enter').textContent(),'ENTER THE CINEMA ');
   assert.equal(await page.locator('#welcome-name').evaluate(input=>input===document.activeElement),true);
   assert.equal(await page.locator('main').evaluate(main=>main.inert),true);
   await page.waitForFunction(()=>document.querySelector('#welcome-progress').value===50);
   assert.equal(await page.locator('#welcome-progress').evaluate(bar=>bar.value),50,'Pending poster remains pending in the progress bar');
   assert.equal(await page.locator('#welcome-status').textContent(),'Ready to enter. Some artwork may finish loading inside.');
   await page.evaluate(()=>SeenI18n.setLanguage('ko'));
-  assert.equal(await page.locator('#welcome-enter').textContent(),'영화관 입장 ↗');
+  assert.equal(await page.locator('#welcome-enter').textContent(),'영화관 입장 ');
   assert.equal(await page.locator('#welcome-status').textContent(),'입장할 준비가 됐어요. 일부 이미지는 입장 후에 표시될 수 있어요.');
   await page.locator('#welcome-name').fill('<');await page.locator('#welcome-enter').click();
   assert.equal(await page.locator('#welcome').isVisible(),true);

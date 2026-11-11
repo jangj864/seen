@@ -808,3 +808,5 @@ Object.assign(window.SEEN_KO,{
  "Ten questions about famous films and their worlds.": "유명 영화와 영화 속 세계에 관한 열 문제입니다.",
  "PHOTO CREDITS ↗": "사진 출처 ↗"
 });
+
+Object.assign(window.SEEN_KO,{"Click the screen to read the article.":"스크린을 클릭해서 기사를 읽어보세요.","Tap the screen to read the article.":"스크린을 터치해서 기사를 읽어보세요."});
