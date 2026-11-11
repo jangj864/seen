@@ -103,7 +103,7 @@ test('focused dialog buttons retain native Space and Enter activation while worl
  await page.evaluate(()=>openOther());
  await page.getByRole('button',{name:'Recommend a film',exact:true}).focus();
  await page.keyboard.press('Space');
- assert.match(await page.locator('#npc-line').textContent(),/A Seat at the Table/);
+ assert.match(await page.locator('#npc-line').textContent(),/Family, on screen/);
  await page.keyboard.press('ArrowRight');await page.keyboard.press('w');
  assert.deepEqual(await page.evaluate(()=>worldKeys),[]);
  await page.locator('.talk-close').focus();await page.keyboard.press('Enter');

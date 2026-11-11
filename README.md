@@ -1,6 +1,12 @@
 # SEEN — Issue 02 / November 2026
 
-A responsive, buildless digital film publication extending Jinhyeok Jang’s SEEN Issue 01 print identity. Theme: **A Seat at the Table** — family, belonging, memory, and coming home.
+A responsive, buildless digital film publication extending Jinhyeok Jang’s SEEN Issue 01 print identity. Issue 02: **Family, on screen** — essays on Lady Bird, After Yang and Minari.
+
+## Editorial copy (November 2026)
+
+The English and Korean articles, titles, introductions, release previews, recommendations, conversations and game feedback use revised editorial copy. The essays discuss specific scenes, with links to film information and supporting scripts, production notes or interviews. The colophon retains the AI-assistance disclosure. Room names derive from the shared articles so the lobby, directory and reading screen show the same title.
+
+`tests/editorial-copy.browser.cjs` checks all four articles in both languages, complete Korean text blocks, heading widths and the colophon in Chrome and WebKit at mobile and desktop sizes. The reading screen offers a bilingual scroll prompt above the image; activating it moves focus and scrolls to the article, and it hides as reading begins. Existing navigation, reading continuity, film and arcade checks cover the surrounding flows without publishing comments or scores.
 
 ## Cinema draft
 

@@ -8,7 +8,7 @@ const lobbyJump=createSeenJump();
 let lobbyRevision=0,lobbyPaintKey='';
 const lobbyLocation=document.querySelector('#location'),screeningDialog=document.querySelector('#screening');
 const canvas=document.querySelector('#world'),ctx=canvas.getContext('2d');
-const rooms=[{n:'01',name:'A Seat at the Table',sub:'THE COVER STORY',x:2.25,y:.65,article:'table',img:'ladybird'},{n:'02',name:'The distance between us.',sub:'CLOSE READING / LADY BIRD',x:6.4,y:.65,article:'ladybird',img:'ladybird-mother'},{n:'03',name:'The things we keep.',sub:'MEMORY / AFTER YANG',x:10.55,y:.65,article:'yang',img:'yang'},{n:'04',name:'A home still taking shape.',sub:'BELONGING / MINARI',x:14.7,y:.65,article:'minari',img:'minari'}];
+const rooms=[{n:'01',x:2.25,y:.65,article:'table'},{n:'02',x:6.4,y:.65,article:'ladybird'},{n:'03',x:10.55,y:.65,article:'yang'},{n:'04',x:14.7,y:.65,article:'minari'}].map(room=>({...room,name:screeningArticles[room.article].title,sub:screeningArticles[room.article].tag,img:screeningArticles[room.article].image}));
 rooms.forEach(r=>{r.open=0});
 const gameRoom=document.querySelector('#game-room'),arcadeRoom=document.querySelector('#arcade-room'),quizConfirm=document.querySelector('#game-confirm');let gameOpen=0,lobbyWaypoints=[];
 const images={};rooms.forEach(r=>{const im=new Image();im.onload=()=>lobbyRevision++;im.src=`assets/${r.img}.jpg`;images[r.img]=im});
@@ -171,7 +171,8 @@ function saveReading(){
  const form=screenArticle.querySelector('.comment-form');
  readingState.save(activeArticle,{scroll:articleScroller.scrollTop,...(form?{body:form.elements.body.value,author:form.elements.author.value}:{})});
 }
-function stopArticleRestore(){restoringArticleScroll=false;screenArticle.dataset.readingReady=readingTransition.active?'false':'true'}
+function updateReadingGuide(){const hero=articleScroller.querySelector('.screen-article-hero');document.querySelector('#screen-reading-guide').hidden=!activeArticle||!hero||articleScroller.scrollTop>=hero.offsetHeight*.35}
+function stopArticleRestore(){restoringArticleScroll=false;screenArticle.dataset.readingReady=readingTransition.active?'false':'true';updateReadingGuide()}
 function closeProgram(updateHistory=true){
  if(!screenArticle.open)return;
  readingTransition.cancel();pendingReadingFrame=null;clearTimeout(articleScrollTimer);saveReading();articleRestoreToken++;activeArticle=null;stopArticleRestore();screenArticle.close();
@@ -193,7 +194,6 @@ function openProgram(fromHistory=false){
  const tag=document.createElement('span');tag.className='screen-article-tag';tag.textContent=article.tag;
  const title=document.createElement('h2');title.id='screen-article-title';title.innerHTML=article.title;
  header.append(tag,title);hero.append(header);
- const cue=document.createElement('span');cue.className='screen-reading-cue';cue.textContent='SCROLL TO READ ↓';hero.append(cue);
  let artworkReady=Promise.resolve();
  if(article.image){
   const figure=document.createElement('figure'),image=document.createElement('img'),caption=document.createElement('figcaption');
@@ -208,7 +208,7 @@ function openProgram(fromHistory=false){
  const commentsReady=SeenHub.mountComments(copy,id);
  const form=content.querySelector('.comment-form');
  if(form){form.elements.body.value=saved.body;if(saved.author)form.elements.author.value=saved.author}
- screenArticle.showModal();const transitionReady=readingTransition.open(transitionFrame);restoringArticleScroll=true;screenArticle.dataset.readingReady='false';
+ updateReadingGuide();screenArticle.showModal();const transitionReady=readingTransition.open(transitionFrame);restoringArticleScroll=true;screenArticle.dataset.readingReady='false';
  document.querySelector('#back-to-seats').focus({preventScroll:true});
  const restore=()=>{if(restoreToken===articleRestoreToken&&screenArticle.open&&restoringArticleScroll)articleScroller.scrollTop=saved.scroll};
  requestAnimationFrame(restore);
@@ -246,7 +246,8 @@ screenArticle.addEventListener('cancel',event=>{event.preventDefault();closeProg
 screenArticle.addEventListener('close',()=>{keys.clear();if(!screenArticle.open)document.querySelector('#room-world').focus({preventScroll:true})});
 screenArticle.addEventListener('click',event=>{if(event.target===screenArticle){const rect=screenArticle.getBoundingClientRect();if(event.clientX<rect.left||event.clientX>rect.right||event.clientY<rect.top||event.clientY>rect.bottom)closeProgram()}});
 screenArticle.addEventListener('input',event=>{if(event.target.closest('.comment-form'))saveReading()});
-articleScroller.addEventListener('scroll',()=>{if(restoringArticleScroll)return;clearTimeout(articleScrollTimer);articleScrollTimer=setTimeout(saveReading,180)},{passive:true});
+document.querySelector('#screen-reading-guide').addEventListener('click',()=>{stopArticleRestore();const copy=articleScroller.querySelector('.screen-article-copy');if(!copy)return;articleScroller.focus({preventScroll:true});articleScroller.scrollTo({top:copy.offsetTop,behavior:matchMedia('(prefers-reduced-motion:reduce)').matches?'instant':'smooth'})});
+articleScroller.addEventListener('scroll',()=>{updateReadingGuide();if(restoringArticleScroll)return;clearTimeout(articleScrollTimer);articleScrollTimer=setTimeout(saveReading,180)},{passive:true});
 for(const event of ['wheel','touchmove','pointerdown'])screenArticle.addEventListener(event,stopArticleRestore,{passive:true});
 screenArticle.addEventListener('keydown',event=>{
  if(event.defaultPrevented||event.altKey||event.ctrlKey||event.metaKey||!['ArrowUp','ArrowDown','PageUp','PageDown','Home','End',' '].includes(event.key))return;
@@ -293,7 +294,7 @@ function positionDoorPreview(){
 function showDoorPreview(r){if(!r||!board.hidden||!SeenHub.entered)return;if(previewRoom===r&&!doorNote.hidden)return;previewRoom=r;preview.hidden=true;doorNote.hidden=false;const note=doorNote,article=screeningArticles[r.article];note.replaceChildren();note.append(document.createTextNode('SCREEN '+r.n+' / NOW SHOWING'));const title=document.createElement('strong'),deck=document.createElement('span');title.textContent=r.name;deck.textContent=article.deck;note.append(title,deck)}
 function doorUnderPointer(px,py){return rooms.find(r=>{const a=p(r.x-.08,r.y+.3,2.85),b=p(r.x+1.65,r.y+.3,2.85),c=p(r.x-.08,r.y+.3,0),u=(px-a.x)/(b.x-a.x),v=(py-a.y-u*(b.y-a.y))/(c.y-a.y);return u>=0&&u<=1&&v>=0&&v<=1})||null}
 canvas.addEventListener('pointermove',e=>{if(e.pointerType==='touch'){hideDoorPreview();return}hoverPoint={x:e.clientX,y:e.clientY};positionDoorPreview()});canvas.addEventListener('pointerleave',hideDoorPreview);
-function browse(kind){const control=document.querySelector(kind==='stories'?'#browse-stories':'#browse-upcoming');if(!board.hidden&&board.dataset.kind===kind){closeUpcoming();return}board.dataset.kind=kind;board.replaceChildren();hideDoorPreview();const heading=document.createElement('h2');heading.id='upcoming-title';heading.textContent=kind==='stories'?'Pick your next conversation.':'Coming to the cinema.';const close=document.createElement('button');close.className='board-close';close.textContent='×';close.setAttribute('aria-label','Close program');close.onclick=closeUpcoming;const toolbar=document.createElement('div');toolbar.className='upcoming-toolbar';toolbar.append(heading,close);board.append(toolbar);const grid=document.createElement('div');grid.className='program-cards';for(const item of kind==='stories'?rooms:upcomingFilms){const card=document.createElement('button'),image=document.createElement('img'),meta=document.createElement('small'),title=document.createElement('strong'),deck=document.createElement('span');if(kind==='stories'){const article=screeningArticles[item.article];image.src=`assets/${article.image}.jpg`;meta.textContent='SCREEN '+item.n;title.textContent=item.name;deck.textContent=article.deck;card.onclick=()=>showDoorPreview(item,true)}else{image.src=`assets/${item.image}.${item.ext||'jpg'}`;meta.textContent='UPCOMING · '+item.date;title.textContent=item.title;deck.textContent='Film details & trailer ↗';card.onclick=()=>openFilm(item)}image.alt='';card.append(image,meta,title,deck);grid.append(card)}board.append(grid);board.hidden=false;keys.clear();target=null;lobbyWaypoints=[];lobbyVelocity={x:0,y:0};board.showModal();control.setAttribute('aria-expanded','true')}
+function browse(kind){const control=document.querySelector(kind==='stories'?'#browse-stories':'#browse-upcoming');if(!board.hidden&&board.dataset.kind===kind){closeUpcoming();return}board.dataset.kind=kind;board.replaceChildren();hideDoorPreview();const heading=document.createElement('h2');heading.id='upcoming-title';heading.textContent=kind==='stories'?'Choose an article':'Upcoming releases';const close=document.createElement('button');close.className='board-close';close.textContent='×';close.setAttribute('aria-label','Close program');close.onclick=closeUpcoming;const toolbar=document.createElement('div');toolbar.className='upcoming-toolbar';toolbar.append(heading,close);board.append(toolbar);const grid=document.createElement('div');grid.className='program-cards';for(const item of kind==='stories'?rooms:upcomingFilms){const card=document.createElement('button'),image=document.createElement('img'),meta=document.createElement('small'),title=document.createElement('strong'),deck=document.createElement('span');if(kind==='stories'){const article=screeningArticles[item.article];image.src=`assets/${article.image}.jpg`;meta.textContent='SCREEN '+item.n;title.textContent=item.name;deck.textContent=article.deck;card.onclick=()=>showDoorPreview(item,true)}else{image.src=`assets/${item.image}.${item.ext||'jpg'}`;meta.textContent='UPCOMING · '+item.date;title.textContent=item.title;deck.textContent='Film details & trailer ↗';card.onclick=()=>openFilm(item)}image.alt='';card.append(image,meta,title,deck);grid.append(card)}board.append(grid);board.hidden=false;keys.clear();target=null;lobbyWaypoints=[];lobbyVelocity={x:0,y:0};board.showModal();control.setAttribute('aria-expanded','true')}
 function closeUpcoming(){board.close();board.hidden=true;document.querySelector('#browse-upcoming').setAttribute('aria-expanded','false')}
 board.addEventListener('cancel',e=>{e.preventDefault();closeUpcoming()});
 board.addEventListener('keydown',e=>{if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','KeyW','KeyA','KeyS','KeyD','Space'].includes(e.code))e.stopPropagation()});

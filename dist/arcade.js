@@ -50,7 +50,7 @@
   box(0,0,-.15,12,10,.15,'#b0aa83','#5e6b4c','#48583f');
   for(let x=0;x<12;x++)for(let y=0;y<10;y++)polygon([[x,y,.004],[x+1,y,.004],[x+1,y+1,.004],[x,y+1,.004]],(x+y)%2?'#434963':'#5b6078');
   box(-.1,-.15,0,12.2,.25,4.0,'#8074ac','#302e4c','#222239');box(-.1,0,0,.18,7,1.2,'#c7b58d','#53664b','#344932');
-  for(let x=.4;x<12;x+=.6)box(x,.12,.3,.025,.035,3.35,'#9c80b3','#36304f','#36304f');ctx.save();ctx.shadowColor='#e4a9f0';ctx.shadowBlur=unit*.35;label('S E E N   A R C A D E',6,.16,3.45,.42,'#f1c9f0');ctx.restore();label('NO COINS NEEDED. JUST CURIOSITY.',6,.16,2.98,.15,'#a5b18c');
+  for(let x=.4;x<12;x+=.6)box(x,.12,.3,.025,.035,3.35,'#9c80b3','#36304f','#36304f');ctx.save();ctx.shadowColor='#e4a9f0';ctx.shadowBlur=unit*.35;label('S E E N   A R C A D E',6,.16,3.45,.42,'#f1c9f0');ctx.restore();label('PICK A GAME TO START',6,.16,2.98,.15,'#a5b18c');
   polygon([[10.9,6.1,.02],[12,6.1,.02],[12,7.7,.02],[10.9,7.7,.02]],'#c5b47e');
   if(path.length){const t=path.at(-1),q=p(t.x,t.y,.02);ctx.fillStyle='#f6df9b88';ctx.beginPath();ctx.ellipse(q.x,q.y,.2*unit,.08*unit,0,0,Math.PI*2);ctx.fill()}
   for(const x of [1.2,4.9,8.6])polygon([[x,3,.014],[x+2,3,.014],[x+2,3.06,.014],[x,3.06,.014]],'#88d9d4');

@@ -8,7 +8,7 @@
  const artwork=[...new Set([...Object.values(images),...[...document.images].filter(im=>im.getAttribute('src'))])];let done=0,failed=0;
  function update(){
   bar.value=artwork.length?Math.round(done/artwork.length*100):100;
-  status.textContent=ready?(done===artwork.length&&!failed?'The lights are on. Your seat is waiting.':'Ready to enter. Some artwork may finish loading inside.'):`Preparing the cinema · ${bar.value}%`;
+  status.textContent=ready?(done===artwork.length&&!failed?'Ready when you are.':'Ready to enter. Some artwork may finish loading inside.'):`Preparing the cinema · ${bar.value}%`;
  }
  // Track actual artwork completion in the background. A slow poster must not
  // block a visitor from entering the already available canvas and controls.

@@ -46,7 +46,7 @@ test('magazine credits follow all five catalog releases and translate alongside 
   assert.deepEqual(await upcoming.locator('li').allTextContents(),english,'English restores the full source register');
   await page.evaluate(()=>{closeArticle();openArticle('about');SeenI18n.setLanguage('ko')});
   const about=page.locator('#article-content .article-body');
-  assert.match(await about.locator('p').first().textContent(),/^SEEN은 상영 전과/);
+  assert.match(await about.locator('p').first().textContent(),/^SEEN은 영화 잡지입니다/);
   assert.match(await about.locator('p').nth(1).textContent(),/개봉 예정작 다섯 편/);
   assert.deepEqual(errors,[]);
  }finally{await browser.close()}

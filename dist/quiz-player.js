@@ -1,9 +1,9 @@
 'use strict';
 // Every cabinet shares one question, answer and result renderer.
 const SeenQuizThemes=Object.freeze({
- all:{title:'SEEN QUIZ',accent:'#b74239',light:'#f0b39d',onAccent:'#fff3dc',description:'Ten questions about famous film directors.'},
+ all:{title:'SEEN QUIZ',accent:'#b74239',light:'#f0b39d',onAccent:'#fff3dc',description:'Ten questions about film directors.'},
  eyes:{title:'EYES ONLY',accent:'#428b7e',light:'#a4d4b2',onAccent:'#fff3dc',description:'Guess ten actors from their eyes.'},
- films:{title:'FILM CLUB',accent:'#b1893e',light:'#efcf82',onAccent:'#172a20',description:'Ten questions about famous films and their worlds.'}
+ films:{title:'FILM CLUB',accent:'#b1893e',light:'#efcf82',onAccent:'#172a20',description:'Ten questions about well-known films.'}
 });
 function createSeenQuizPlayer({canRequest=()=>true,onOpen=()=>{},onClose=()=>{},fx=()=>{},nickname=()=>undefined}={}){
 const gameRoom=document.querySelector('#game-room'),quizConfirm=document.querySelector('#game-confirm'),quizThemes=SeenQuizThemes;
@@ -50,7 +50,7 @@ function renderGame(){
  });question.append(options)}root.append(question);
  const slot=document.createElement('div');slot.className='game-answer-slot';root.append(slot);
  if(gameAnswered!==null){const feedback=document.createElement('p');feedback.className='game-feedback';feedback.setAttribute('role','status');feedback.textContent=`${gameAnswered===q.answer?'CORRECT! +1 POINT':'ANSWER: '+q.options[q.answer]} — ${q.note}`;
- const next=document.createElement('button');next.className='game-next';next.textContent=gameIndex===total-1?'SEE YOUR RESULT →':'NEXT QUESTION →';next.onclick=()=>{gameIndex++;gameAnswered=null;renderGame();root.querySelector('button')?.focus({preventScroll:true})};slot.append(feedback,next)}else{const hint=document.createElement('p');hint.className='game-idle-hint';hint.textContent='Pick one. Make it count.';slot.append(hint)}
+ const next=document.createElement('button');next.className='game-next';next.textContent=gameIndex===total-1?'SEE YOUR RESULT →':'NEXT QUESTION →';next.onclick=()=>{gameIndex++;gameAnswered=null;renderGame();root.querySelector('button')?.focus({preventScroll:true})};slot.append(feedback,next)}else{const hint=document.createElement('p');hint.className='game-idle-hint';hint.textContent='Choose your answer.';slot.append(hint)}
 }
 function openQuiz(mode='all'){
  if(gameRoom.open||!quizThemes[mode])return;
