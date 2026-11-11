@@ -44,7 +44,7 @@ function walkLobbyTo(destination){
 function walkToScreen(room){if(!room)return;if(isSceneOpen('screening'))closeScene('screening');if(isSceneOpen('arcade-room'))leaveArcade();keys.clear();hideDoorPreview();walkLobbyTo({x:room.x+.8,y:room.y+.48});canvas.focus({preventScroll:true})}
 function propDepth(left,right,top,bottom){return Math.max(left,Math.min(right,player.x))+Math.max(top,Math.min(bottom,player.y))}
 const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
-function resize(){lobbyRevision++;w=canvas.clientWidth;h=canvas.clientHeight;const d=Math.min(devicePixelRatio||1,2);canvas.width=w*d;canvas.height=h*d;ctx.setTransform(d,0,0,d,0,0);scale=Math.min(w/(w<700?28:27),h/17.5);ox=w/2-4.2*scale;oy=h*.36-1.7*scale+(w<700&&h>650?h*.05:0);lobbyViewport={width:w,height:h,unit:scale,ox,oy};updateLobbyCamera(1);}
+function resize(){const layout=seenResizeWorldCanvas(canvas,ctx);if(!layout)return;lobbyRevision++;w=layout.width;h=layout.height;scale=Math.min(w/(w<700?28:27),h/17.5);ox=w/2-4.2*scale;oy=h*.36-1.7*scale+(w<700&&h>650?h*.05:0);lobbyViewport={width:w,height:h,unit:scale,ox,oy};updateLobbyCamera(1);}
 function updateLobbyCamera(dt){const view=lobbyCamera.view({...lobbyViewport,x:player.x,y:player.y,dt});scale=view.unit;ox=view.ox;oy=view.oy;if(view.changed)lobbyRevision++}
 addEventListener('resize',resize);resize();
 function p(x,y,z=0){return{x:ox+(x-y)*scale*.86,y:oy+(x+y)*scale*.43-z*scale}}

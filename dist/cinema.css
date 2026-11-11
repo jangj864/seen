@@ -248,17 +248,11 @@ html[data-input="pointer"] #game-confirm button:focus-visible,html[data-input="p
  .touch-jump{pointer-events:auto;touch-action:none;width:74px;height:74px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:3px;border-radius:50%;border:2px solid #a14536;background:#c85e48;color:#fff2d6;box-shadow:0 5px 0 #813e32;font:700 10px 'DM Sans',sans-serif;letter-spacing:1px}
  .touch-jump svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
  .touch-jump.is-held{transform:translateY(4px);box-shadow:0 1px 0 #813e32}
- #screening .touch-gamepad,#arcade-room .touch-gamepad{bottom:18px}
- #screening .auditorium-bottom{height:142px;min-height:142px;max-height:142px;padding:8px 4%;align-items:start;pointer-events:none}
- #screening .auditorium-bottom>div:first-child{align-self:start;margin-left:125px}
- #screening .auditorium-bottom strong{font-size:14px}
- #screening .auditorium-bottom small{font-size:8px}
  .location{bottom:143px}.mobile-walk-hint{bottom:158px!important}
 }
-@media(any-pointer:coarse) and (max-height:500px){.touch-gamepad{left:16px;right:16px;bottom:12px}.touch-stick{width:86px;height:86px}.stick-thumb{left:22px;top:22px;width:38px;height:38px}.touch-jump{width:64px;height:64px}#screening .auditorium-bottom{display:none}}
+@media(any-pointer:coarse) and (max-height:500px){.touch-gamepad{left:16px;right:16px;bottom:12px}.touch-stick{width:86px;height:86px}.stick-thumb{left:22px;top:22px;width:38px;height:38px}.touch-jump{width:64px;height:64px}}
 
 @media(any-pointer:coarse) and (max-width:1100px){#lobby-scene .location{left:22px;right:22px;bottom:145px;max-width:none;min-height:18px;line-height:18px;white-space:nowrap}#lobby-scene .location i{flex-shrink:0}#lobby-scene .mobile-walk-hint{left:22px;right:22px;bottom:179px!important;margin:0;line-height:18px;text-align:left}}
-@media(any-pointer:coarse) and (max-width:1100px){#screening .auditorium-bottom>div:first-child{position:absolute;left:22px;right:22px;bottom:145px;margin:0;display:block;max-width:none}#screening .auditorium-bottom .ticket-label{display:block}#screening .auditorium-bottom strong{display:block;margin:4px 0}#screening .auditorium-bottom small{height:auto;min-height:16px;max-width:none;line-height:16px}}
 /* Reserve answer feedback before selection so quiz cards never change height. */
 @media(max-width:700px),(max-height:600px){
  #game-room{height:calc(100dvh - 40px - env(safe-area-inset-top) - env(safe-area-inset-bottom))}

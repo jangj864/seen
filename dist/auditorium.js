@@ -14,7 +14,7 @@ function updateStageReveal(dt){
  seenSetData(world,'curtainProgress',stageReveal.curtain.toFixed(4));seenSetData(world,'curtainState',stageReveal.elapsed<2.1?'opening':'open');
 }
 let viewport;
-const camera=createSeenWorldCamera({scene:dialog,onChange:()=>{size();roomRevision++;render()},zoom:1.6,home:{x:6.5,y:5.5},deadZone:{x:4,y:5}});
+const camera=createSeenWorldCamera({scene:dialog,toolbar:room.querySelector('.room-help'),onChange:()=>{size();roomRevision++;render()},zoom:1.6,home:{x:6.5,y:5.5},deadZone:{x:4,y:5},startOverview:true,bounds:{left:-10.5,right:10.5,top:-5.4,bottom:10.5}});
 function updateCamera(dt){if(!viewport)return;const view=camera.view({...viewport,x:visitor.x,y:visitor.y,dt});unit=view.unit;cx=view.ox;cy=view.oy;if(view.changed)roomRevision++}
 screenStill.addEventListener('load',()=>roomRevision++);
 const chairDrawOrder=[...chairs].sort((a,b)=>(a.x+a.y)-(b.x+b.y)),chairHitOrder=[...chairDrawOrder].reverse();
@@ -24,7 +24,7 @@ function cancelSeatRequest(){seatRequest++;clearTimeout(seatRetry);seatRetry=0}
 const navigation=createSeenCrowdNavigation(createSeenRoomNavigation(chairs),()=>SeenHub.people('screen-'+currentRoom.n)),roomJump=createSeenJump();
 function jump(){if(!active()||seated||motion)return;roomJump.start();world.focus({preventScroll:true})}
 const active=()=>SeenHub.entered&&!document.querySelector('dialog[open]')&&!document.hidden&&isSceneOpen('screening')&&!room.hidden&&!articleDialog.open;
-function size(){roomRevision++;width=world.clientWidth;height=world.clientHeight;if(!width||!height)return;const ratio=Math.min(devicePixelRatio||1,2);world.width=width*ratio;world.height=height*ratio;g.setTransform(ratio,0,0,ratio,0,0);unit=Math.min(width/22.5,height/18.3);cx=width/2;cy=Math.max(unit*5.3+12,height*.29)+(width<700&&height>650?height*.05:0);viewport={width,height,unit,ox:cx,oy:cy};updateCamera(1);}
+function size(){const layout=seenResizeWorldCanvas(world,g);if(!layout)return;roomRevision++;({width,height}=layout);unit=Math.min(width/22.5,height/18.3);cx=width/2;cy=Math.max(unit*5.3+12,height*.29)+(width<700&&height>650?height*.05:0);viewport={width,height,unit,ox:cx,oy:cy};updateCamera(1);}
 new ResizeObserver(size).observe(world);
 function point(x,y,z=0){return{x:cx+(x-y)*unit*.86,y:cy+(x+y)*unit*.43-z*unit}}
 function polygon(vertices,color){g.beginPath();vertices.forEach((v,i)=>{const p=point(...v);i?g.lineTo(p.x,p.y):g.moveTo(p.x,p.y)});g.closePath();g.fillStyle=color;g.fill()}
@@ -209,5 +209,5 @@ document.addEventListener('seen-conversation-open',()=>{held.clear();path=[];pen
 addEventListener('keydown',e=>{if(!active()||seenControlTarget(e.target))return;const key=seenNavigationKey(e);if(e.code==='Space'||e.key===' '){e.preventDefault();if(!e.repeat)jump();return}if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','w','a','s','d'].includes(key)){e.preventDefault();cancelSeatRequest();held.add(key);world.focus({preventScroll:true})}if(key==='Enter'&&document.activeElement===world){e.preventDefault();sitHere()}});addEventListener('keyup',e=>held.delete(seenNavigationKey(e)));addEventListener('blur',()=>held.clear());dialog.addEventListener('close',()=>{cancelSeatRequest();held.clear()});document.querySelector('#start-program').addEventListener('click',()=>{cancelSeatRequest();held.clear();velocity={x:0,y:0}});
 const controls={up:'ArrowUp',left:'ArrowLeft',down:'ArrowDown',right:'ArrowRight'};document.querySelectorAll('[data-room-dir]').forEach(button=>{button.addEventListener('pointerdown',e=>{e.preventDefault();button.setPointerCapture(e.pointerId);held.add(controls[button.dataset.roomDir])});for(const name of ['pointerup','pointercancel','lostpointercapture'])button.addEventListener(name,()=>held.delete(controls[button.dataset.roomDir]))});
 document.addEventListener('seen-room-enter',()=>{cancelSeatRequest();stageReveal.elapsed=0;updateStageReveal(0);held.clear();roomJump.reset();autoSpeed=0;exiting=false;visitor={x:6,y:10.65};path=[];seated=null;pendingSeat=null;closeSeat=null;motion=null;afterStand=null;posture=0;heading=-Math.PI/2;velocity={x:0,y:0};gait=0;sit.disabled=false;sit.textContent='TAKE A SEAT';picker.value=seatChoices.get(currentRoom.n)||'';size();world.focus({preventScroll:true});render()});
-createSeenTouchGamepad({scene:dialog,keys:held,active,jump});
+createSeenTouchGamepad({scene:dialog,container:room.querySelector('.scene-dock'),keys:held,active,jump});
 })();
